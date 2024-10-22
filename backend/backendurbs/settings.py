@@ -37,9 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api.apps.ApiConfig',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -121,3 +124,26 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Served on same origin - also use some-origin for fetching
+# CSRF_COOKIE_SAMESITE = 'Strict'
+# SESSION_COOKIE_SAMESITE = 'Strict'
+# CSRF_COOKIE_HTTPONLY = True
+# SESSION_COOKIE_HTTPONLY = True
+# CSRF_TRUSTED_ORIGINS = ['http://localhost:8080']
+
+# Served on different origins
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8080']
+
+CORS_ALLOWED_ORIGINS = []
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
+CORS_ALLOW_CREDENTIALS = True
+
+# For production
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
