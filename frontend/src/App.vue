@@ -1,11 +1,4 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link>
-    |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <!--  <router-view/>-->
-
   <template v-if="!state.isAuthenticated">
     <div>
       <label>Username</label>
@@ -28,137 +21,128 @@
   </template>
 </template>
 
-<script setup>
-import { reactive } from "vue";
+<script setup lang="ts">
+import { reactive } from 'vue'
 
 const state = reactive({
-  csrf: "",
-  username: "",
-  password: "",
-  error: "",
+  csrf: '',
+  username: '',
+  password: '',
+  error: '',
   isAuthenticated: false,
-});
+})
 
 function setState(nstate) {
-  if (nstate.csrf) state.csrf = nstate.csrf;
-  if (nstate.username) state.username = nstate.username;
-  if (nstate.password) state.password = nstate.password;
-  if (nstate.error) state.error = nstate.error;
-  if (nstate.isAuthenticated) state.isAuthenticated = nstate.isAuthenticated;
+  if (nstate.csrf) state.csrf = nstate.csrf
+  if (nstate.username) state.username = nstate.username
+  if (nstate.password) state.password = nstate.password
+  if (nstate.error) state.error = nstate.error
+  if (nstate.isAuthenticated) state.isAuthenticated = nstate.isAuthenticated
 }
 
-getSession();
+getSession()
 
 function getCSRF() {
-  fetch("http://localhost:8000/api/csrf/", {
-    credentials: "include",
+  fetch('http://localhost:8000/api/csrf/', {
+    credentials: 'include',
   })
-    .then((res) => {
-      let csrfToken = res.headers.get("X-CSRFToken");
-      setState({ csrf: csrfToken });
-      console.log(csrfToken);
+    .then(res => {
+      const csrfToken = res.headers.get('X-CSRFToken')
+      setState({ csrf: csrfToken })
+      console.log(csrfToken)
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 function getSession() {
-  fetch("http://localhost:8000/api/session/", {
-    credentials: "include",
+  fetch('http://localhost:8000/api/session/', {
+    credentials: 'include',
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
+    .then(res => res.json())
+    .then(data => {
+      console.log(data)
       if (data.isAuthenticated) {
-        setState({ isAuthenticated: true });
+        setState({ isAuthenticated: true })
       } else {
-        setState({ isAuthenticated: false });
-        getCSRF();
+        setState({ isAuthenticated: false })
+        getCSRF()
       }
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 function whoami() {
-  fetch("http://localhost:8000/api/whoami/", {
+  fetch('http://localhost:8000/api/whoami/', {
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-    credentials: "include",
+    credentials: 'include',
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("You are logged in as: " + data.username);
+    .then(res => res.json())
+    .then(data => {
+      console.log('You are logged in as: ' + data.username)
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(err => {
+      console.log(err)
+    })
 }
 
 function isResponseOk(response) {
   if (response.status >= 200 && response.status <= 299) {
-    return response.json();
+    return response.json()
   } else {
-    throw Error(response.statusText);
+    throw Error(response.statusText)
   }
 }
 
 function login(event) {
-  event.preventDefault();
-  fetch("http://localhost:8000/api/login/", {
-    method: "POST",
+  event.preventDefault()
+  fetch('http://localhost:8000/api/login/', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": state.csrf,
+      'Content-Type': 'application/json',
+      'X-CSRFToken': state.csrf,
     },
-    credentials: "include",
+    credentials: 'include',
     body: JSON.stringify({
       username: state.username,
       password: state.password,
     }),
   })
     .then(isResponseOk)
-    .then((data) => {
-      console.log(data);
+    .then(data => {
+      console.log(data)
       setState({
         isAuthenticated: true,
-        username: "",
-        password: "",
-        error: "",
-      });
+        username: '',
+        password: '',
+        error: '',
+      })
     })
-    .catch((err) => {
-      console.log(err);
-      setState({ error: "Wrong username or password." });
-    });
+    .catch(err => {
+      console.log(err)
+      setState({ error: 'Wrong username or password.' })
+    })
 }
 
 function logout() {
-  fetch("http://localhost:8000/api/logout", {
-    credentials: "include",
+  fetch('http://localhost:8000/api/logout', {
+    credentials: 'include',
   })
     .then(isResponseOk)
-    .then((data) => {
-      console.log(data);
-      setState({ isAuthenticated: false });
-      getCSRF();
+    .then(data => {
+      console.log(data)
+      setState({ isAuthenticated: false })
+      getCSRF()
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(err => {
+      console.log(err)
+    })
 }
 </script>
 
-<style>
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-</style>
+<style></style>
