@@ -1,28 +1,34 @@
 <template>
-  <template v-if="!state.isAuthenticated">
-    <div>
-      <label>Username</label>
-      <input type="text" v-model="state.username" />
+  <div class="flex flex-col w-full">
+    <Header />
+    <div v-if="false">
+      <template v-if="!state.isAuthenticated">
+        <div>
+          <label>Username</label>
+          <input type="text" v-model="state.username" />
+        </div>
+        <div>
+          <label>Password</label>
+          <input type="password" v-model="state.password" />
+        </div>
+        <div v-if="state.error">
+          {{ state.error }}
+        </div>
+        <button @click="login">Login</button>
+      </template>
+      <template v-else>
+        <h1>Cookie Auth</h1>
+        <p>You are logged in!</p>
+        <button @click="whoami">WhoAmI</button>
+        <button @click="logout">Log out</button>
+      </template>
     </div>
-    <div>
-      <label>Password</label>
-      <input type="password" v-model="state.password" />
-    </div>
-    <div v-if="state.error">
-      {{ state.error }}
-    </div>
-    <button @click="login">Login</button>
-  </template>
-  <template v-else>
-    <h1>Cookie Auth</h1>
-    <p>You are logged in!</p>
-    <button @click="whoami">WhoAmI</button>
-    <button @click="logout">Log out</button>
-  </template>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { reactive } from 'vue'
+import Header from '@/components/HeaderComponent.vue'
 
 const state = reactive({
   csrf: '',
@@ -32,7 +38,13 @@ const state = reactive({
   isAuthenticated: false,
 })
 
-function setState(nstate) {
+function setState(nstate: {
+  csrf?: string
+  username?: string
+  password?: string
+  error?: string
+  isAuthenticated?: boolean
+}) {
   if (nstate.csrf) state.csrf = nstate.csrf
   if (nstate.username) state.username = nstate.username
   if (nstate.password) state.password = nstate.password
@@ -48,8 +60,10 @@ function getCSRF() {
   })
     .then(res => {
       const csrfToken = res.headers.get('X-CSRFToken')
-      setState({ csrf: csrfToken })
-      console.log(csrfToken)
+      if (csrfToken) {
+        setState({ csrf: csrfToken })
+        console.log(csrfToken)
+      }
     })
     .catch(err => {
       console.log(err)
@@ -91,7 +105,7 @@ function whoami() {
     })
 }
 
-function isResponseOk(response) {
+function isResponseOk(response: Response) {
   if (response.status >= 200 && response.status <= 299) {
     return response.json()
   } else {
@@ -99,8 +113,7 @@ function isResponseOk(response) {
   }
 }
 
-function login(event) {
-  event.preventDefault()
+function login() {
   fetch('http://localhost:8000/api/login/', {
     method: 'POST',
     headers: {
