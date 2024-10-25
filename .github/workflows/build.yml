@@ -1,0 +1,51 @@
+name: Validate format & build
+
+on:
+  push:
+    branches: [ "master", "development" ]
+  pull_request:
+    branches: [ "master", "development" ]
+  workflow_dispatch:
+
+jobs:
+  frontendFormat:
+    name: "Frontend: Validate format"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install frontend dependencies
+        run: cd frontend && pnpm install
+      - name: Validate frontend linter
+        run: cd frontend && pnpm lint-check
+      - name: Validate frontend prettier
+        run: cd frontend && pnpm format-check
+
+  frontendTypescript:
+    name: "Frontend: Validate Types"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install frontend dependencies
+        run: cd frontend && pnpm install
+      - name: Check types and Build
+        run: cd frontend && pnpm type-check
+
+  frontendBuild:
+    name: "Frontend: Build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install frontend dependencies
+        run: cd frontend && pnpm install
+      - name: Check types and Build
+        run: cd frontend && pnpm build-only
+
