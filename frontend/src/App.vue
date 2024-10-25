@@ -4,11 +4,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { provide, ref } from 'vue'
-
-const authenticated = ref(false)
-provide('authenticated', authenticated)
-</script>
+<script setup lang="ts"></script>
 
 <style></style>

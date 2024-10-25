@@ -62,11 +62,11 @@
                 label="Sign In"
                 icon="pi pi-user"
                 class="w-full"
-                @click="login"
+                @click="clogin"
               />
-              <Message v-if="error" class="mt-2" severity="error">{{
-                error
-              }}</Message>
+              <Message v-if="error" class="mt-2" severity="error"
+                >{{ error }}
+              </Message>
             </div>
           </div>
           <div v-else>
@@ -75,7 +75,7 @@
               label="Logout"
               icon="pi pi-user"
               class="w-full"
-              @click="logout"
+              @click="clogout"
             />
           </div>
         </template>
@@ -85,102 +85,44 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, type Ref } from 'vue'
+import { ref, watch } from 'vue'
+import { login, logout, useAuthenticated, useCSRF } from '@/backend/security'
+import { useQueryClient } from '@tanstack/vue-query'
+import { useRouter } from 'vue-router'
 
-const authenticated = inject<Ref<boolean>>('authenticated')
-const csrf = ref('')
+const { data: authenticated } = useAuthenticated()
+const { data: csrf } = useCSRF()
 const username = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
 
-getSession()
+const router = useRouter()
+watch(
+  authenticated,
+  () => {
+    if (authenticated.value) {
+      router.push({ name: 'Home' })
+    }
+  },
+  { immediate: true },
+)
 
-function setAuthenticated(auth: boolean) {
-  if (authenticated) authenticated.value = auth
-}
-
-function getCSRF() {
-  fetch('http://localhost:8000/api/csrf/', {
-    credentials: 'include',
-  })
-    .then(res => {
-      const csrfToken = res.headers.get('X-CSRFToken')
-      if (csrfToken) {
-        csrf.value = csrfToken
-        console.log(csrfToken)
-      }
-    })
-    .catch(err => {
-      console.log(err)
-    })
-}
-
-function getSession() {
-  fetch('http://localhost:8000/api/session/', {
-    credentials: 'include',
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log(data)
-      setAuthenticated(data.isAuthenticated)
-      if (!data.isAuthenticated) getCSRF()
-    })
-    .catch(err => {
-      console.log(err)
-    })
-}
-
-function isResponseOk(response: Response) {
-  if (response.status >= 200 && response.status <= 299) {
-    return response.json()
-  } else {
-    throw Error(response.statusText)
-  }
-}
-
-function login() {
+const queryClient = useQueryClient()
+async function clogin() {
   loading.value = true
-  fetch('http://localhost:8000/api/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrf.value,
-    },
-    credentials: 'include',
-    body: JSON.stringify({
-      username: username.value,
-      password: password.value,
-    }),
-  })
-    .then(isResponseOk)
-    .then(() => {
-      username.value = ''
-      password.value = ''
-      error.value = ''
-      setAuthenticated(true)
-      loading.value = false
-    })
-    .catch(err => {
-      console.log(err)
-      error.value = 'Wrong username or password.'
-      loading.value = false
-    })
+  if (!(await login(queryClient, csrf.value, username.value, password.value))) {
+    error.value = 'Wrong username or password.'
+  } else {
+    error.value = ''
+  }
+  loading.value = false
 }
 
-function logout() {
-  fetch('http://localhost:8000/api/logout', {
-    credentials: 'include',
-  })
-    .then(isResponseOk)
-    .then(data => {
-      console.log(data)
-      setAuthenticated(false)
-      getCSRF()
-    })
-    .catch(err => {
-      console.log(err)
-    })
+async function clogout() {
+  loading.value = true
+  await logout(queryClient)
+  loading.value = false
 }
 </script>
 
