@@ -6,6 +6,7 @@ import router from './router'
 import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 import { VueQueryPlugin } from '@tanstack/vue-query'
+import FocusTrap from 'primevue/focustrap'
 
 createApp(App)
   .use(router)
@@ -21,4 +22,5 @@ createApp(App)
       },
     },
   })
+  .directive('focustrap', FocusTrap)
   .mount('#app')

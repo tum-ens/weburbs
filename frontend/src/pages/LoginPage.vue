@@ -1,54 +1,104 @@
 <template>
-  <div>
-    <template v-if="!state.isAuthenticated">
-      <div>
-        <label>Username</label>
-        <input type="text" v-model="state.username" />
-      </div>
-      <div>
-        <label>Password</label>
-        <input type="password" v-model="state.password" />
-      </div>
-      <div v-if="state.error">
-        {{ state.error }}
-      </div>
-      <button @click="login">Login</button>
-    </template>
-    <template v-else>
-      <h1>Cookie Auth</h1>
-      <p>You are logged in!</p>
-      <button @click="whoami">WhoAmI</button>
-      <button @click="logout">Log out</button>
-    </template>
+  <div class="w-screen min-h-screen flex flex-col justify-center items-center">
+    <div class="lg:w-6/12 w-full p-6">
+      <Card>
+        <template #header>
+          <div class="text-center">
+            <h1 class="font-bold text-5xl mt-2">URBS</h1>
+            <span
+              class="text-surface-600 dark:text-surface-200 font-medium leading-normal"
+              >Don't have an account?</span
+            >
+            <RouterLink
+              to="/register"
+              class="font-medium no-underline ml-2 text-primary cursor-pointer"
+            >
+              Create today!
+            </RouterLink>
+          </div>
+        </template>
+        <template #content>
+          <div v-if="!authenticated">
+            <div>
+              <label
+                for="username"
+                class="text-surface-900 dark:text-surface-0 font-medium mb-2 block"
+                >Username</label
+              >
+              <InputText
+                :disabled="loading"
+                autofocus
+                id="username"
+                v-model="username"
+                type="text"
+                placeholder="Username"
+                class="w-full mb-4"
+              />
+
+              <label
+                for="password"
+                class="text-surface-900 dark:text-surface-0 font-medium mb-2 block"
+                >Password</label
+              >
+              <InputText
+                :disabled="loading"
+                id="password"
+                v-model="password"
+                type="password"
+                placehoder="Password"
+                class="w-full mb-4"
+              />
+
+              <div class="flex justify-end mb-12">
+                <RouterLink
+                  to="/resetPassword"
+                  class="font-medium no-underline ml-2 text-primary text-right cursor-pointer"
+                  >Forgot password?
+                </RouterLink>
+              </div>
+
+              <Button
+                :loading="loading"
+                label="Sign In"
+                icon="pi pi-user"
+                class="w-full"
+                @click="login"
+              />
+              <Message v-if="error" class="mt-2" severity="error">{{
+                error
+              }}</Message>
+            </div>
+          </div>
+          <div v-else>
+            <p>Already authenticated!</p>
+            <Button
+              label="Logout"
+              icon="pi pi-user"
+              class="w-full"
+              @click="logout"
+            />
+          </div>
+        </template>
+      </Card>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { inject, ref, type Ref } from 'vue'
 
-const state = reactive({
-  csrf: '',
-  username: '',
-  password: '',
-  error: '',
-  isAuthenticated: false,
-})
-
-function setState(nstate: {
-  csrf?: string
-  username?: string
-  password?: string
-  error?: string
-  isAuthenticated?: boolean
-}) {
-  if (nstate.csrf) state.csrf = nstate.csrf
-  if (nstate.username) state.username = nstate.username
-  if (nstate.password) state.password = nstate.password
-  if (nstate.error) state.error = nstate.error
-  if (nstate.isAuthenticated) state.isAuthenticated = nstate.isAuthenticated
-}
+const authenticated = inject<Ref<boolean>>('authenticated')
+const csrf = ref('')
+const username = ref('')
+const password = ref('')
+const error = ref('')
+const loading = ref(false)
 
 getSession()
+
+function setAuthenticated(auth: boolean) {
+  if (authenticated) authenticated.value = auth
+}
 
 function getCSRF() {
   fetch('http://localhost:8000/api/csrf/', {
@@ -57,7 +107,7 @@ function getCSRF() {
     .then(res => {
       const csrfToken = res.headers.get('X-CSRFToken')
       if (csrfToken) {
-        setState({ csrf: csrfToken })
+        csrf.value = csrfToken
         console.log(csrfToken)
       }
     })
@@ -73,28 +123,8 @@ function getSession() {
     .then(res => res.json())
     .then(data => {
       console.log(data)
-      if (data.isAuthenticated) {
-        setState({ isAuthenticated: true })
-      } else {
-        setState({ isAuthenticated: false })
-        getCSRF()
-      }
-    })
-    .catch(err => {
-      console.log(err)
-    })
-}
-
-function whoami() {
-  fetch('http://localhost:8000/api/whoami/', {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log('You are logged in as: ' + data.username)
+      setAuthenticated(data.isAuthenticated)
+      if (!data.isAuthenticated) getCSRF()
     })
     .catch(err => {
       console.log(err)
@@ -110,31 +140,31 @@ function isResponseOk(response: Response) {
 }
 
 function login() {
+  loading.value = true
   fetch('http://localhost:8000/api/login/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRFToken': state.csrf,
+      'X-CSRFToken': csrf.value,
     },
     credentials: 'include',
     body: JSON.stringify({
-      username: state.username,
-      password: state.password,
+      username: username.value,
+      password: password.value,
     }),
   })
     .then(isResponseOk)
-    .then(data => {
-      console.log(data)
-      setState({
-        isAuthenticated: true,
-        username: '',
-        password: '',
-        error: '',
-      })
+    .then(() => {
+      username.value = ''
+      password.value = ''
+      error.value = ''
+      setAuthenticated(true)
+      loading.value = false
     })
     .catch(err => {
       console.log(err)
-      setState({ error: 'Wrong username or password.' })
+      error.value = 'Wrong username or password.'
+      loading.value = false
     })
 }
 
@@ -145,7 +175,7 @@ function logout() {
     .then(isResponseOk)
     .then(data => {
       console.log(data)
-      setState({ isAuthenticated: false })
+      setAuthenticated(false)
       getCSRF()
     })
     .catch(err => {
