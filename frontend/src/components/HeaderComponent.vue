@@ -1,5 +1,5 @@
 <template>
-  <div class="w-screen p-6">
+  <div class="w-screen p-3">
     <Menubar :model="items" />
   </div>
 </template>
