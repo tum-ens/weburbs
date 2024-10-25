@@ -88,7 +88,7 @@
 import { ref, watch } from 'vue'
 import { login, logout, useAuthenticated, useCSRF } from '@/backend/security'
 import { useQueryClient } from '@tanstack/vue-query'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const { data: authenticated } = useAuthenticated()
 const { data: csrf } = useCSRF()
@@ -98,11 +98,14 @@ const error = ref('')
 const loading = ref(false)
 
 const router = useRouter()
+const route = useRoute()
 watch(
   authenticated,
   () => {
     if (authenticated.value) {
-      router.push({ name: 'Home' })
+      if (route.query['redirect'])
+        router.push({ path: <string>route.query['redirect'] })
+      else router.push({ name: 'Home' })
     }
   },
   { immediate: true },
