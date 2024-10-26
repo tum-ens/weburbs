@@ -5,7 +5,7 @@ export function useCSRF() {
   return useQuery({
     queryKey: ['csrftoken'],
     queryFn: () =>
-      axios.get('/api/csrf').then(res => res.headers.get('X-CSRFToken')),
+      axios.get('/api/csrf').then(res => res.headers['x-csrftoken']),
   })
 }
 
