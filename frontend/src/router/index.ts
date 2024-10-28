@@ -27,6 +27,21 @@ const router = createRouter({
       name: 'Home',
       path: '/home',
       component: () => import('@/pages/HomePage.vue'),
+      children: [
+        {
+          name: 'ProjectList',
+          path: 'project',
+          component: () => import('@/pages/ProjectListPage.vue'),
+        },
+        {
+          name: 'Project',
+          path: 'project/:projId',
+          meta: {
+            parents: ['ProjectList'],
+          },
+          component: () => import('@/pages/ProjectListPage.vue'),
+        },
+      ],
     },
   ],
 })

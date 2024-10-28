@@ -1,31 +1,28 @@
 <template>
-  <div class="w-screen p-3">
-    <Menubar :model="items">
-      <template #end>
-        <Button
-          text
-          rounded
-          icon="pi pi-sign-out"
-          aria-label="Logout"
-          @click="clogout"
-        />
-      </template>
-    </Menubar>
+  <div
+    class="w-full h-14 p-3 bg-surface-0 flex flex-row justify-between items-center"
+  >
+    <Button
+      class="invisible"
+      text
+      rounded
+      icon="pi pi-bars"
+      aria-label="Logout"
+    />
+    <Button
+      text
+      rounded
+      icon="pi pi-sign-out"
+      aria-label="Logout"
+      @click="clogout"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { logout } from '@/backend/security'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
-
-const items = ref([
-  {
-    label: 'Home',
-    icon: 'pi pi-home',
-  },
-])
 
 const queryClient = useQueryClient()
 const router = useRouter()
