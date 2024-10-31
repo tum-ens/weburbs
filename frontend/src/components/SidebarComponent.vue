@@ -32,8 +32,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useProjectList } from '@/backend/projects'
 
 const route = useRoute()
 const router = useRouter()
@@ -52,43 +53,49 @@ watch(
   },
   { immediate: true },
 )
-const items = ref([
-  {
-    key: 'Home',
-    label: 'Home',
-    icon: 'pi pi-home',
-    command: () => router.push({ name: 'Home' }),
-  },
-  {
-    key: 'ProjectList',
-    label: 'Projects',
-    icon: 'pi pi-folder',
-    command: () => router.push({ name: 'ProjectList' }),
-    items: [
-      {
-        key: 'CreateProject',
-        label: 'Create',
-        icon: 'pi pi-pencil',
-        command: () =>
-          router.push({
-            name: 'CreateProject',
-          }),
-      },
-      {
-        key: 'proj:Project A',
-        label: 'Project A',
-        icon: 'pi pi-receipt',
-        command: () =>
-          router.push({
-            name: 'Project',
-            params: {
-              projId: 'Project A',
-            },
-          }),
-      },
-    ],
-  },
-])
+const { data: projects } = useProjectList()
+
+const items = computed(() => {
+  return [
+    {
+      key: 'Home',
+      label: 'Home',
+      icon: 'pi pi-home',
+      command: () => router.push({ name: 'Home' }),
+    },
+    {
+      key: 'ProjectList',
+      label: 'Projects',
+      icon: 'pi pi-folder',
+      command: () => router.push({ name: 'ProjectList' }),
+      items: [
+        {
+          key: 'CreateProject',
+          label: 'Create',
+          icon: 'pi pi-pencil',
+          command: () =>
+            router.push({
+              name: 'CreateProject',
+            }),
+        },
+        ...(projects.value || []).map(p => {
+          return {
+            key: 'proj:' + p.name,
+            label: p.name,
+            icon: 'pi pi-receipt',
+            command: () =>
+              router.push({
+                name: 'Project',
+                params: {
+                  projId: p.name,
+                },
+              }),
+          }
+        }),
+      ],
+    },
+  ]
+})
 </script>
 
 <style scoped></style>

@@ -20,19 +20,28 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useToast } from 'primevue/usetoast'
+import { useCreateProject } from '@/backend/projects'
 
 const toast = useToast()
 
 const name = ref('')
 const description = ref('')
+const { mutate: createProject } = useCreateProject()
 
 function create() {
-  toast.add({
-    summary: 'Success',
-    detail: 'Project was create',
-    severity: 'success',
-    life: 2000,
-  })
+  createProject(
+    { name: name.value, description: description.value },
+    {
+      onSuccess() {
+        toast.add({
+          summary: 'Success',
+          detail: 'Project was create',
+          severity: 'success',
+          life: 2000,
+        })
+      },
+    },
+  )
 }
 </script>
 
