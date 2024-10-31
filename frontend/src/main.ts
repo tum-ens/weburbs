@@ -9,6 +9,7 @@ import Aura from '@primevue/themes/aura'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 import FocusTrap from 'primevue/focustrap'
 import axios from 'axios'
+import ToastService from 'primevue/toastservice'
 
 axios.defaults.baseURL = 'http://localhost:8000'
 axios.defaults.withCredentials = true
@@ -16,6 +17,7 @@ axios.defaults.withCredentials = true
 createApp(App)
   .use(router)
   .use(VueQueryPlugin)
+  .use(ToastService)
   .use(PrimeVue, {
     theme: {
       preset: Aura,

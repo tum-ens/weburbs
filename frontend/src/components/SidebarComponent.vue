@@ -2,7 +2,30 @@
   <Card class="w-80">
     <template #content>
       <ScrollPanel>
-        <PanelMenu :model="items" v-model:expanded-keys="expandedKey" />
+        <PanelMenu :model="items" v-model:expanded-keys="expandedKey">
+          <template #item="{ item }">
+            <a class="flex items-center px-4 py-2 cursor-pointer group">
+              <span
+                v-if="item.items"
+                class="pi text-primary mr-2"
+                :class="{
+                  'pi-angle-right': !expandedKey[<string>item.key],
+                  'pi-angle-down': expandedKey[<string>item.key],
+                }"
+              />
+              <span
+                :class="[item.icon, 'text-primary group-hover:text-inherit']"
+              />
+              <span
+                :class="[
+                  'ml-2',
+                  { 'font-semibold': expandedKey[<string>item.key] },
+                ]"
+                >{{ item.label }}</span
+              >
+            </a>
+          </template>
+        </PanelMenu>
       </ScrollPanel>
     </template>
   </Card>
@@ -20,11 +43,12 @@ watch(
   () => {
     expandedKey.value = {}
     if (route.name) expandedKey.value[<string>route.name] = true
-    for (const parent of <string[]>route.meta.parents) {
-      expandedKey.value[parent] = true
-    }
+    if (route.meta.parents)
+      for (const parent of <string[]>route.meta.parents) {
+        expandedKey.value[parent] = true
+      }
     if (route.params.projId)
-      expandedKey.value[<string>route.params.projId] = true
+      expandedKey.value['proj:' + <string>route.params.projId] = true
   },
   { immediate: true },
 )
@@ -42,7 +66,16 @@ const items = ref([
     command: () => router.push({ name: 'ProjectList' }),
     items: [
       {
-        key: 'Project A',
+        key: 'CreateProject',
+        label: 'Create',
+        icon: 'pi pi-pencil',
+        command: () =>
+          router.push({
+            name: 'CreateProject',
+          }),
+      },
+      {
+        key: 'proj:Project A',
         label: 'Project A',
         icon: 'pi pi-receipt',
         command: () =>

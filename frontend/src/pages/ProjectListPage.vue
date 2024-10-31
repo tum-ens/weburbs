@@ -1,7 +1,9 @@
 <template>
   <Card>
-    <template #title>Projects</template>/
-    <template #content> My content </template>
+    <template #title>Projects</template>
+    <template #content>
+      <span>Please select a project or create one</span>
+    </template>
   </Card>
 </template>
 
