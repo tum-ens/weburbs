@@ -21,11 +21,37 @@ export function useCreateProject() {
   })
 }
 
+export function useUpdateProject(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Project) =>
+      axios.post(`/api/project/details/${route.params.proj}/update/`, data, {
+        headers: {
+          'X-CSRFToken': csrf.value,
+        },
+      }),
+    onSuccess() {
+      client.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
+}
+
 export function useProjectList() {
   return useQuery({
     queryKey: ['projects'],
     queryFn: () =>
       axios.get<Project[]>(`/api/project/list/`).then(res => res.data),
+  })
+}
+
+export function useProjectDetails(route: RouteLocationNormalized) {
+  return useQuery({
+    queryKey: ['projectDetails', computed(() => route.params.proj)],
+    queryFn: () =>
+      axios
+        .get<Project>(`/api/project/details/${route.params.proj}/`)
+        .then(res => res.data),
   })
 }
 

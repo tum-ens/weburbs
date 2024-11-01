@@ -1,6 +1,6 @@
 <template>
   <Card>
-    <template #title>Create Project</template>
+    <template #title>Update Project</template>
     <template #content>
       <div class="flex flex-col gap-3">
         <FloatLabel variant="on">
@@ -11,27 +11,42 @@
           <Textarea class="w-full" id="description" v-model="description" />
           <label for="description">Description</label>
         </FloatLabel>
-        <Button @click="create">Create</Button>
+        <Button @click="create">Update</Button>
       </div>
     </template>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { useCreateProject } from '@/backend/projects'
-import { useRouter } from 'vue-router'
+import { useProjectDetails, useUpdateProject } from '@/backend/projects'
+import { useRoute, useRouter } from 'vue-router'
 
 const toast = useToast()
+const route = useRoute()
 const router = useRouter()
+
+const { data: project } = useProjectDetails(route)
+const { mutate: updateProject } = useUpdateProject(route)
 
 const name = ref('')
 const description = ref('')
-const { mutate: createProject } = useCreateProject()
+watch(
+  project,
+  () => {
+    if (project.value) {
+      name.value = project.value.name
+      description.value = project.value.description
+    }
+  },
+  {
+    immediate: true,
+  },
+)
 
 function create() {
-  createProject(
+  updateProject(
     { name: name.value, description: description.value },
     {
       onSuccess() {
@@ -42,7 +57,7 @@ function create() {
           life: 2000,
         })
         router.push({
-          name: 'ProjectConfig',
+          name: 'Project',
           params: {
             proj: name.value,
           },

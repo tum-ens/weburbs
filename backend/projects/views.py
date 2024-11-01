@@ -1,5 +1,4 @@
 import json
-from http.client import HTTPResponse
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404
@@ -16,15 +15,23 @@ def list_projects(request):
 
     return JsonResponse(list(projects), safe=False)
 
+@login_required
+@require_GET
+def project_details(request, project_name):
+    project = (Project.objects.get(user=request.user, name=project_name))
+
+    return JsonResponse({
+        'name': project.name,
+        'description': project.description
+    }, safe=False)
+
 
 @login_required
 @require_POST
 def create_project(request):
     data = json.loads(request.body)
-    name = data.get('name')
-    description = data.get('description')
 
-    project = Project(user=request.user, name=name, description=description)
+    project = Project(user=request.user, name=data['name'], description=data['description'])
     project.save()
 
     (Global(project=project, value=150000000,
@@ -33,6 +40,18 @@ def create_project(request):
     (Global(project=project, value=35000000000,
                              description='Limits the sum of all costs in all sites; Only relevant if not minimized')
      .save())
+
+    return JsonResponse({'detail': 'Project created'})
+
+@login_required
+@require_POST
+def update_project(request, project_name):
+    data = json.loads(request.body)
+
+    project = get_project(project_name)
+    project.name = data['name']
+    project.description = data['description']
+    project.save()
 
     return JsonResponse({'detail': 'Project created'})
 
