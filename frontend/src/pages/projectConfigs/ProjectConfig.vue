@@ -1,43 +1,38 @@
 <template>
-  <Card>
-    <template #title>Create Project</template>
+  <Card v-if="project">
+    <template #title>Configure "{{ project.name }}"</template>
     <template #content>
-      <ProjectForm
-        submit-label="Create"
-        :project="defaultProject"
-        @submit="create"
-      />
+      <ProjectForm submit-label="Update" :project="project" @submit="update" />
     </template>
   </Card>
 </template>
 
 <script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router'
+import { useProjectDetails, useUpdateProject } from '@/backend/projects'
 import { useToast } from 'primevue/usetoast'
-import {useUpdateProject} from '@/backend/projects'
-import {useRoute, useRouter} from 'vue-router'
 import ProjectForm from '@/forms/ProjectForm.vue'
 
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
-const { mutate: createProject } = useUpdateProject(route)
+const { data: project } = useProjectDetails(route)
+const { mutate: updateProject } = useUpdateProject(route)
 
-const defaultProject = {
-  name: '',
-  description: '',
-  co2limit: 35000000000,
-  costlimit: 150000000,
-}
-
-function create(
+function update(
   name: string,
   description: string,
   co2limit: number,
   costlimit: number,
-) {
-  createProject(
-    { name, description, co2limit, costlimit },
+): void {
+  updateProject(
+    {
+      name: name,
+      description: description,
+      co2limit: co2limit,
+      costlimit: costlimit,
+    },
     {
       onSuccess() {
         toast.add({
@@ -47,7 +42,7 @@ function create(
           life: 2000,
         })
         router.push({
-          name: 'ProjectSites',
+          name: 'Project',
           params: {
             proj: name,
           },

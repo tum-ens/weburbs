@@ -90,6 +90,44 @@ const items = computed(() => {
                   proj: p.name,
                 },
               }),
+            items: [
+              {
+                key: 'ProjectGlobal',
+                label: 'Global',
+                icon: 'pi pi-globe',
+                command: () =>
+                  router.push({
+                    name: 'ProjectGlobal',
+                    params: {
+                      proj: p.name,
+                    },
+                  }),
+              },
+              {
+                key: 'ProjectSites',
+                label: 'Sites',
+                icon: 'pi pi-map-marker',
+                command: () =>
+                  router.push({
+                    name: 'ProjectSites',
+                    params: {
+                      proj: p.name,
+                    },
+                  }),
+              },
+              {
+                key: 'ProjectCommoditySites',
+                label: 'Commodities',
+                icon: 'pi pi-bolt',
+                command: () =>
+                  router.push({
+                    name: 'ProjectCommoditySites',
+                    params: {
+                      proj: p.name,
+                    },
+                  }),
+              },
+            ],
           }
         }),
       ],

@@ -9,13 +9,8 @@ class Project(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=255, unique=True, null=False)
     description = models.TextField()
-
-class Global(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
-    property = models.CharField(max_length=255, null=False)
-    value = models.BigIntegerField(null=False)
-    description = models.TextField()
+    co2limit = models.BigIntegerField(null=False)
+    costlimit = models.BigIntegerField(null=False)
 
 class Site(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

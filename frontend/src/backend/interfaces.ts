@@ -1,12 +1,8 @@
 export interface Project {
   name: string
   description: string
-}
-
-export interface GlobalConfig {
-  property: string
-  value: number
-  description: string
+  co2limit: number
+  costlimit: number
 }
 
 export interface Site {

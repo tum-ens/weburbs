@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_POST, require_GET
 
-from projects.models import Project, Global, Site, Commodity
+from projects.models import Project, Site, Commodity
 
 
 @login_required
@@ -15,6 +15,7 @@ def list_projects(request):
 
     return JsonResponse(list(projects), safe=False)
 
+
 @login_required
 @require_GET
 def project_details(request, project_name):
@@ -22,7 +23,9 @@ def project_details(request, project_name):
 
     return JsonResponse({
         'name': project.name,
-        'description': project.description
+        'description': project.description,
+        'co2limit': project.co2limit,
+        'costlimit': project.costlimit,
     }, safe=False)
 
 
@@ -31,17 +34,11 @@ def project_details(request, project_name):
 def create_project(request):
     data = json.loads(request.body)
 
-    project = Project(user=request.user, name=data['name'], description=data['description'])
+    project = Project(user=request.user, name=data['name'], description=data['description'], co2limit=data['co2limit'], costlimit=data['costlimit'])
     project.save()
 
-    (Global(project=project, value=150000000,
-            description='Limits the sum of all created (as calculated by commodity_balance) CO2 in all sites; Only relevant if not minimized')
-     .save())
-    (Global(project=project, value=35000000000,
-                             description='Limits the sum of all costs in all sites; Only relevant if not minimized')
-     .save())
-
     return JsonResponse({'detail': 'Project created'})
+
 
 @login_required
 @require_POST
@@ -51,37 +48,11 @@ def update_project(request, project_name):
     project = get_project(project_name)
     project.name = data['name']
     project.description = data['description']
+    project.co2limit = data['co2limit']
+    project.costlimit = data['costlimit']
     project.save()
 
     return JsonResponse({'detail': 'Project created'})
-
-
-@login_required
-@require_GET
-def list_globals(request, project_name):
-    project = get_project(project_name)
-
-    glob = (Global.objects.filter(project=project)
-            .order_by('property').values('property', 'value'))
-
-    return JsonResponse(list(glob), safe=False)
-
-
-@login_required
-@require_POST
-def update_globals(request, project_name):
-    project = get_project(project_name)
-    data = json.loads(request.body)
-
-    (Global.objects.filter(project=project)
-     .order_by('property').values('property', 'value')
-     .delete())
-
-    for glob in data:
-        (Global(project=project, property=glob['property'], value=glob['value'], description=glob['description'])
-         .save())
-
-    return JsonResponse({'detail': 'Globals updated'})
 
 
 @login_required
@@ -94,6 +65,7 @@ def list_sites(request, project_name):
 
     return JsonResponse(list(sites), safe=False)
 
+
 @login_required
 @require_POST
 def create_site(request, project_name):
@@ -104,6 +76,7 @@ def create_site(request, project_name):
      .save())
 
     return JsonResponse({'detail': 'Site created'})
+
 
 @login_required
 @require_POST
@@ -119,6 +92,7 @@ def update_site(request, project_name, site_name):
     site.save()
 
     return JsonResponse({'detail': 'Site updated'})
+
 
 @login_required
 @require_GET
