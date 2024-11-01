@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axios from 'axios'
 import { useCSRF } from '@/backend/security'
+import type { Project } from '@/backend/interfaces'
 
 export function useCreateProject() {
   const { data: csrf } = useCSRF()
@@ -21,6 +22,7 @@ export function useCreateProject() {
 export function useProjectList() {
   return useQuery({
     queryKey: ['projects'],
-    queryFn: () => axios.get('/api/project/list/').then(res => res.data),
+    queryFn: () =>
+      axios.get<Project[]>('/api/project/list/').then(res => res.data),
   })
 }
