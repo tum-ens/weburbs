@@ -48,8 +48,8 @@ watch(
       for (const parent of <string[]>route.meta.parents) {
         expandedKey.value[parent] = true
       }
-    if (route.params.projId)
-      expandedKey.value['proj:' + <string>route.params.projId] = true
+    if (route.params.proj)
+      expandedKey.value['proj:' + <string>route.params.proj] = true
   },
   { immediate: true },
 )
@@ -87,7 +87,7 @@ const items = computed(() => {
               router.push({
                 name: 'Project',
                 params: {
-                  projId: p.name,
+                  proj: p.name,
                 },
               }),
           }

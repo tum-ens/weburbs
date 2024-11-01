@@ -44,11 +44,35 @@ const router = createRouter({
         },
         {
           name: 'Project',
-          path: 'project/:projId',
+          path: 'project/:proj',
           meta: {
             parents: ['ProjectList'],
           },
           component: () => import('@/pages/ProjectListPage.vue'),
+        },
+        {
+          name: 'ProjectConfig',
+          path: 'project/:proj/global',
+          meta: {
+            parents: ['ProjectList'],
+          },
+          component: () => import('@/pages/projectConfigs/GlobalConfig.vue'),
+        },
+        {
+          name: 'ProjectSites',
+          path: 'project/:proj/sites',
+          meta: {
+            parents: ['ProjectList'],
+          },
+          component: () => import('@/pages/projectConfigs/SiteConfig.vue'),
+        },
+        {
+          name: 'ProjectCommoditySites',
+          path: 'project/:proj/commodities',
+          meta: {
+            parents: ['ProjectList'],
+          },
+          component: () => import('@/pages/projectConfigs/CommodityConfig.vue'),
         },
       ],
     },

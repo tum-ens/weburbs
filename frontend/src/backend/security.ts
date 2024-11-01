@@ -5,7 +5,7 @@ export function useCSRF() {
   return useQuery({
     queryKey: ['csrftoken'],
     queryFn: () =>
-      axios.get('/api/security/csrf').then(res => res.headers['x-csrftoken']),
+      axios.get('/api/security/csrf/').then(res => res.headers['x-csrftoken']),
   })
 }
 
@@ -55,7 +55,7 @@ export async function login(
 
 export async function logout(queryClient: QueryClient) {
   return axios
-    .get('/api/security/logout')
+    .get('/api/security/logout/')
     .then(isResponseOk)
     .then(async () => {
       await queryClient.invalidateQueries({ queryKey: ['authenticated'] })

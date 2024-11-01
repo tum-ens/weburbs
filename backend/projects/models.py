@@ -7,14 +7,15 @@ from django.contrib.auth.models import User
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    name = models.CharField(max_length=255, null=False)
+    name = models.CharField(max_length=255, unique=True, null=False)
     description = models.TextField()
 
 class Global(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
     property = models.CharField(max_length=255, null=False)
-    value = models.IntegerField(null=False)
+    value = models.BigIntegerField(null=False)
+    description = models.TextField()
 
 class Site(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
