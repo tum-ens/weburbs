@@ -80,7 +80,7 @@ def edit_site(request, project_name, site_name):
             return HttpResponseNotAllowed(['POST', 'DELETE'])
     except Site.DoesNotExist:
         if request.method == "POST":
-            (Site(project=project, name=data['name'], area=data['area'], long=data['long']/(60*60*1000), lat=data['lat']/(60*60*1000))
+            (Site(project=project, name=data['name'], area=data['area'], long=data['long'], lat=data['lat'])
              .save())
             return JsonResponse({'detail': 'Site created'})
         else:

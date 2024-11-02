@@ -21,17 +21,6 @@
     <FloatLabel variant="on">
       <InputMask
         :auto-clear="false"
-        :invalid="longInvalid"
-        mask="a99°99'99.999''"
-        class="w-full"
-        id="long"
-        v-model="long"
-      />
-      <label for="long">Longitude</label>
-    </FloatLabel>
-    <FloatLabel variant="on">
-      <InputMask
-        :auto-clear="false"
         :invalid="latInvalid"
         mask="a99°99'99.999''"
         class="w-full"
@@ -40,16 +29,28 @@
       />
       <label for="lat">Latitude</label>
     </FloatLabel>
+    <FloatLabel variant="on">
+      <InputMask
+        :auto-clear="false"
+        :invalid="lngInvalid"
+        mask="a999°99'99.999''"
+        class="w-full"
+        id="lng"
+        v-model="lng"
+      />
+      <label for="lng">Longitude</label>
+    </FloatLabel>
     <Button @click="submit">{{ !!site ? 'Update' : 'Create' }}</Button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Site } from '@/backend/interfaces'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useUpdateSite } from '@/backend/projects'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
 
 const toast = useToast()
 const route = useRoute()
@@ -58,22 +59,43 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   update: [string]
+  updateMarker: [number, number]
+  deleteMarker: []
 }>()
 
 const name = ref(props.site?.name || '')
 const area = ref(props.site?.area || undefined)
-const long = ref(props.site ? decimalToDms(props.site.long, true) : '')
 const lat = ref(props.site ? decimalToDms(props.site.lat, false) : '')
+const lng = ref(props.site ? decimalToDms(props.site.long, true) : '')
 
 const nameInvalid = ref(false)
 const areaInvalid = ref(false)
-const longInvalid = ref(false)
+const lngInvalid = ref(false)
 const latInvalid = ref(false)
 
-const { mutate: updateSite } = useUpdateSite(route)
-
-const longReg = /([EW])(\d+)°(\d+)'([\d.]+)''/
 const latReg = /([NS])(\d+)°(\d+)'([\d.]+)''/
+const lngReg = /([EW])(\d+)°(\d+)'([\d.]+)''/
+watch(
+  [lng, lat],
+  () => {
+    if (lat.value.match(latReg) && lng.value.match(lngReg)) {
+      emit('updateMarker', dmsToDecimal(lat.value), dmsToDecimal(lng.value))
+    } else {
+      emit('deleteMarker')
+    }
+  },
+  {
+    immediate: true,
+  },
+)
+
+function mapClick(event: L.LeafletMouseEvent) {
+  lat.value = decimalToDms(event.latlng.lat, false)
+  lng.value = decimalToDms(event.latlng.lng, true)
+}
+defineExpose({ mapClick })
+
+const { mutate: updateSite } = useUpdateSite(route)
 
 function submit() {
   let error = false
@@ -89,11 +111,11 @@ function submit() {
   } else {
     areaInvalid.value = false
   }
-  if (!long.value || !long.value.match(longReg)) {
+  if (!lng.value || !lng.value.match(lngReg)) {
     error = true
-    longInvalid.value = true
+    lngInvalid.value = true
   } else {
-    longInvalid.value = false
+    lngInvalid.value = false
   }
   if (!lat.value || !lat.value.match(latReg)) {
     error = true
@@ -112,14 +134,14 @@ function submit() {
     return
   }
 
-  if (area.value && long.value && lat.value)
+  if (area.value && lng.value && lat.value)
     updateSite(
       {
         name: props.site?.name || name.value,
         site: {
           name: name.value,
           area: area.value,
-          long: dmsToDecimal(long.value),
+          long: dmsToDecimal(lng.value),
           lat: dmsToDecimal(lat.value),
         },
       },
@@ -135,31 +157,6 @@ function submit() {
         },
       },
     )
-}
-
-function dmsToDecimal(dms: string) {
-  const regex = /([NSEW])(\d+)°(\d+)'([\d.]+)''/
-  const matches = dms.match(regex)
-  if (!matches) {
-    throw new Error('Invalid DMS format')
-  }
-  const [, direction, degrees, minutes, seconds] = matches
-  let decimal =
-    parseInt(degrees) + parseInt(minutes) / 60 + parseFloat(seconds) / 3600
-  if (direction === 'W' || direction === 'S') {
-    decimal = -decimal
-  }
-  return decimal
-}
-
-function decimalToDms(decimal: number, long: boolean) {
-  const direction = decimal < 0 ? (long ? 'W' : 'N') : long ? 'E' : 'S'
-  decimal = Math.abs(decimal)
-  const degrees = Math.floor(decimal)
-  const minutesDecimal = (decimal - degrees) * 60
-  const minutes = Math.floor(minutesDecimal)
-  const seconds = (minutesDecimal - minutes) * 60
-  return `${direction}${degrees.toString().padStart(2, '0')}°${minutes.toString().padStart(2, '0')}'${seconds < 10 ? '0' : ''}${seconds.toFixed(3)}''`
 }
 </script>
 
