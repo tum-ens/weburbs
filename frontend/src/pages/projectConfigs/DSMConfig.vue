@@ -1,20 +1,21 @@
 <template>
   <Card>
-    <template #title>Commodities</template>
+    <template #title>DSM</template>
     <template #content>
-      My commodities
-      <div class="mt-3 flex justify-end">
+      My DSM
+
+      <div class="mt-3 flex justify-end gap-3">
         <Button
           @click="
             router.push({
-              name: 'ProjectProcess',
+              name: 'ProjectBuySell',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          Processes >>
+          Buy-Sell-Price >>
         </Button>
       </div>
     </template>

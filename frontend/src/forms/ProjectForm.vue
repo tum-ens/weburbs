@@ -14,9 +14,9 @@
       <label for="description">Description</label>
     </FloatLabel>
 
-    <Accordion>
+    <Accordion value="1">
       <!-- @vue-ignore -->
-      <AccordionPanel pt:root:class="border-0">
+      <AccordionPanel pt:root:class="border-0" value="0">
         <AccordionHeader>Advanced</AccordionHeader>
         <AccordionContent>
           <div class="flex flex-col mt-2 gap-5">

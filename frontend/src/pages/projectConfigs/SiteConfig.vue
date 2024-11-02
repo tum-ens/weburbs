@@ -1,6 +1,6 @@
 <template>
   <Card v-if="sites">
-    <template #title> Sites</template>
+    <template #title>Sites</template>
     <template #content>
       <div class="grid grid-cols-2 gap-3">
         <Accordion v-model:value="curSite" :lazy="true">
@@ -67,6 +67,20 @@
           </l-map>
         </div>
       </div>
+      <div class="mt-3 flex justify-end">
+        <Button
+          @click="
+            router.push({
+              name: 'ProjectProcess',
+              params: {
+                proj: route.params.proj,
+              },
+            })
+          "
+        >
+          Processes >>
+        </Button>
+      </div>
     </template>
   </Card>
 </template>
@@ -74,12 +88,13 @@
 <script setup lang="ts">
 import SiteForm from '@/forms/SiteForm.vue'
 import { useSites } from '@/backend/projects'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 
 const route = useRoute()
+const router = useRouter()
 
 const { data: sites } = useSites(route)
 
