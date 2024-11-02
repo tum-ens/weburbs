@@ -38,9 +38,11 @@ import { useProjectList } from '@/backend/projects'
 
 const route = useRoute()
 const router = useRouter()
+
 const expandedKey = ref<{ [key: string]: boolean }>({})
+const { data: projects } = useProjectList()
 watch(
-  route,
+  [route, projects],
   () => {
     expandedKey.value = {}
     if (route.name) expandedKey.value[<string>route.name] = true
@@ -53,7 +55,6 @@ watch(
   },
   { immediate: true },
 )
-const { data: projects } = useProjectList()
 
 const items = computed(() => {
   return [
@@ -92,12 +93,12 @@ const items = computed(() => {
               }),
             items: [
               {
-                key: 'ProjectGlobal',
+                key: 'ProjectConfig',
                 label: 'Global',
                 icon: 'pi pi-globe',
                 command: () =>
                   router.push({
-                    name: 'ProjectGlobal',
+                    name: 'ProjectConfig',
                     params: {
                       proj: p.name,
                     },

@@ -1,7 +1,7 @@
 <template>
-  <div class="h-screen flex flex-col">
+  <div class="flex flex-col">
     <Header />
-    <div class="flex-grow p-3 gap-3 flex flex-row">
+    <div class="p-3 gap-3 flex flex-row">
       <SidebarComponent />
       <div class="flex-grow">
         <router-view />

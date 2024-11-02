@@ -15,10 +15,10 @@ class Project(models.Model):
 class Site(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
-    name = models.CharField(max_length=255, null=False, unique=True)
+    name = models.CharField(max_length=255, null=False)
     area = models.IntegerField(null=False)
-    long = models.FloatField(null=False)
-    lat = models.FloatField(null=False)
+    long = models.DecimalField(null=False, decimal_places=9, max_digits=12)
+    lat = models.DecimalField(null=False, decimal_places=9, max_digits=12)
 
 class ComType(IntEnum):
     SupIm = 1

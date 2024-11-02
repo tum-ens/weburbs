@@ -4,6 +4,7 @@
     <template #content>
       <ProjectForm
         submit-label="Create"
+        :loading="pending"
         :project="defaultProject"
         @submit="create"
       />
@@ -13,22 +14,16 @@
 
 <script setup lang="ts">
 import { useToast } from 'primevue/usetoast'
-import {useUpdateProject} from '@/backend/projects'
-import {useRoute, useRouter} from 'vue-router'
+import { useUpdateProject } from '@/backend/projects'
+import { useRoute, useRouter } from 'vue-router'
 import ProjectForm from '@/forms/ProjectForm.vue'
+import { defaultProject } from '@/backend/defaults'
 
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
-const { mutate: createProject } = useUpdateProject(route)
-
-const defaultProject = {
-  name: '',
-  description: '',
-  co2limit: 35000000000,
-  costlimit: 150000000,
-}
+const { mutate: createProject, isPending: pending } = useUpdateProject(route)
 
 function create(
   name: string,

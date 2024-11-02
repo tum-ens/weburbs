@@ -2,7 +2,12 @@
   <Card v-if="project">
     <template #title>Configure "{{ project.name }}"</template>
     <template #content>
-      <ProjectForm submit-label="Update" :project="project" @submit="update" />
+      <ProjectForm
+        submit-label="Update"
+        :loading="pending"
+        :project="project"
+        @submit="update"
+      />
     </template>
   </Card>
 </template>
@@ -18,7 +23,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { data: project } = useProjectDetails(route)
-const { mutate: updateProject } = useUpdateProject(route)
+const { mutate: updateProject, isPending: pending } = useUpdateProject(route)
 
 function update(
   name: string,
@@ -37,12 +42,12 @@ function update(
       onSuccess() {
         toast.add({
           summary: 'Success',
-          detail: 'Project was create',
+          detail: 'Project was saved',
           severity: 'success',
           life: 2000,
         })
         router.push({
-          name: 'Project',
+          name: 'ProjectConfig',
           params: {
             proj: name,
           },

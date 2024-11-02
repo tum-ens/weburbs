@@ -1,15 +1,20 @@
 <template>
   <div v-if="project" class="mt-2 flex flex-col gap-3">
     <FloatLabel variant="on">
-      <InputText class="w-full" id="name" v-model="name"/>
+      <InputText
+        :invalid="nameInvalid"
+        class="w-full"
+        id="name"
+        v-model="name"
+      />
       <label for="name">Name</label>
     </FloatLabel>
     <FloatLabel variant="on">
-      <Textarea class="w-full" id="description" v-model="description"/>
+      <Textarea class="w-full" id="description" v-model="description" />
       <label for="description">Description</label>
     </FloatLabel>
 
-    <Accordion value="0">
+    <Accordion>
       <!-- @vue-ignore -->
       <AccordionPanel pt:root:class="border-0">
         <AccordionHeader>Advanced</AccordionHeader>
@@ -18,6 +23,7 @@
             <div class="lg:grid lg:grid-cols-3 lg:gap-3 flex flex-col gap-2">
               <FloatLabel variant="on" class="lg:col-span-1">
                 <InputNumber
+                  :invalid="co2limitInvalid"
                   class="w-full"
                   inputId="co2limit"
                   v-model="co2limit"
@@ -38,6 +44,7 @@
             <div class="lg:grid lg:grid-cols-3 lg:gap-3 flex flex-col gap-2">
               <FloatLabel variant="on" class="lg:col-span-1">
                 <InputNumber
+                  :invalid="costlimitInvalid"
                   class="w-full"
                   inputId="costlimit"
                   v-model="costlimit"
@@ -58,21 +65,23 @@
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-    <Button
-      @click="() => emit('submit', name, description, co2limit, costlimit)"
-    >
+    <Button :loading="loading" @click="submit">
       {{ submitLabel }}
     </Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from 'vue'
-import type {Project} from '@/backend/interfaces'
+import { ref } from 'vue'
+import type { Project } from '@/backend/interfaces'
+import { useToast } from 'primevue/usetoast'
+
+const toast = useToast()
 
 const props = defineProps<{
   submitLabel: string
   project: Project
+  loading: boolean
 }>()
 const emit = defineEmits<{
   submit: [
@@ -83,25 +92,48 @@ const emit = defineEmits<{
   ]
 }>()
 
-const name = ref('')
-const description = ref('')
-const co2limit = ref(0)
-const costlimit = ref(0)
+const name = ref(props.project.name)
+const description = ref(props.project.description)
+const co2limit = ref(props.project.co2limit)
+const costlimit = ref(props.project.costlimit)
 
-watch(
-  props.project,
-  () => {
-    if (props.project) {
-      name.value = props.project.name
-      description.value = props.project.description
-      co2limit.value = props.project.co2limit
-      costlimit.value = props.project.costlimit
-    }
-  },
-  {
-    immediate: true,
-  },
-)
+const nameInvalid = ref(false)
+const co2limitInvalid = ref(false)
+const costlimitInvalid = ref(false)
+
+function submit() {
+  let error = false
+  if (!name.value) {
+    error = true
+    nameInvalid.value = true
+  } else {
+    nameInvalid.value = false
+  }
+  if (!co2limit.value || co2limit.value < 0) {
+    error = true
+    co2limitInvalid.value = true
+  } else {
+    co2limitInvalid.value = false
+  }
+  if (!costlimit.value || costlimit.value < 0) {
+    error = true
+    costlimitInvalid.value = true
+  } else {
+    costlimitInvalid.value = false
+  }
+
+  if (error) {
+    toast.add({
+      summary: 'Error',
+      detail: 'Not all fields have been filled properly',
+      severity: 'error',
+      life: 2000,
+    })
+    return
+  }
+
+  emit('submit', name.value, description.value, co2limit.value, costlimit.value)
+}
 </script>
 
 <style scoped></style>
