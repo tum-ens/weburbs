@@ -1,0 +1,35 @@
+stages:
+  - validate_format
+  - validate_types
+  - build
+
+variables:
+  PNPM_VERSION: '9'
+
+default:
+  image: node:18
+
+before_script:
+  - npm install -g pnpm@$PNPM_VERSION
+
+# Checking format in frontend
+frontend_format:
+  stage: validate_format
+  script:
+    - cd frontend && pnpm install
+    - cd frontend && pnpm lint-check
+    - cd frontend && pnpm format-check
+
+# Validate typescript in frontend
+frontend_typescript:
+  stage: validate_types
+  script:
+    - cd frontend && pnpm install
+    - cd frontend && pnpm type-check
+
+# Build frontend
+frontend_build:
+  stage: build
+  script:
+    - cd frontend && pnpm install
+    - cd frontend && pnpm build-only
