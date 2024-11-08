@@ -45,33 +45,53 @@ class DefCommodity(models.Model):
 
 class Commodity(DefCommodity):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 class DefProcess(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
-    instcap = models.IntegerField(null=False)
-    caplo = models.IntegerField(null=False)
-    maxgrad = models.IntegerField(null=False)
-    minfraction = models.IntegerField(null=False)
-    invcost = models.IntegerField(null=False)
-    fixcost = models.IntegerField(null=False)
-    varcost = models.IntegerField(null=False)
-    wacc = models.IntegerField(null=False)
-    deprecation = models.IntegerField(null=False)
-    areapercap = models.IntegerField(null=False)
+    instcap = models.FloatField(null=False)
+    caplo = models.FloatField(null=False)
+    capup = models.FloatField(null=False)
+    maxgrad = models.FloatField(null=False)
+    minfraction = models.FloatField(null=False)
+    invcost = models.FloatField(null=False)
+    fixcost = models.FloatField(null=False)
+    varcost = models.FloatField(null=False)
+    wacc = models.FloatField(null=False)
+    deprecation = models.FloatField(null=False)
+    areapercap = models.FloatField(null=True)
 
 class Process(DefProcess):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefProcess, on_delete=models.SET_NULL, null=True, related_name="usages")
 
-class DefProcessCommodity(models.Model):
+class ProcComDir(IntEnum):
+    In = 1
+    Out = 2
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+class ProcessCommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    direction = models.IntegerField(choices=ProcComDir.choices(), null=False)
     ratio = models.FloatField(null=False)
-    ratiomin = models.FloatField(null=False)
+    ratiomin = models.FloatField(null=True)
 
-class ProcessCommodity(DefProcessCommodity):
+    class Meta:
+        abstract = True
+
+class DefProcessCommodity(ProcessCommodityTypes):
+    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
+    def_process = models.ForeignKey(DefProcess, on_delete=models.CASCADE, null=False)
+
+class ProcessCommodity(ProcessCommodityTypes):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefProcessCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 class DefStorage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -95,11 +115,12 @@ class DefStorage(models.Model):
     deprecation = models.IntegerField(null=False)
     init = models.FloatField(null=False)
     discharge = models.FloatField(null=False)
-    epratio = models.FloatField(null=False)
+    epratio = models.FloatField(null=True)
 
 
 class Storage(DefStorage):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefStorage, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 class DefDemand(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -111,6 +132,7 @@ class DefDemand(models.Model):
 class Demand(DefDemand):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 class DefSuplm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -120,6 +142,7 @@ class DefSuplm(models.Model):
 
 class Suplm(DefSuplm):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    default = models.ForeignKey(DefSuplm, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 class TransType(IntEnum):
     hvac = 1
