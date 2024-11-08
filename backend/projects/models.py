@@ -4,6 +4,7 @@ from enum import IntEnum
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
@@ -12,6 +13,7 @@ class Project(models.Model):
     co2limit = models.BigIntegerField(null=False)
     costlimit = models.BigIntegerField(null=False)
 
+
 class Site(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
@@ -19,6 +21,7 @@ class Site(models.Model):
     area = models.IntegerField(null=False)
     long = models.DecimalField(null=False, decimal_places=9, max_digits=12)
     lat = models.DecimalField(null=False, decimal_places=9, max_digits=12)
+
 
 class ComType(IntEnum):
     SupIm = 1
@@ -32,6 +35,7 @@ class ComType(IntEnum):
     def choices(cls):
         return [(key.value, key.name) for key in cls]
 
+
 class DefCommodity(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
@@ -43,9 +47,11 @@ class DefCommodity(models.Model):
     def get_com_type_label(self):
         return ComType(self.type).name.title()
 
+
 class Commodity(DefCommodity):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     default = models.ForeignKey(DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
+
 
 class DefProcess(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -63,9 +69,10 @@ class DefProcess(models.Model):
     deprecation = models.FloatField(null=False)
     areapercap = models.FloatField(null=True)
 
+
 class Process(DefProcess):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefProcess, on_delete=models.SET_NULL, null=True, related_name="usages")
+
 
 class ProcComDir(IntEnum):
     In = 1
@@ -74,6 +81,7 @@ class ProcComDir(IntEnum):
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]
+
 
 class ProcessCommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -84,14 +92,16 @@ class ProcessCommodityTypes(models.Model):
     class Meta:
         abstract = True
 
+
 class DefProcessCommodity(ProcessCommodityTypes):
     def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
     def_process = models.ForeignKey(DefProcess, on_delete=models.CASCADE, null=False)
 
+
 class ProcessCommodity(ProcessCommodityTypes):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefProcessCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
+
 
 class DefStorage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -122,6 +132,7 @@ class Storage(DefStorage):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     default = models.ForeignKey(DefStorage, on_delete=models.SET_NULL, null=True, related_name="usages")
 
+
 class DefDemand(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
@@ -129,10 +140,12 @@ class DefDemand(models.Model):
     count = models.IntegerField(null=False)
     steps = models.JSONField(null=False)
 
+
 class Demand(DefDemand):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     default = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
+
 
 class DefSuplm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -140,9 +153,11 @@ class DefSuplm(models.Model):
     description = models.TextField()
     steps = models.JSONField(null=False)
 
+
 class Suplm(DefSuplm):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     default = models.ForeignKey(DefSuplm, on_delete=models.SET_NULL, null=True, related_name="usages")
+
 
 class TransType(IntEnum):
     hvac = 1
@@ -150,6 +165,7 @@ class TransType(IntEnum):
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]
+
 
 class Transmission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -173,11 +189,13 @@ class Transmission(models.Model):
     def get_trans_type_label(self):
         return ComType(self.transmission).name.title()
 
+
 class BuySellPrice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     buy = models.JSONField(null=False)
     sell = models.JSONField(null=False)
+
 
 class TimeVarEff(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

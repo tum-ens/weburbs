@@ -20,7 +20,7 @@ def list_projects(request):
 @login_required
 @require_GET
 def project_details(request, project_name):
-    project = get_project(project_name)
+    project = get_project(request.user, project_name)
 
     return JsonResponse({
         'name': project.name,

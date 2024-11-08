@@ -11,7 +11,7 @@ from projects.models import Site
 @login_required
 @require_GET
 def list_sites(request, project_name):
-    project = get_project(project_name)
+    project = get_project(request.user, project_name)
     sites = (Site.objects.filter(project=project)
              .order_by('name').values('name', 'area', 'long', 'lat'))
 
@@ -21,7 +21,7 @@ def list_sites(request, project_name):
 @login_required
 @require_POST
 def edit_site(request, project_name, site_name):
-    project = get_project(project_name)
+    project = get_project(request.user, project_name)
     data = json.loads(request.body)
 
     try:
