@@ -69,6 +69,7 @@
       </div>
       <div class="mt-3 flex justify-end">
         <Button
+          :disabled="sites.length === 0"
           @click="
             router.push({
               name: 'ProjectProcess',
@@ -87,11 +88,11 @@
 
 <script setup lang="ts">
 import SiteForm from '@/forms/SiteForm.vue'
-import { useSites } from '@/backend/projects'
 import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { useSites } from '@/backend/sites'
 
 const route = useRoute()
 const router = useRouter()

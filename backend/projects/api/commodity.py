@@ -28,7 +28,7 @@ def list_commodities(request, project_name, site_name):
 
 
 def add_def_to_project(def_commodity: DefCommodity, site: Site):
-    commodity = Commodity(site=site, default=def_commodity, name=def_commodity.name, type=def_commodity.type,
+    commodity = Commodity(site=site, defcommodity=def_commodity, name=def_commodity.name, type=def_commodity.type,
                           price=def_commodity.price, max=def_commodity.max, maxperhour=def_commodity.maxperhour)
     commodity.save()
     return commodity

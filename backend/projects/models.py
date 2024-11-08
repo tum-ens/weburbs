@@ -36,7 +36,7 @@ class ComType(IntEnum):
         return [(key.value, key.name) for key in cls]
 
 
-class DefCommodity(models.Model):
+class CommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     type = models.IntegerField(choices=ComType.choices(), null=False)
@@ -47,13 +47,20 @@ class DefCommodity(models.Model):
     def get_com_type_label(self):
         return ComType(self.type).name.title()
 
+    class Meta:
+        abstract = True
 
-class Commodity(DefCommodity):
+
+class DefCommodity(CommodityTypes):
+    pass
+
+
+class Commodity(CommodityTypes):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defcommodity = models.ForeignKey(DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
-class DefProcess(models.Model):
+class ProcessTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
@@ -69,8 +76,15 @@ class DefProcess(models.Model):
     deprecation = models.FloatField(null=False)
     areapercap = models.FloatField(null=True)
 
+    class Meta:
+        abstract = True
 
-class Process(DefProcess):
+
+class DefProcess(ProcessTypes):
+    pass
+
+
+class Process(ProcessTypes):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
 
 
@@ -103,7 +117,7 @@ class ProcessCommodity(ProcessCommodityTypes):
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
 
 
-class DefStorage(models.Model):
+class StorageType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
@@ -127,36 +141,57 @@ class DefStorage(models.Model):
     discharge = models.FloatField(null=False)
     epratio = models.FloatField(null=True)
 
+    class Meta:
+        abstract = True
 
-class Storage(DefStorage):
+
+class DefStorage(StorageType):
+    pass
+
+
+class Storage(StorageType):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefStorage, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defstorage = models.ForeignKey(DefStorage, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
-class DefDemand(models.Model):
+class DemandType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
     count = models.IntegerField(null=False)
     steps = models.JSONField(null=False)
 
+    class Meta:
+        abstract = True
 
-class Demand(DefDemand):
+
+class DefDemand(DemandType):
+    pass
+
+
+class Demand(DemandType):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defdemand = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
-class DefSuplm(models.Model):
+class SuplmType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
     steps = models.JSONField(null=False)
 
+    class Meta:
+        abstract = True
 
-class Suplm(DefSuplm):
+
+class DefSuplm(SuplmType):
+    pass
+
+
+class Suplm(SuplmType):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    default = models.ForeignKey(DefSuplm, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defsuplm = models.ForeignKey(DefSuplm, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
 class TransType(IntEnum):

@@ -47,10 +47,10 @@
 <script setup lang="ts">
 import type { Site } from '@/backend/interfaces'
 import { ref, watch } from 'vue'
-import { useUpdateSite } from '@/backend/projects'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
+import { useUpdateSite } from '@/backend/sites'
 
 const toast = useToast()
 const route = useRoute()

@@ -20,3 +20,21 @@ export interface Commodity {
   max: number
   maxperhour: number
 }
+
+export interface Process {
+  name: string
+  description: string
+  instcap: number
+  caplo: number
+  capup: number
+  maxgrad: number
+  minfraction: number
+  invcost: number
+  fixcost: number
+  varcost: number
+  wacc: number
+  deprecation: number
+  areapercap: number
+  in: string[]
+  out: string[]
+}

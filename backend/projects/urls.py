@@ -9,9 +9,9 @@ urlpatterns = [
     path('project/<str:project_name>/sites/', site.list_sites),
     path('project/<str:project_name>/site/<str:site_name>/', site.edit_site),
     path('project/<str:project_name>/site/<str:site_name>/commodities/', commodity.list_commodities),
-    path('project/<str:project_name>/site/<str:site_name>/def_commodities/', commodity.list_def_commodities),
+    path('def_commodities/', commodity.list_def_commodities),
     path('project/<str:project_name>/site/<str:site_name>/processes/', process.list_processes),
-    path('project/<str:project_name>/site/<str:site_name>/def_processes/', process.list_def_processes),
-    path('project/<str:project_name>/site/<str:site_name>/def_processes/<str:def_proc_name>/add',
+    path('def_processes/', process.list_def_processes),
+    path('project/<str:project_name>/site/<str:site_name>/def_processes/<str:def_proc_name>/add/',
          process.add_def_process),
 ]
