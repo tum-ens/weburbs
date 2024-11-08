@@ -36,9 +36,9 @@ class DefCommodity(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     type = models.IntegerField(choices=ComType.choices(), null=False)
-    price = models.IntegerField(null=False)
-    max = models.IntegerField(null=False)
-    maxperhour = models.IntegerField(null=False)
+    price = models.IntegerField(null=True)
+    max = models.IntegerField(null=True)
+    maxperhour = models.IntegerField(null=True)
 
     def get_com_type_label(self):
         return ComType(self.type).name.title()
