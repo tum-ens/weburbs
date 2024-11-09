@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
+from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
@@ -21,19 +22,7 @@ def list_def_processes(request):
                  .order_by('name'))
 
     proclist = [{
-        'name': proc.name,
-        'description': proc.description,
-        'instcap': proc.instcap,
-        'caplo': proc.caplo,
-        'capup': proc.capup,
-        'maxgrad': proc.maxgrad,
-        'minfraction': proc.minfraction,
-        'invcost': proc.invcost,
-        'fixcost': proc.fixcost,
-        'varcost': proc.varcost,
-        'wacc': proc.wacc,
-        'deprecation': proc.deprecation,
-        'areapercap': proc.areapercap,
+        **model_to_dict(proc, exclude=['id']),
         'in': [proccom.def_commodity.name for proccom in proc.inCom],
         'out': [proccom.def_commodity.name for proccom in proc.outCom],
     }
@@ -58,19 +47,7 @@ def list_processes(request, project_name, site_name):
                  .order_by('name'))
 
     proclist = [{
-        'name': proc.name,
-        'description': proc.description,
-        'instcap': proc.instcap,
-        'caplo': proc.caplo,
-        'capup': proc.capup,
-        'maxgrad': proc.maxgrad,
-        'minfraction': proc.minfraction,
-        'invcost': proc.invcost,
-        'fixcost': proc.fixcost,
-        'varcost': proc.varcost,
-        'wacc': proc.wacc,
-        'deprecation': proc.deprecation,
-        'areapercap': proc.areapercap,
+        **model_to_dict(proc, exclude=['id']),
         'in': [proccom.commodity.name for proccom in proc.inCom],
         'out': [proccom.commodity.name for proccom in proc.outCom],
     }

@@ -38,3 +38,28 @@ export interface Process {
   in: string[]
   out: string[]
 }
+
+export interface Storage {
+  name: string
+  description: string
+  instcapc: number
+  caploc: number
+  capupc: number
+  instcapp: number
+  caplop: number
+  capupp: number
+  effin: number
+  effout: number
+  invcostp: number
+  invcostc: number
+  fixcostp: number
+  fixcostc: number
+  varcostp: number
+  varcostc: number
+  wacc: number
+  deprecation: number
+  init: number
+  discharge: number
+  epratio: number | null
+  commodity: string
+}

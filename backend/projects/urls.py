@@ -1,6 +1,6 @@
 from django.urls import path
 
-from projects.api import project, site, commodity, process
+from projects.api import project, site, commodity, process, storage
 
 urlpatterns = [
     path('projects/', project.list_projects),
@@ -14,4 +14,8 @@ urlpatterns = [
     path('def_processes/', process.list_def_processes),
     path('project/<str:project_name>/site/<str:site_name>/def_processes/<str:def_proc_name>/add/',
          process.add_def_process),
+    path('project/<str:project_name>/site/<str:site_name>/storage/', storage.list_storage),
+    path('def_storage/', storage.list_def_storage),
+    path('project/<str:project_name>/site/<str:site_name>/def_storage/<str:def_storage_name>/add/',
+         storage.add_def_storage),
 ]

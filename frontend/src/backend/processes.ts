@@ -22,7 +22,7 @@ export function useProcesses(route: RouteLocationNormalized, site: Site) {
       axios
         .get<
           Process[]
-        >(`/api/project/${route.params.proj}/site/${site.name}/processes`)
+        >(`/api/project/${route.params.proj}/site/${site.name}/processes/`)
         .then(response => response.data),
   })
 }
@@ -41,9 +41,9 @@ export function useAddDefProcess(route: RouteLocationNormalized) {
           },
         },
       ),
-    onSuccess() {
+    onSuccess(data, vars) {
       queryClient.invalidateQueries({
-        queryKey: ['processes', route.params.proj],
+        queryKey: ['processes', route.params.proj, vars.site_name],
       })
     },
   })
