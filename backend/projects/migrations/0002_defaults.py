@@ -52,7 +52,7 @@ def load_defaults(apps, schema_editor):
     diesel_generator_co2.save()
 
     def_storage = apps.get_model('projects', 'DefStorage')
-    battery = def_storage(name='Battery', description='Example battery', instcapc=0, caploc=0, capupc=-1, instcapp=0, caplop=0, capupp=-1, effin=0.80, effout=0.80, invcostp=1000, invcostc=9.7, fixcostp=0, fixcostc=0, varcostp=0, varcostc=0, wacc=0.007, deprecation=50, init=0.5, discharge=0.0000035)
+    battery = def_storage(name='Battery', description='Example battery', def_commodity=elec, instcapc=0, caploc=0, capupc=-1, instcapp=0, caplop=0, capupp=-1, effin=0.80, effout=0.80, invcostp=1000, invcostc=9.7, fixcostp=0, fixcostc=0, varcostp=0, varcostc=0, wacc=0.007, deprecation=50, init=0.5, discharge=0.0000035)
     battery.save()
 
 class Migration(migrations.Migration):

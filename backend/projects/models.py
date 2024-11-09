@@ -146,12 +146,12 @@ class StorageType(models.Model):
 
 
 class DefStorage(StorageType):
-    pass
+    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
 
 
 class Storage(StorageType):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    defstorage = models.ForeignKey(DefStorage, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
 class DemandType(models.Model):
