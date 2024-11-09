@@ -30,7 +30,10 @@
 import Transformer from '@/components/TransformerComponent.vue'
 import { useAddDefProcess, useDefProcesses } from '@/backend/processes'
 import { useRoute } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import type { AxiosError } from 'axios'
 
+const toast = useToast()
 const route = useRoute()
 
 const visible = defineModel<boolean>('visible', { default: false })
@@ -43,7 +46,29 @@ const { mutate: addDefProcess } = useAddDefProcess(route)
 
 function add(def_proc_name: string) {
   visible.value = false
-  addDefProcess({ site_name: props.site_name, def_proc_name })
+  addDefProcess(
+    { site_name: props.site_name, def_proc_name },
+    {
+      onSuccess() {
+        toast.add({
+          summary: 'Added',
+          detail: `Default has been added to site ${props.site_name}`,
+          severity: 'success',
+          life: 2000,
+        })
+      },
+      onError(error) {
+        toast.add({
+          summary: 'Error adding',
+          detail:
+            (<AxiosError>error)?.response?.data ||
+            `An error occurred when adding ${def_proc_name}`,
+          severity: 'error',
+          life: 2000,
+        })
+      },
+    },
+  )
 }
 </script>
 
