@@ -10,6 +10,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query'
 import FocusTrap from 'primevue/focustrap'
 import axios from 'axios'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
 
 axios.defaults.baseURL = 'http://localhost:8000'
 axios.defaults.withCredentials = true
@@ -30,4 +31,5 @@ createApp(App)
     },
   })
   .directive('focustrap', FocusTrap)
+  .directive('tooltip', Tooltip)
   .mount('#app')

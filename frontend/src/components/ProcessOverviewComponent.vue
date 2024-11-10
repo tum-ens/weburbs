@@ -10,6 +10,7 @@
       :description="proc.description"
       :in="proc.in"
       :out="proc.out"
+      @click="emit('clickProcess', proc)"
     />
   </div>
   <div v-else>
@@ -21,12 +22,15 @@
 import { useProcesses } from '@/backend/processes'
 import Transformer from '@/components/TransformerComponent.vue'
 import { useRoute } from 'vue-router'
-import type { Site } from '@/backend/interfaces'
+import type { Process, Site } from '@/backend/interfaces'
 
 const route = useRoute()
 
 const props = defineProps<{
   site: Site
+}>()
+const emit = defineEmits<{
+  clickProcess: [process: Process]
 }>()
 
 const { data: processes } = useProcesses(route, props.site)

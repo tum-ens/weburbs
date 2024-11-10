@@ -20,7 +20,15 @@
         >
           <AccordionHeader>{{ site.name }}</AccordionHeader>
           <AccordionContent>
-            <ProcessOverviewComponent :site="site" />
+            <ProcessOverviewComponent
+              :site="site"
+              @clickProcess="
+                proc => {
+                  clickedProces = proc
+                  editVisible = true
+                }
+              "
+            />
           </AccordionContent>
         </AccordionPanel>
       </Accordion>
@@ -46,22 +54,38 @@
     v-model:visible="defaultVisible"
     :site_name="curSite"
   />
+  <CreateProcessDialog
+    v-if="curSite != null"
+    v-model:visible="createVisible"
+    :site_name="curSite"
+  />
+  <EditProcessDialog
+    v-if="curSite != null && clickedProces"
+    :process="clickedProces"
+    v-model:visible="editVisible"
+    :site_name="curSite"
+  />
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import ProcessOverviewComponent from '@/components/ProcessOverviewComponent.vue'
 import { ref, watch } from 'vue'
-import { useToast } from 'primevue/usetoast'
 import DefaultProcessOverviewDialog from '@/dialogs/DefaultProcessOverviewDialog.vue'
 import { useSites } from '@/backend/sites'
+import CreateProcessDialog from '@/dialogs/CreateProcessDialog.vue'
+import EditProcessDialog from '@/dialogs/EditProcessDialog.vue'
+import type { Process } from '@/backend/interfaces'
 
-const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
 const curSite = ref()
 const defaultVisible = ref(false)
+const createVisible = ref(false)
+const editVisible = ref(false)
+
+const clickedProces = ref<Process | null>(null)
 
 const { data: sites } = useSites(route)
 watch(
@@ -78,12 +102,7 @@ const items = [
   {
     label: 'Add Custom',
     command: () => {
-      toast.add({
-        severity: 'info',
-        summary: 'TODO',
-        detail: 'Not yet implemented',
-        life: 3000,
-      })
+      createVisible.value = true
     },
   },
 ]

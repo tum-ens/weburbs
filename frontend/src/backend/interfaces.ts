@@ -34,7 +34,7 @@ export interface Process {
   varcost: number
   wacc: number
   deprecation: number
-  areapercap: number
+  areapercap: number | undefined
   in: string[]
   out: string[]
 }

@@ -14,7 +14,7 @@ def load_defaults(apps, schema_editor):
     wind.save()
     hydro = def_commodity(name='Hydro', type=ComType.SupIm)
     hydro.save()
-    diesel = def_commodity(name='CO2', type=ComType.Stock, price=4, max=-1, maxperhour=-1)
+    diesel = def_commodity(name='Diesel', type=ComType.Stock, price=4, max=-1, maxperhour=-1)
     diesel.save()
     elec = def_commodity(name='Elec', type=ComType.Demand)
     elec.save()
