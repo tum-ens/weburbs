@@ -1,3 +1,6 @@
+import json
+
+from Alacarte.ItemEditor import try_icon_name
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.forms import model_to_dict
@@ -5,7 +8,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
-from projects.models import DefProcess, Process, Site, DefProcessCommodity, ProcComDir, ProcessCommodity
+from projects.models import DefProcess, Process, Site, DefProcessCommodity, ProcComDir, ProcessCommodity, Commodity, \
+    DefCommodity, CommodityTypes
 from projects.api import commodity
 
 
@@ -99,3 +103,56 @@ def add_def_process(request, project_name, site_name, def_proc_name):
         proccom.save()
 
     return JsonResponse({'detail': 'Process added'})
+
+@login_required
+@require_POST
+def update_process(request, project_name, site_name, process_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    data = json.loads(request.body)
+
+    if process_name != data['name']:
+        if Process.objects.filter(site=site, name=data['name']).exists():
+            return HttpResponse("Process with the same name already exists", status=409)
+
+    try:
+        process = Process.objects.get(site=site, name=process_name)
+    except Process.DoesNotExist:
+        process = Process(site=site)
+    process.name = data['name']
+    process.description = data['description']
+    process.instcap = data['instcap']
+    process.caplo = data['caplo']
+    process.capup = data['capup']
+    process.maxgrad = data['maxgrad']
+    process.minfraction = data['minfraction']
+    process.invcost = data['invcost']
+    process.fixcost = data['fixcost']
+    process.varcost = data['varcost']
+    process.wacc = data['wacc']
+    process.deprecation = data['deprecation']
+    if 'areapercap' in data:
+        process.areapercap = data['areapercap']
+    else:
+        del process.areapercap
+    process.save()
+
+    ProcessCommodity.objects.filter(process=process).delete()
+
+    for in_proccom in data['in']:
+        try:
+            com = Commodity.objects.get(site=site, name=in_proccom)
+        except Commodity.DoesNotExist:
+            def_com = DefCommodity.objects.get(name=in_proccom)
+            com = commodity.add_def_to_project(def_com, site)
+        ProcessCommodity(process=process, commodity=com, direction=ProcComDir.In, ratio=1, ratiomin=1).save()
+    for in_proccom in data['out']:
+        try:
+            com = Commodity.objects.get(site=site, name=in_proccom)
+        except Commodity.DoesNotExist:
+            def_com = DefCommodity.objects.get(name=in_proccom)
+            com = commodity.add_def_to_project(def_com, site)
+        ProcessCommodity(process=process, commodity=com, direction=ProcComDir.Out, ratio=1, ratiomin=1).save()
+
+    return JsonResponse({'detail': 'Project created'})

@@ -29,7 +29,7 @@ export function useProjectSiteCommodities(
       axios
         .get<
           Commodity[]
-        >(`/api/project/${route.params.proj}/site/${site}/commodities`)
+        >(`/api/project/${route.params.proj}/site/${site}/commodities/`)
         .then(res => res.data),
   })
 }

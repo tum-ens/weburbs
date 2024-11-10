@@ -11,6 +11,7 @@ urlpatterns = [
     path('project/<str:project_name>/site/<str:site_name>/commodities/', commodity.list_commodities),
     path('def_commodities/', commodity.list_def_commodities),
     path('project/<str:project_name>/site/<str:site_name>/processes/', process.list_processes),
+    path('project/<str:project_name>/site/<str:site_name>/process/<str:process_name>/update/', process.update_process),
     path('def_processes/', process.list_def_processes),
     path('project/<str:project_name>/site/<str:site_name>/def_processes/<str:def_proc_name>/add/',
          process.add_def_process),

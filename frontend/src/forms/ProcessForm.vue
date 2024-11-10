@@ -167,7 +167,7 @@
       </FloatLabel>
       <FloatLabel variant="on">
         <MultiSelect
-          optionLabel="name"
+          optionLabel="disp_name"
           v-model="outComs"
           display="chip"
           :options="coms"
@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import type { Commodity, Process } from '@/backend/interfaces'
 import {
@@ -223,6 +223,7 @@ const coms = computed(() => {
     ...commodities.value.map(com => {
       return {
         ...com,
+        disp_name: com.name,
         default: false,
       }
     }),
@@ -233,7 +234,7 @@ const coms = computed(() => {
       .map(def_com => {
         return {
           ...def_com,
-          name: def_com.name + ' (Default)',
+          disp_name: def_com.name + ' (Default)',
           default: true,
         }
       }),
@@ -264,11 +265,36 @@ const deprecation = ref(defaultValue(props.process?.deprecation, undefined))
 const areapercap = ref(defaultValue(props.process?.areapercap, undefined))
 
 interface TaggedCommodity extends Commodity {
+  disp_name: string
   default: boolean
 }
 
 const inComs = ref<TaggedCommodity[]>([])
 const outComs = ref<TaggedCommodity[]>([])
+watch(
+  coms,
+  () => {
+    inComs.value = coms.value
+      .filter(com => props.process?.in.includes(com.name))
+      .map(com => {
+        return {
+          ...com,
+          disp_name: com.name,
+          default: false,
+        }
+      })
+    outComs.value = coms.value
+      .filter(com => props.process?.out.includes(com.name))
+      .map(com => {
+        return {
+          ...com,
+          disp_name: com.name,
+          default: false,
+        }
+      })
+  },
+  { immediate: true },
+)
 
 const invalids = ref<string[]>([])
 
@@ -279,10 +305,11 @@ function check() {
   if (instcap.value === undefined || instcap.value < 0)
     invalids.value.push('instcap')
   if (caplo.value === undefined || caplo.value < 0) invalids.value.push('caplo')
-  if (capup.value === undefined || capup.value < 0) invalids.value.push('capup')
+  if (capup.value === undefined) invalids.value.push('capup')
   if (
-    caplo.value === undefined ||
-    capup.value === undefined ||
+    caplo.value !== undefined &&
+    capup.value !== undefined &&
+    capup.value >= 0 &&
     caplo.value > capup.value
   ) {
     invalids.value.push('caplo')
@@ -300,14 +327,14 @@ function check() {
   if (varcost.value === undefined || varcost.value < 0)
     invalids.value.push('varcost')
 
-  if (wacc.value === undefined || wacc.value < 0 || wacc.value > 0)
+  if (wacc.value === undefined || wacc.value < 0 || wacc.value > 1)
     invalids.value.push('wacc')
   if (deprecation.value === undefined || deprecation.value < 0)
     invalids.value.push('deprecation')
   if (areapercap.value !== undefined && areapercap.value < 0)
     invalids.value.push('areapercap')
 
-  return invalids.value.length > 0
+  return invalids.value.length === 0
 }
 
 function submit() {
@@ -335,8 +362,8 @@ function submit() {
     wacc: wacc.value || 0,
     deprecation: deprecation.value || 0,
     areapercap: areapercap.value,
-    in: ['Wind'],
-    out: ['Elec'],
+    in: inComs.value.map(inCom => inCom.name),
+    out: outComs.value.map(outCom => outCom.name),
   })
 }
 </script>

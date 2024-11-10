@@ -48,3 +48,29 @@ export function useAddDefProcess(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useUpdateProcess(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: {
+      site_name: string
+      process_name: string
+      process: Process
+    }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/process/${data.process_name}/update/`,
+        data.process,
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['processes', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}
