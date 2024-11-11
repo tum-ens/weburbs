@@ -1,6 +1,5 @@
 import json
 
-from Alacarte.ItemEditor import try_icon_name
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.forms import model_to_dict
@@ -9,7 +8,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
 from projects.models import DefProcess, Process, Site, DefProcessCommodity, ProcComDir, ProcessCommodity, Commodity, \
-    DefCommodity, CommodityTypes
+    DefCommodity
 from projects.api import commodity
 
 
@@ -27,8 +26,10 @@ def list_def_processes(request):
 
     proclist = [{
         **model_to_dict(proc, exclude=['id']),
-        'in': [proccom.def_commodity.name for proccom in proc.inCom],
-        'out': [proccom.def_commodity.name for proccom in proc.outCom],
+        'in': [{'name': proccom.def_commodity.name, 'ratio': proccom.ratio, 'ratiomin': proccom.ratiomin}
+               for proccom in proc.inCom],
+        'out': [{'name': proccom.def_commodity.name, 'ratio': proccom.ratio, 'ratiomin': proccom.ratiomin}
+                for proccom in proc.outCom],
     }
         for proc in processes]
     return JsonResponse(proclist, safe=False)
@@ -41,7 +42,7 @@ def list_processes(request, project_name, site_name):
     site = get_site(project, site_name)
 
     processes = (Process.objects
-                .filter(site=site)
+                 .filter(site=site)
                  .prefetch_related(
         Prefetch('processcommodity_set', queryset=ProcessCommodity.objects.filter(direction=ProcComDir.In),
                  to_attr='inCom'),
@@ -52,8 +53,10 @@ def list_processes(request, project_name, site_name):
 
     proclist = [{
         **model_to_dict(proc, exclude=['id']),
-        'in': [proccom.commodity.name for proccom in proc.inCom],
-        'out': [proccom.commodity.name for proccom in proc.outCom],
+        'in': [{'name': proccom.commodity.name, 'ratio': proccom.ratio, 'ratiomin': proccom.ratiomin}
+               for proccom in proc.inCom],
+        'out': [{'name': proccom.commodity.name, 'ratio': proccom.ratio, 'ratiomin': proccom.ratiomin}
+                for proccom in proc.outCom],
     }
         for proc in processes]
     return JsonResponse(proclist, safe=False)
@@ -99,10 +102,11 @@ def add_def_process(request, project_name, site_name, def_proc_name):
             com = commodity.add_def_to_project(def_com, site)
 
         proccom = ProcessCommodity(commodity=com, process=process, direction=def_proccom.direction,
-                                      ratio=def_proccom.ratio, ratiomin=def_proccom.ratiomin)
+                                   ratio=def_proccom.ratio, ratiomin=def_proccom.ratiomin)
         proccom.save()
 
     return JsonResponse({'detail': 'Process added'})
+
 
 @login_required
 @require_POST
@@ -142,17 +146,19 @@ def update_process(request, project_name, site_name, process_name):
 
     for in_proccom in data['in']:
         try:
-            com = Commodity.objects.get(site=site, name=in_proccom)
+            com = Commodity.objects.get(site=site, name=in_proccom['name'])
         except Commodity.DoesNotExist:
-            def_com = DefCommodity.objects.get(name=in_proccom)
+            def_com = DefCommodity.objects.get(name=in_proccom['name'])
             com = commodity.add_def_to_project(def_com, site)
-        ProcessCommodity(process=process, commodity=com, direction=ProcComDir.In, ratio=1, ratiomin=1).save()
-    for in_proccom in data['out']:
+        ProcessCommodity(process=process, commodity=com, direction=ProcComDir.In, ratio=in_proccom['ratio'],
+                         ratiomin=in_proccom['ratiomin']).save()
+    for out_proccom in data['out']:
         try:
-            com = Commodity.objects.get(site=site, name=in_proccom)
+            com = Commodity.objects.get(site=site, name=out_proccom['name'])
         except Commodity.DoesNotExist:
-            def_com = DefCommodity.objects.get(name=in_proccom)
+            def_com = DefCommodity.objects.get(name=out_proccom['name'])
             com = commodity.add_def_to_project(def_com, site)
-        ProcessCommodity(process=process, commodity=com, direction=ProcComDir.Out, ratio=1, ratiomin=1).save()
+        (ProcessCommodity(process=process, commodity=com, direction=ProcComDir.Out, ratio=out_proccom['ratio'],
+                          ratiomin=out_proccom['ratiomin']).save())
 
     return JsonResponse({'detail': 'Project created'})

@@ -8,8 +8,8 @@
       :key="proc.name"
       :title="proc.name"
       :description="proc.description"
-      :in="proc.in"
-      :out="proc.out"
+      :in="proc.in.map(proccom => proccom.name)"
+      :out="proc.out.map(proccom => proccom.name)"
       @click="emit('clickProcess', proc)"
     />
   </div>

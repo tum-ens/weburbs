@@ -153,35 +153,93 @@
       </FloatLabel>
     </div>
     <div class="grid grid-cols-2 gap-3">
-      <FloatLabel variant="on">
-        <MultiSelect
-          optionLabel="name"
-          v-model="inComs"
-          display="chip"
-          :options="coms"
-          filter
-          fluid
-          id="inComs"
-        />
-        <label for="inComs">Incoming commodities</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <MultiSelect
-          optionLabel="disp_name"
-          v-model="outComs"
-          display="chip"
-          :options="coms"
-          filter
-          fluid
-          id="outComs"
-        />
-        <label for="outComs">Outgoing commodities</label>
-      </FloatLabel>
+      <div class="flex flex-col gap-3">
+        <FloatLabel variant="on">
+          <MultiSelect
+            optionLabel="disp_name"
+            dataKey="name"
+            v-model="inComs"
+            display="chip"
+            :options="coms"
+            filter
+            fluid
+            id="inComs"
+          />
+          <label for="inComs">Incoming commodities</label>
+        </FloatLabel>
+        <div
+          v-for="inCom in inComs"
+          :key="inCom.name"
+          class="grid grid-cols-3 gap-3 items-center"
+        >
+          <span>{{ inCom.disp_name }}</span>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="ratio"
+              fluid
+              v-model="inCom.ratio"
+              :invalid="inCom.ratio === undefined || inCom.ratio < 0"
+            />
+            <label for="ratio">Ratio</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="ratiomin"
+              fluid
+              v-model="inCom.ratiomin"
+              :invalid="inCom.ratiomin === undefined || inCom.ratiomin < 0"
+            />
+            <label for="ratiomin">Minimum ratio</label>
+          </FloatLabel>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <FloatLabel variant="on">
+          <MultiSelect
+            optionLabel="disp_name"
+            dataKey="name"
+            v-model="outComs"
+            display="chip"
+            :options="coms"
+            filter
+            fluid
+            id="outComs"
+          />
+          <label for="outComs">Outgoing commodities</label>
+        </FloatLabel>
+        <div
+          v-for="outCom in outComs"
+          :key="outCom.name"
+          class="grid grid-cols-3 gap-3 items-center"
+        >
+          <span>{{ outCom.disp_name }}</span>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="ratio"
+              fluid
+              v-model="outCom.ratio"
+              :invalid="outCom.ratio === undefined || outCom.ratio < 0"
+            />
+            <label for="ratio">Ratio</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              id="ratiomin"
+              fluid
+              v-model="outCom.ratiomin"
+              :invalid="outCom.ratiomin === undefined || outCom.ratiomin < 0"
+            />
+            <label for="ratiomin">Minimum ratio</label>
+          </FloatLabel>
+        </div>
+      </div>
     </div>
     <Message
       v-if="inComs.some(com => com.default) || outComs.some(com => com.default)"
       severity="warn"
-      >Default commodities will be added automatically
+    >
+      Default commodities will be added automatically
     </Message>
     <Button :loading="loading" @click="submit">
       {{ submitLabel }}
@@ -192,7 +250,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import type { Commodity, Process } from '@/backend/interfaces'
+import type { Process, ProcessCommodity } from '@/backend/interfaces'
 import {
   useDefCommodities,
   useProjectSiteCommodities,
@@ -222,9 +280,11 @@ const coms = computed(() => {
   return [
     ...commodities.value.map(com => {
       return {
-        ...com,
+        name: com.name,
         disp_name: com.name,
         default: false,
+        ratio: 1,
+        ratiomin: 1,
       }
     }),
     ...def_commodities.value
@@ -233,9 +293,11 @@ const coms = computed(() => {
       )
       .map(def_com => {
         return {
-          ...def_com,
+          name: def_com.name,
           disp_name: def_com.name + ' (Default)',
           default: true,
+          ratio: 1,
+          ratiomin: 1,
         }
       }),
   ]
@@ -264,34 +326,36 @@ const wacc = ref(defaultValue(props.process?.wacc, undefined))
 const deprecation = ref(defaultValue(props.process?.deprecation, undefined))
 const areapercap = ref(defaultValue(props.process?.areapercap, undefined))
 
-interface TaggedCommodity extends Commodity {
+interface ProcComTag extends ProcessCommodity {
   disp_name: string
   default: boolean
 }
 
-const inComs = ref<TaggedCommodity[]>([])
-const outComs = ref<TaggedCommodity[]>([])
+const inComs = ref<ProcComTag[]>([])
+const outComs = ref<ProcComTag[]>([])
 watch(
   coms,
   () => {
-    inComs.value = coms.value
-      .filter(com => props.process?.in.includes(com.name))
-      .map(com => {
-        return {
-          ...com,
-          disp_name: com.name,
-          default: false,
-        }
-      })
-    outComs.value = coms.value
-      .filter(com => props.process?.out.includes(com.name))
-      .map(com => {
-        return {
-          ...com,
-          disp_name: com.name,
-          default: false,
-        }
-      })
+    if (!props.process) {
+      inComs.value = []
+      outComs.value = []
+      return
+    }
+
+    inComs.value = props.process.in.map(proccom => {
+      return {
+        ...proccom,
+        disp_name: proccom.name,
+        default: false,
+      }
+    })
+    outComs.value = props.process.out.map(proccom => {
+      return {
+        ...proccom,
+        disp_name: proccom.name,
+        default: false,
+      }
+    })
   },
   { immediate: true },
 )
@@ -334,6 +398,19 @@ function check() {
   if (areapercap.value !== undefined && areapercap.value < 0)
     invalids.value.push('areapercap')
 
+  for (const inCom of inComs.value) {
+    if (inCom.ratio === undefined || inCom.ratio < 0)
+      invalids.value.push('inComRatio')
+    if (inCom.ratiomin === undefined || inCom.ratiomin < 0)
+      invalids.value.push('inComRatioMin')
+  }
+  for (const outCom of outComs.value) {
+    if (outCom.ratio === undefined || outCom.ratio < 0)
+      invalids.value.push('outComRatio')
+    if (outCom.ratiomin === undefined || outCom.ratiomin < 0)
+      invalids.value.push('outComRatioMin')
+  }
+
   return invalids.value.length === 0
 }
 
@@ -362,8 +439,20 @@ function submit() {
     wacc: wacc.value || 0,
     deprecation: deprecation.value || 0,
     areapercap: areapercap.value,
-    in: inComs.value.map(inCom => inCom.name),
-    out: outComs.value.map(outCom => outCom.name),
+    in: inComs.value.map(com => {
+      return {
+        name: com.name,
+        ratio: com.ratio,
+        ratiomin: com.ratiomin,
+      }
+    }),
+    out: outComs.value.map(com => {
+      return {
+        name: com.name,
+        ratio: com.ratio,
+        ratiomin: com.ratiomin,
+      }
+    }),
   })
 }
 </script>

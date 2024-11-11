@@ -21,6 +21,12 @@ export interface Commodity {
   maxperhour: number
 }
 
+export interface ProcessCommodity {
+  name: string
+  ratio: number
+  ratiomin: number
+}
+
 export interface Process {
   name: string
   description: string
@@ -35,8 +41,8 @@ export interface Process {
   wacc: number
   deprecation: number
   areapercap: number | undefined
-  in: string[]
-  out: string[]
+  in: ProcessCommodity[]
+  out: ProcessCommodity[]
 }
 
 export interface Storage {

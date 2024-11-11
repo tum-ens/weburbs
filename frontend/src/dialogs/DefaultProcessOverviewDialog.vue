@@ -15,8 +15,8 @@
         :key="def_proc.name"
         :title="def_proc.name"
         :description="def_proc.description"
-        :in="def_proc.in"
-        :out="def_proc.out"
+        :in="def_proc.in.map(proccom => proccom.name)"
+        :out="def_proc.out.map(proccom => proccom.name)"
         @click="() => add(def_proc.name)"
       />
     </div>
