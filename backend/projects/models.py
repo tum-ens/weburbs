@@ -158,7 +158,6 @@ class DemandType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
-    count = models.IntegerField(null=False)
     steps = models.JSONField(null=False)
 
     class Meta:
@@ -166,11 +165,10 @@ class DemandType(models.Model):
 
 
 class DefDemand(DemandType):
-    pass
+    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
 
 
 class Demand(DemandType):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     defdemand = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
 
@@ -186,7 +184,7 @@ class SuplmType(models.Model):
 
 
 class DefSuplm(SuplmType):
-    pass
+    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
 
 
 class Suplm(SuplmType):

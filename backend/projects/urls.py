@@ -1,6 +1,6 @@
 from django.urls import path
 
-from projects.api import project, site, commodity, process, storage
+from projects.api import project, site, commodity, process, storage, supim, demand
 
 urlpatterns = [
     path('projects/', project.list_projects),
@@ -19,4 +19,8 @@ urlpatterns = [
     path('def_storage/', storage.list_def_storage),
     path('project/<str:project_name>/site/<str:site_name>/def_storage/<str:def_storage_name>/add/',
          storage.add_def_storage),
+    path('project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/generate/',
+         supim.querySupIm),
+    path('project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/generate/',
+         demand.queryDemand),
 ]
