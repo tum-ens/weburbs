@@ -65,9 +65,7 @@
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-    <Button :loading="loading" @click="submit">
-      {{ submitLabel }}
-    </Button>
+    <Button :loading="loading" :label="submitLabel" @click="submit" />
   </div>
 </template>
 

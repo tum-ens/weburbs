@@ -241,9 +241,7 @@
     >
       Default commodities will be added automatically
     </Message>
-    <Button :loading="loading" @click="submit">
-      {{ submitLabel }}
-    </Button>
+    <Button :loading="loading" :label="submitLabel" @click="submit" />
   </div>
 </template>
 

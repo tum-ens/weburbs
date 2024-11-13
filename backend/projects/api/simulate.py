@@ -1,6 +1,6 @@
 import requests
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project
@@ -81,15 +81,15 @@ def trigger_simulation(request, project_name):
         },
     }
 
-    print(requests.post("http://localhost:5000/simulate", json=remove_none(data)).json())
+    response = requests.post("http://localhost:5000/simulate", json=remove_none(data))
+    if response.status_code != 200:
+        return HttpResponse("Simulation failed", status="400")
 
-    return JsonResponse({'detail': 'Triggered simulation'})
+    return JsonResponse(response.json())
 
 
 def remove_none(d):
     if isinstance(d, dict):
         return {k: remove_none(v) for k, v in d.items() if v is not None}
-    elif isinstance(d, list):
-        return [remove_none(v) for v in d if v is not None]
     else:
         return d
