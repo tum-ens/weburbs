@@ -116,12 +116,12 @@ const router = createRouter({
           component: () => import('@/pages/projectConfigs/DemandConfig.vue'),
         },
         {
-          name: 'ProjectSuplm',
-          path: 'project/:proj/suplm',
+          name: 'ProjectSupIm',
+          path: 'project/:proj/supim',
           meta: {
             parents: ['ProjectList'],
           },
-          component: () => import('@/pages/projectConfigs/SuplmConfig.vue'),
+          component: () => import('@/pages/projectConfigs/SupImConfig.vue'),
         },
         {
           name: 'ProjectBuySell',

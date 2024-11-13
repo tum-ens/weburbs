@@ -49,7 +49,7 @@ def add_def_to_project(def_storage: DefStorage, site: Site, com: Commodity):
                       effin=def_storage.effin, effout=def_storage.effout, invcostp=def_storage.invcostp,
                       invcostc=def_storage.invcostc, fixcostp=def_storage.fixcostp, fixcostc=def_storage.fixcostc,
                       varcostp=def_storage.varcostp, varcostc=def_storage.varcostc, wacc=def_storage.wacc,
-                      deprecation=def_storage.deprecation, init=def_storage.init, discharge=def_storage.discharge,
+                      depreciation=def_storage.depreciation, init=def_storage.init, discharge=def_storage.discharge,
                       epratio=def_storage.epratio)
     storage.save()
     return storage

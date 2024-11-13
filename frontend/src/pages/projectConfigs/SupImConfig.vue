@@ -1,6 +1,6 @@
 <template>
   <Card>
-    <template #title>Suplm</template>
+    <template #title>SupIm</template>
     <template #content>
       <Accordion>
         <AccordionPanel

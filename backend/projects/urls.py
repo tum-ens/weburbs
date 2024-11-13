@@ -1,6 +1,6 @@
 from django.urls import path
 
-from projects.api import project, site, commodity, process, storage, supim, demand
+from projects.api import project, site, commodity, process, storage, supim, demand, simulate
 
 urlpatterns = [
     path('projects/', project.list_projects),
@@ -23,4 +23,6 @@ urlpatterns = [
          supim.querySupIm),
     path('project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/generate/',
          demand.queryDemand),
+
+    path('project/<str:project_name>/simulate/trigger/', simulate.trigger_simulation)
 ]

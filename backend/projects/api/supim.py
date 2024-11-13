@@ -3,7 +3,7 @@ from django.http import Http404, JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project, get_site, get_commodity
-from projects.models import Suplm
+from projects.models import SupIm
 
 
 @login_required
@@ -13,17 +13,17 @@ def querySupIm(request, project_name, site_name, com_name):
     site = get_site(project, site_name)
     commodity = get_commodity(site, com_name)
 
-    if Suplm.objects.filter(commodity=commodity).exists():
+    if SupIm.objects.filter(commodity=commodity).exists():
         return HttpResponse("SupIm already exists for this commodity", status=409)
 
     if com_name == 'Solar':
-        suplm = Suplm(name="Solar_Example", description="Simple example", commodity=commodity,
+        supim = SupIm(name="Solar_Example", description="Simple example", commodity=commodity,
                       steps=solar_def)
-        suplm.save()
+        supim.save()
     elif com_name == 'Wind':
-        suplm = Suplm(name="Wind_Example", description="Wind example", commodity=commodity,
+        supim = SupIm(name="Wind_Example", description="Wind example", commodity=commodity,
                       steps=wind_def)
-        suplm.save()
+        supim.save()
     else:
         return HttpResponse("This commodity does not provide a default supim", status=404)
 

@@ -45,7 +45,7 @@ class CommodityTypes(models.Model):
     maxperhour = models.IntegerField(null=True)
 
     def get_com_type_label(self):
-        return ComType(self.type).name.title()
+        return ComType(self.type).name
 
     class Meta:
         abstract = True
@@ -73,7 +73,7 @@ class ProcessTypes(models.Model):
     fixcost = models.FloatField(null=False)
     varcost = models.FloatField(null=False)
     wacc = models.FloatField(null=False)
-    deprecation = models.FloatField(null=False)
+    depreciation = models.FloatField(null=False)
     areapercap = models.FloatField(null=True)
 
     class Meta:
@@ -102,6 +102,10 @@ class ProcessCommodityTypes(models.Model):
     direction = models.IntegerField(choices=ProcComDir.choices(), null=False)
     ratio = models.FloatField(null=False)
     ratiomin = models.FloatField(null=True)
+
+
+    def get_direction_type_label(self):
+        return ProcComDir(self.direction).name
 
     class Meta:
         abstract = True
@@ -136,7 +140,7 @@ class StorageType(models.Model):
     varcostp = models.FloatField(null=False)
     varcostc = models.IntegerField(null=False)
     wacc = models.FloatField(null=False)
-    deprecation = models.IntegerField(null=False)
+    depreciation = models.IntegerField(null=False)
     init = models.FloatField(null=False)
     discharge = models.FloatField(null=False)
     epratio = models.FloatField(null=True)
@@ -173,7 +177,7 @@ class Demand(DemandType):
     defdemand = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
-class SuplmType(models.Model):
+class SupImType(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, null=False)
     description = models.TextField()
@@ -183,13 +187,13 @@ class SuplmType(models.Model):
         abstract = True
 
 
-class DefSuplm(SuplmType):
+class DefSupIm(SupImType):
     def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
 
 
-class Suplm(SuplmType):
+class SupIm(SupImType):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    defsuplm = models.ForeignKey(DefSuplm, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defsupim = models.ForeignKey(DefSupIm, on_delete=models.SET_NULL, null=True, related_name="usages")
 
 
 class TransType(IntEnum):
@@ -214,13 +218,13 @@ class Transmission(models.Model):
     caplo = models.IntegerField(null=False)
     capup = models.IntegerField(null=False)
     wacc = models.FloatField(null=False)
-    deprecation = models.FloatField(null=False)
+    depreciation = models.FloatField(null=False)
     reactance = models.FloatField(null=False)
     difflimit = models.FloatField(null=False)
     basevoltage = models.FloatField(null=False)
 
     def get_trans_type_label(self):
-        return ComType(self.transmission).name.title()
+        return ComType(self.transmission).name
 
 
 class BuySellPrice(models.Model):

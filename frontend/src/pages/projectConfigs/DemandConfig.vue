@@ -19,14 +19,14 @@
         <Button
           @click="
             router.push({
-              name: 'ProjectSuplm',
+              name: 'ProjectSupIm',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          Suplm >>
+          SupIm >>
         </Button>
       </div></template
     >

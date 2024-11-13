@@ -5,7 +5,8 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.decorators.http import require_POST, require_GET
 
 from projects.api.helper import get_project
-from projects.models import Site
+from projects.api.commodity import add_def_to_project
+from projects.models import Site, DefCommodity
 
 
 @login_required
@@ -41,8 +42,11 @@ def edit_site(request, project_name, site_name):
             return HttpResponseNotAllowed(['POST', 'DELETE'])
     except Site.DoesNotExist:
         if request.method == "POST":
-            (Site(project=project, name=data['name'], area=data['area'], long=data['long'], lat=data['lat'])
-             .save())
+            site = Site(project=project, name=data['name'], area=data['area'], long=data['long'], lat=data['lat'])
+            site.save()
+
+            add_def_to_project(DefCommodity.objects.get(name="CO2"), site)
+
             return JsonResponse({'detail': 'Site created'})
         else:
             return HttpResponseNotAllowed(['POST', 'DELETE'])

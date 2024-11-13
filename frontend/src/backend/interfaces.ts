@@ -39,7 +39,7 @@ export interface Process {
   fixcost: number
   varcost: number
   wacc: number
-  deprecation: number
+  depreciation: number
   areapercap: number | undefined
   in: ProcessCommodity[]
   out: ProcessCommodity[]
@@ -63,7 +63,7 @@ export interface Storage {
   varcostp: number
   varcostc: number
   wacc: number
-  deprecation: number
+  depreciation: number
   init: number
   discharge: number
   epratio: number | null

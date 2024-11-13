@@ -129,15 +129,15 @@
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
-          :invalid="invalids.includes('deprecation')"
+          :invalid="invalids.includes('depreciation')"
           v-tooltip.bottom="
             'Economic lifetime (more conservative than technical lifetime) of a process investment in years (a). Used to calculate annuity factor for investment costs.'
           "
-          id="deprecation"
+          id="depreciation"
           fluid
-          v-model="deprecation"
+          v-model="depreciation"
         />
-        <label for="deprecation">Depreciation period (a)</label>
+        <label for="depreciation">Depreciation period (a)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -323,7 +323,7 @@ const fixcost = ref(defaultValue(props.process?.fixcost, undefined))
 const varcost = ref(defaultValue(props.process?.varcost, undefined))
 
 const wacc = ref(defaultValue(props.process?.wacc, undefined))
-const deprecation = ref(defaultValue(props.process?.deprecation, undefined))
+const depreciation = ref(defaultValue(props.process?.depreciation, undefined))
 const areapercap = ref(defaultValue(props.process?.areapercap, undefined))
 
 interface ProcComTag extends ProcessCommodity {
@@ -393,8 +393,8 @@ function check() {
 
   if (wacc.value === undefined || wacc.value < 0 || wacc.value > 1)
     invalids.value.push('wacc')
-  if (deprecation.value === undefined || deprecation.value < 0)
-    invalids.value.push('deprecation')
+  if (depreciation.value === undefined || depreciation.value < 0)
+    invalids.value.push('depreciation')
   if (areapercap.value !== undefined && areapercap.value < 0)
     invalids.value.push('areapercap')
 
@@ -437,7 +437,7 @@ function submit() {
     fixcost: fixcost.value || 0,
     varcost: varcost.value || 0,
     wacc: wacc.value || 0,
-    deprecation: deprecation.value || 0,
+    depreciation: depreciation.value || 0,
     areapercap: areapercap.value,
     in: inComs.value.map(com => {
       return {

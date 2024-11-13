@@ -22,13 +22,13 @@ def load_defaults(apps, schema_editor):
     co2.save()
 
     def_process = apps.get_model('projects', 'DefProcess')
-    photovoltaics = def_process(name='Photovoltaics', description='Generates electricity from sun', instcap=0, caplo=15000, capup=160000, maxgrad=-1, minfraction=0, invcost=600000, fixcost=12000, varcost=0, wacc=0.07, deprecation=25, areapercap=14000)
+    photovoltaics = def_process(name='Photovoltaics', description='Generates electricity from sun', instcap=0, caplo=15000, capup=160000, maxgrad=-1, minfraction=0, invcost=600000, fixcost=12000, varcost=0, wacc=0.07, depreciation=25, areapercap=14000)
     photovoltaics.save()
-    wind_park = def_process(name='Wind park', description='Generates electricity from wind', instcap=0, caplo=0, capup=13000, maxgrad=-1, minfraction=0, invcost=1500000, fixcost=30000, varcost=0, wacc=0.07, deprecation=25)
+    wind_park = def_process(name='Wind park', description='Generates electricity from wind', instcap=0, caplo=0, capup=13000, maxgrad=-1, minfraction=0, invcost=1500000, fixcost=30000, varcost=0, wacc=0.07, depreciation=25)
     wind_park.save()
-    hydro_plant = def_process(name='Hydro plant', description='Generates electricity from water', instcap=0, caplo=0, capup=1400, maxgrad=-1, minfraction=0, invcost=1600000, fixcost=20000, varcost=0, wacc=0.07, deprecation=50)
+    hydro_plant = def_process(name='Hydro plant', description='Generates electricity from water', instcap=0, caplo=0, capup=1400, maxgrad=-1, minfraction=0, invcost=1600000, fixcost=20000, varcost=0, wacc=0.07, depreciation=50)
     hydro_plant.save()
-    diesel_generator = def_process(name='Diesel Generator', description='Generates electricity from diesel while generating CO2', instcap=0, caplo=0, capup=80000, maxgrad=4.8, minfraction=0.25, invcost=450000, fixcost=6000, varcost=1.6, wacc=0.07, deprecation=30)
+    diesel_generator = def_process(name='Diesel Generator', description='Generates electricity from diesel while generating CO2', instcap=0, caplo=0, capup=80000, maxgrad=4.8, minfraction=0.25, invcost=450000, fixcost=6000, varcost=1.6, wacc=0.07, depreciation=30)
     diesel_generator.save()
 
     def_process_commodity = apps.get_model('projects', 'DefProcessCommodity')
@@ -52,7 +52,7 @@ def load_defaults(apps, schema_editor):
     diesel_generator_co2.save()
 
     def_storage = apps.get_model('projects', 'DefStorage')
-    battery = def_storage(name='Battery', description='Example battery', def_commodity=elec, instcapc=0, caploc=0, capupc=-1, instcapp=0, caplop=0, capupp=-1, effin=0.80, effout=0.80, invcostp=1000, invcostc=9.7, fixcostp=0, fixcostc=0, varcostp=0, varcostc=0, wacc=0.007, deprecation=50, init=0.5, discharge=0.0000035)
+    battery = def_storage(name='Battery', description='Example battery', def_commodity=elec, instcapc=0, caploc=0, capupc=-1, instcapp=0, caplop=0, capupp=-1, effin=0.80, effout=0.80, invcostp=1000, invcostc=9.7, fixcostp=0, fixcostc=0, varcostp=0, varcostc=0, wacc=0.007, depreciation=50, init=0.5, discharge=0.0000035)
     battery.save()
 
 class Migration(migrations.Migration):

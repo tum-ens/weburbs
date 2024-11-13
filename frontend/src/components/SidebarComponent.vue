@@ -165,12 +165,12 @@ const items = computed(() => {
                   }),
               },
               {
-                key: 'ProjectSuplm',
-                label: 'Suplm',
+                key: 'ProjectSupIm',
+                label: 'SupIm',
                 icon: 'pi pi-sun',
                 command: () =>
                   router.push({
-                    name: 'ProjectSuplm',
+                    name: 'ProjectSupIm',
                     params: {
                       proj: p.name,
                     },

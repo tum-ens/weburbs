@@ -67,7 +67,7 @@ def add_def_to_project(def_process: DefProcess, site: Site):
                       instcap=def_process.instcap, caplo=def_process.caplo, capup=def_process.capup,
                       maxgrad=def_process.maxgrad, minfraction=def_process.minfraction, invcost=def_process.invcost,
                       fixcost=def_process.fixcost, varcost=def_process.varcost, wacc=def_process.wacc,
-                      deprecation=def_process.deprecation, areapercap=def_process.areapercap)
+                      depreciation=def_process.depreciation, areapercap=def_process.areapercap)
     process.save()
     return process
 
@@ -135,7 +135,7 @@ def update_process(request, project_name, site_name, process_name):
     process.fixcost = data['fixcost']
     process.varcost = data['varcost']
     process.wacc = data['wacc']
-    process.deprecation = data['deprecation']
+    process.depreciation = data['depreciation']
     if 'areapercap' in data:
         process.areapercap = data['areapercap']
     else:
