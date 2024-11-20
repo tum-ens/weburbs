@@ -1,30 +1,30 @@
 <template>
-  <divider />
+  <divider/>
   <div class="grid grid-cols-8">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
       <Button @click="query" :disabled="!!supim?.data">Query SupIm</Button>
-      <Button @click="del" severity="danger" :disabled="!supim?.data"
-        >Query SupIm</Button
-      >
+      <Button @click="del" severity="danger" :disabled="!supim?.data">
+        Delete SupIm
+      </Button>
     </div>
 
     <div v-if="supim?.data" class="col-span-7">
-      <BarDiagramm :data title-x="Steps" title-y="kwH" class="h-80" />
+      <BarDiagramm :data title-x="Steps" title-y="kwH" class="h-80"/>
     </div>
-    <Skeleton v-else-if="pending" class="w-full" style="height: 10rem" />
+    <Skeleton v-else-if="pending" class="w-full" style="height: 10rem"/>
     <div v-else class="ml-5 italic">No SupIm configured</div>
   </div>
-  <QuerySupImDialog :site :commodity v-model="queryVisible" />
+  <QuerySupImDialog :site :commodity v-model="queryVisible"/>
 </template>
 
 <script setup lang="ts">
-import type { Commodity, Site } from '@/backend/interfaces'
+import type {Commodity, Site} from '@/backend/interfaces'
 import Plotly from 'plotly.js-dist'
-import { computed, ref, type Ref } from 'vue'
-import { useDeleteSupIm, useGetSupIm } from '@/backend/supim'
-import { useRoute } from 'vue-router'
-import { useToast } from 'primevue/usetoast'
+import {computed, ref, type Ref} from 'vue'
+import {useDeleteSupIm, useGetSupIm} from '@/backend/supim'
+import {useRoute} from 'vue-router'
+import {useToast} from 'primevue/usetoast'
 import BarDiagramm from '@/plotly/BarDiagramm.vue'
 import QuerySupImDialog from '@/dialogs/QuerySupImDialog.vue'
 
@@ -38,12 +38,12 @@ const props = defineProps<{
   commodity: Commodity
 }>()
 
-const { data: supim, isPending: pending } = useGetSupIm(
+const {data: supim, isPending: pending} = useGetSupIm(
   route,
   props.site,
   props.commodity,
 )
-const { mutate: deleteSupIm } = useDeleteSupIm(
+const {mutate: deleteSupIm} = useDeleteSupIm(
   route,
   props.site,
   props.commodity,
