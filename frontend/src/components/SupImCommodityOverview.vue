@@ -56,6 +56,9 @@ const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
       name: props.commodity.name,
       y: supim.value.data,
       type: 'bar',
+      marker: {
+        color: props.commodity.name.includes('Solar') ? 'gold' : undefined
+      }
     },
   ]
 })
