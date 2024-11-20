@@ -1,14 +1,28 @@
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, JsonResponse, HttpResponse
-from django.views.decorators.http import require_POST
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_POST, require_GET
 
 from projects.api.helper import get_project, get_site, get_commodity
 from projects.models import SupIm
 
+@login_required
+@require_GET
+def getSupIm(request, project_name, site_name, com_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+    commodity = get_commodity(site, com_name)
+
+    supims = SupIm.objects.filter(commodity=commodity).all()
+    if len(supims) == 0:
+        return JsonResponse({})
+    elif len(supims) > 1:
+        return HttpResponse("Serverside error: Multiple SupIms for one commodity", status=500)
+    else:
+        return JsonResponse({'data': supims[0].steps})
 
 @login_required
 @require_POST
-def querySupIm(request, project_name, site_name, com_name):
+def querySupIm(request, project_name, site_name, com_name, type):
     project = get_project(request.user, project_name)
     site = get_site(project, site_name)
     commodity = get_commodity(site, com_name)
@@ -16,11 +30,11 @@ def querySupIm(request, project_name, site_name, com_name):
     if SupIm.objects.filter(commodity=commodity).exists():
         return HttpResponse("SupIm already exists for this commodity", status=409)
 
-    if com_name == 'Solar':
+    if type == 'Solar':
         supim = SupIm(name="Solar_Example", description="Simple example", commodity=commodity,
                       steps=solar_def)
         supim.save()
-    elif com_name == 'Wind':
+    elif type == 'Wind':
         supim = SupIm(name="Wind_Example", description="Wind example", commodity=commodity,
                       steps=wind_def)
         supim.save()

@@ -69,3 +69,7 @@ export interface Storage {
   epratio: number | null
   commodity: string
 }
+
+export interface SupIm {
+  data?: number[]
+}

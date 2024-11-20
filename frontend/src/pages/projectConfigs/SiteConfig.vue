@@ -3,7 +3,7 @@
     <template #title>Sites</template>
     <template #content>
       <div class="grid grid-cols-2 gap-3">
-        <Accordion v-model:value="curSite" :lazy="true">
+        <Accordion v-model:value="curSite" lazy>
           <AccordionPanel
             v-for="site in sites"
             :key="site.name"

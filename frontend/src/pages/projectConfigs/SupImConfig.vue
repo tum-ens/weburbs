@@ -2,7 +2,7 @@
   <Card>
     <template #title>SupIm</template>
     <template #content>
-      <Accordion>
+      <Accordion lazy>
         <AccordionPanel
           v-for="site in sites"
           :key="site.name"
