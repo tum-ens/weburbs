@@ -1,29 +1,37 @@
 <template>
   <divider />
-  <div class="grid grid-cols-3">
+  <div class="grid grid-cols-8">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
-      <Button severity="secondary" @click="query">Query SupIm</Button>
+      <Button @click="query" :disabled="!!supim?.data">Query SupIm</Button>
+      <Button @click="del" severity="danger" :disabled="!supim?.data"
+        >Query SupIm</Button
+      >
     </div>
 
-    <div v-if="supim?.data" class="col-span-2">
-      <BarDiagramm :data title-x="Steps" title-y="kwH" />
+    <div v-if="supim?.data" class="col-span-7">
+      <BarDiagramm :data title-x="Steps" title-y="kwH" class="h-80" />
     </div>
     <Skeleton v-else-if="pending" class="w-full" style="height: 10rem" />
+    <div v-else class="ml-5 italic">No SupIm configured</div>
   </div>
+  <QuerySupImDialog :site :commodity v-model="queryVisible" />
 </template>
 
 <script setup lang="ts">
 import type { Commodity, Site } from '@/backend/interfaces'
-import BarDiagramm from '@/plotly/BarDiagramm.vue'
 import Plotly from 'plotly.js-dist'
-import { computed, type Ref } from 'vue'
-import { useGenerateSupIm, useGetSupIm } from '@/backend/supim'
+import { computed, ref, type Ref } from 'vue'
+import { useDeleteSupIm, useGetSupIm } from '@/backend/supim'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import BarDiagramm from '@/plotly/BarDiagramm.vue'
+import QuerySupImDialog from '@/dialogs/QuerySupImDialog.vue'
 
 const route = useRoute()
 const toast = useToast()
+
+const queryVisible = ref(false)
 
 const props = defineProps<{
   site: Site
@@ -35,7 +43,7 @@ const { data: supim, isPending: pending } = useGetSupIm(
   props.site,
   props.commodity,
 )
-const { mutate: generateSupim } = useGenerateSupIm(
+const { mutate: deleteSupIm } = useDeleteSupIm(
   route,
   props.site,
   props.commodity,
@@ -52,20 +60,21 @@ const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
   ]
 })
 
-function query() {
-  generateSupim(
-    { type: 'Solar' },
-    {
-      onSuccess() {
-        toast.add({
-          summary: 'Success',
-          detail: `SupIm for ${props.commodity.name} was generated`,
-          severity: 'success',
-          life: 2000,
-        })
-      },
+function del() {
+  deleteSupIm(undefined, {
+    onSuccess() {
+      toast.add({
+        summary: 'Success',
+        detail: `SupIm for ${props.commodity.name} was deleted`,
+        severity: 'success',
+        life: 2000,
+      })
     },
-  )
+  })
+}
+
+function query() {
+  queryVisible.value = true
 }
 </script>
 

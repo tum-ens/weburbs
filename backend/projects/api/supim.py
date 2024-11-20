@@ -6,7 +6,14 @@ from projects.api.helper import get_project, get_site, get_commodity
 from projects.models import SupIm
 
 @login_required
-@require_GET
+def handleSupIm(request, project_name, site_name, com_name):
+    if request.method == 'GET':
+        return getSupIm(request, project_name, site_name, com_name)
+    elif request.method == 'DELETE':
+        return deleteSupIm(request, project_name, site_name, com_name)
+    else:
+        return HttpResponse("Method not allowed", status=405)
+
 def getSupIm(request, project_name, site_name, com_name):
     project = get_project(request.user, project_name)
     site = get_site(project, site_name)
@@ -19,6 +26,16 @@ def getSupIm(request, project_name, site_name, com_name):
         return HttpResponse("Serverside error: Multiple SupIms for one commodity", status=500)
     else:
         return JsonResponse({'data': supims[0].steps})
+
+def deleteSupIm(request, project_name, site_name, com_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+    commodity = get_commodity(site, com_name)
+
+    SupIm.objects.filter(commodity=commodity).delete()
+    return HttpResponse("SupIm deleted", status=200)
+
+
 
 @login_required
 @require_POST

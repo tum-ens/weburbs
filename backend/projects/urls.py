@@ -20,7 +20,7 @@ urlpatterns = [
     path('project/<str:project_name>/site/<str:site_name>/def_storage/<str:def_storage_name>/add/',
          storage.add_def_storage),
     path('project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/',
-         supim.getSupIm),
+         supim.handleSupIm),
     path('project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/query/<str:type>/',
          supim.querySupIm),
     path('project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/generate/',

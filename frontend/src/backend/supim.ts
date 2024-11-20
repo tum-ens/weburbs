@@ -51,3 +51,28 @@ export function useGenerateSupIm(
     },
   })
 }
+
+export function useDeleteSupIm(
+  route: RouteLocationNormalized,
+  site: Site,
+  commodity: Commodity,
+) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () =>
+      axios.delete(
+        `/api/project/${route.params.proj}/site/${site.name}/supim/${commodity.name}/`,
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    async onSuccess() {
+      await client.invalidateQueries({
+        queryKey: ['SupIm', route.params.proj, site.name, commodity.name],
+      })
+    },
+  })
+}
