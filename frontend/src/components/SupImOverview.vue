@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col ga-3">
+  <div class="flex flex-col">
     <template v-if="commodities">
       <SupImCommodityOverview
         v-for="com in commodities"

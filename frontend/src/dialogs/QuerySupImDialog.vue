@@ -7,7 +7,12 @@
   >
     <div class="flex flex-col gap-3">
       <Select v-model="option" :options />
-      <Button @click="query" :disabled="!option || isPending">Query</Button>
+      <Button
+        @click="query"
+        :disabled="!option || isPending"
+        :loading="isPending"
+        label="Query"
+      />
     </div>
   </Dialog>
 </template>

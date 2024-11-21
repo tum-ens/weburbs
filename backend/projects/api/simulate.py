@@ -33,6 +33,8 @@ def trigger_simulation(request, project_name):
                         "price": commodity.price,
                         "max": None if commodity.max is None else commodity.max if commodity.max >= 0 else "inf",
                         "maxperhour": None if commodity.maxperhour is None else commodity.maxperhour if commodity.maxperhour >= 0 else "inf",
+                        "supim": SupIm.objects.filter(commodity=commodity).get().steps if SupIm.objects.filter(commodity=commodity).exists() else None,
+                        "demand": Demand.objects.filter(commodity=commodity).get().steps if Demand.objects.filter(commodity=commodity).exists() else None
                     }
                     for commodity in Commodity.objects.filter(site=site)
                 },
@@ -60,22 +62,6 @@ def trigger_simulation(request, project_name):
                     }
                     for process in Process.objects.filter(site=site)
                 }
-            }
-            for site in sites
-        },
-        "supim": {
-            site.name: {
-                commodity.name: supim.steps
-                for commodity in Commodity.objects.filter(site=site)
-                for supim in SupIm.objects.filter(commodity=commodity)
-            }
-            for site in sites
-        },
-        "demand": {
-            site.name: {
-                commodity.name: demand.steps
-                for commodity in Commodity.objects.filter(site=site)
-                for demand in Demand.objects.filter(commodity=commodity)
             }
             for site in sites
         },

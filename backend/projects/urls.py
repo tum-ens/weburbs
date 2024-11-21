@@ -23,6 +23,8 @@ urlpatterns = [
          supim.handleSupIm),
     path('project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/query/<str:type>/',
          supim.querySupIm),
+    path('project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/',
+         demand.handleDemand),
     path('project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/generate/',
          demand.queryDemand),
 

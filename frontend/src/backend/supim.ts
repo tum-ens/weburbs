@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
 import { computed } from 'vue'
-import type { Commodity, Site, SupIm } from '@/backend/interfaces'
+import type { Commodity, Site, Steps } from '@/backend/interfaces'
 
 export function useGetSupIm(
   route: RouteLocationNormalized,
@@ -19,7 +19,7 @@ export function useGetSupIm(
     ],
     queryFn: () =>
       axios
-        .get<SupIm>(
+        .get<Steps>(
           `/api/project/${route.params.proj}/site/${site.name}/supim/${commodity.name}/`,
         )
         .then(response => response.data),

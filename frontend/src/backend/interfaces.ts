@@ -70,6 +70,6 @@ export interface Storage {
   commodity: string
 }
 
-export interface SupIm {
+export interface Steps {
   data?: number[]
 }
