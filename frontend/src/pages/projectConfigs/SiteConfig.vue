@@ -108,7 +108,7 @@ const markers = computed<[number, number][]>(() => {
 
   return sites.value
     .filter(s => s.name != curSite.value)
-    .map(s => [s.lat, s.long])
+    .map(s => [s.lat, s.lon])
 })
 
 function updateMarker(lat: number, lng: number) {

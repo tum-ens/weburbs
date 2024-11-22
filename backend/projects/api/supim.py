@@ -57,7 +57,7 @@ def querySupIm(request, project_name, site_name, com_name, type):
         response = requests.get("https://www.renewables.ninja/api/data/pv",
                                 {
                                     'lat': site.lat,
-                                    'lon': site.long,
+                                    'lon': site.lon,
                                     'date_from': '2023-01-01',
                                     'date_to': '2023-12-31',
                                     'dataset': 'merra2',
@@ -81,7 +81,7 @@ def querySupIm(request, project_name, site_name, com_name, type):
         response = requests.get("https://www.renewables.ninja/api/data/wind",
                                 {
                                     'lat': site.lat,
-                                    'lon': site.long,
+                                    'lon': site.lon,
                                     'date_from': '2023-01-01',
                                     'date_to': '2023-12-31',
                                     'dataset': 'merra2',

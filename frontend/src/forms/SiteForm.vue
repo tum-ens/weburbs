@@ -32,13 +32,13 @@
     <FloatLabel variant="on">
       <InputMask
         :auto-clear="false"
-        :invalid="lngInvalid"
+        :invalid="lonInvalid"
         mask="a999°99'99.999''"
         class="w-full"
-        id="lng"
-        v-model="lng"
+        id="lon"
+        v-model="lon"
       />
-      <label for="lng">Longitude</label>
+      <label for="lon">Longitude</label>
     </FloatLabel>
     <Button @click="submit">{{ !!site ? 'Update' : 'Create' }}</Button>
   </div>
@@ -66,20 +66,20 @@ const emit = defineEmits<{
 const name = ref(props.site?.name || '')
 const area = ref(props.site?.area || undefined)
 const lat = ref(props.site ? decimalToDms(props.site.lat, false) : '')
-const lng = ref(props.site ? decimalToDms(props.site.long, true) : '')
+const lon = ref(props.site ? decimalToDms(props.site.lon, true) : '')
 
 const nameInvalid = ref(false)
 const areaInvalid = ref(false)
-const lngInvalid = ref(false)
+const lonInvalid = ref(false)
 const latInvalid = ref(false)
 
 const latReg = /([NS])(\d+)°(\d+)'([\d.]+)''/
-const lngReg = /([EW])(\d+)°(\d+)'([\d.]+)''/
+const lonReg = /([EW])(\d+)°(\d+)'([\d.]+)''/
 watch(
-  [lng, lat],
+  [lon, lat],
   () => {
-    if (lat.value.match(latReg) && lng.value.match(lngReg)) {
-      emit('updateMarker', dmsToDecimal(lat.value), dmsToDecimal(lng.value))
+    if (lat.value.match(latReg) && lon.value.match(lonReg)) {
+      emit('updateMarker', dmsToDecimal(lat.value), dmsToDecimal(lon.value))
     } else {
       emit('deleteMarker')
     }
@@ -91,7 +91,7 @@ watch(
 
 function mapClick(event: L.LeafletMouseEvent) {
   lat.value = decimalToDms(event.latlng.lat, false)
-  lng.value = decimalToDms(event.latlng.lng, true)
+  lon.value = decimalToDms(event.latlng.lng, true)
 }
 defineExpose({ mapClick })
 
@@ -111,11 +111,11 @@ function submit() {
   } else {
     areaInvalid.value = false
   }
-  if (!lng.value || !lng.value.match(lngReg)) {
+  if (!lon.value || !lon.value.match(lonReg)) {
     error = true
-    lngInvalid.value = true
+    lonInvalid.value = true
   } else {
-    lngInvalid.value = false
+    lonInvalid.value = false
   }
   if (!lat.value || !lat.value.match(latReg)) {
     error = true
@@ -134,14 +134,14 @@ function submit() {
     return
   }
 
-  if (area.value && lng.value && lat.value)
+  if (area.value && lon.value && lat.value)
     updateSite(
       {
         name: props.site?.name || name.value,
         site: {
           name: name.value,
           area: area.value,
-          long: dmsToDecimal(lng.value),
+          lon: dmsToDecimal(lon.value),
           lat: dmsToDecimal(lat.value),
         },
       },

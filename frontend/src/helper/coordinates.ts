@@ -13,12 +13,12 @@ export function dmsToDecimal(dms: string) {
   return decimal
 }
 
-export function decimalToDms(decimal: number, long: boolean) {
-  const direction = decimal < 0 ? (long ? 'W' : 'S') : long ? 'E' : 'N'
+export function decimalToDms(decimal: number, lon: boolean) {
+  const direction = decimal < 0 ? (lon ? 'W' : 'S') : lon ? 'E' : 'N'
   decimal = Math.abs(decimal)
   const degrees = Math.floor(decimal)
   const minutesDecimal = (decimal - degrees) * 60
   const minutes = Math.floor(minutesDecimal)
   const seconds = (minutesDecimal - minutes) * 60
-  return `${direction}${degrees.toString().padStart(long ? 3 : 2, '0')}°${minutes.toString().padStart(2, '0')}'${seconds < 10 ? '0' : ''}${seconds.toFixed(3)}''`
+  return `${direction}${degrees.toString().padStart(lon ? 3 : 2, '0')}°${minutes.toString().padStart(2, '0')}'${seconds < 10 ? '0' : ''}${seconds.toFixed(3)}''`
 }

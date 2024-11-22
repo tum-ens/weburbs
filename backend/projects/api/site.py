@@ -14,7 +14,7 @@ from projects.models import Site, DefCommodity
 def list_sites(request, project_name):
     project = get_project(request.user, project_name)
     sites = (Site.objects.filter(project=project)
-             .order_by('name').values('name', 'area', 'long', 'lat'))
+             .order_by('name').values('name', 'area', 'lon', 'lat'))
 
     return JsonResponse(list(sites), safe=False)
 
@@ -31,7 +31,7 @@ def edit_site(request, project_name, site_name):
         if request.method == "POST":
             site.name = data['name']
             site.area = data['area']
-            site.long = data['long']
+            site.lon = data['lon']
             site.lat = data['lat']
             site.save()
             return JsonResponse({'detail': 'Site updated'})
@@ -42,7 +42,7 @@ def edit_site(request, project_name, site_name):
             return HttpResponseNotAllowed(['POST', 'DELETE'])
     except Site.DoesNotExist:
         if request.method == "POST":
-            site = Site(project=project, name=data['name'], area=data['area'], long=data['long'], lat=data['lat'])
+            site = Site(project=project, name=data['name'], area=data['area'], lon=data['lon'], lat=data['lat'])
             site.save()
 
             add_def_to_project(DefCommodity.objects.get(name="CO2"), site)
