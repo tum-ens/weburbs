@@ -10,22 +10,42 @@
       />
 
       <template v-if="overview">
-        <div class="grid grid-cols-4 gap-3">
-          <Fieldset legend="Overview">
-            <ul>
-              <li>Environmental: {{ overview.Environmental }}</li>
-              <li>Fixed: {{ overview.Invest }}</li>
-              <li>Fuel: {{ overview.Fuel }}</li>
-              <li>Invest: {{ overview.Invest }}</li>
-              <li>Variable: {{ overview.Variable }}</li>
-            </ul>
-          </Fieldset>
-          <DataTable :value="procs" class="col-span-3">
-            <Column field="site" header="Site"></Column>
-            <Column field="proc" header="Commodity"></Column>
-            <Column field="new" header="New"></Column>
-            <Column field="total" header="Total"></Column>
-          </DataTable>
+        <div class="flex flex-col gap-3">
+          <div class="grid grid-cols-4 gap-3">
+            <Fieldset legend="Overview">
+              <ul>
+                <li>Environmental: {{ overview.Environmental }}</li>
+                <li>Fixed: {{ overview.Invest }}</li>
+                <li>Fuel: {{ overview.Fuel }}</li>
+                <li>Invest: {{ overview.Invest }}</li>
+                <li>Variable: {{ overview.Variable }}</li>
+              </ul>
+            </Fieldset>
+            <DataTable :value="procs" class="col-span-3">
+              <Column field="site" header="Site"></Column>
+              <Column field="proc" header="Commodity"></Column>
+              <Column field="new" header="New"></Column>
+              <Column field="total" header="Total"></Column>
+            </DataTable>
+          </div>
+
+          <Accordion lazy>
+            <AccordionPanel
+              v-for="site in sites"
+              :key="site.name"
+              :value="site.name"
+            >
+              <AccordionHeader>{{ site.name }}</AccordionHeader>
+              <AccordionContent>
+                <SiteResults
+                  v-if="site.name in demand && site.name in created"
+                  :site="site"
+                  :demand="demand[site.name]"
+                  :created="created[site.name]"
+                />
+              </AccordionContent>
+            </AccordionPanel>
+          </Accordion>
         </div>
       </template>
     </template>
@@ -38,9 +58,14 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
 import { ref } from 'vue'
+import { useSites } from '@/backend/sites'
+import Plotly from 'plotly.js-dist'
+import SiteResults from '@/pages/simulation/SiteResults.vue'
+
 const route = useRoute()
 const toast = useToast()
 
+const { data: sites } = useSites(route)
 const { mutate: triggerSimulation, isPending: simulating } =
   useTriggerSimulation(route)
 
@@ -48,19 +73,50 @@ const overview = ref()
 const procs = ref<{ site: string; proc: string; total: number; new: number }[]>(
   [],
 )
+const demand = ref<{
+  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
+}>({})
+const created = ref<{
+  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
+}>({})
 
 function trigger() {
   triggerSimulation(undefined, {
     onSuccess(data) {
-      overview.value = data.data.costs
-      for (const site in data.data.process) {
-        for (const proc in data.data.process[site]) {
+      procs.value = []
+      overview.value = data.costs
+      for (const site in data.process) {
+        for (const proc in data.process[site]) {
           procs.value.push({
             site,
             proc,
-            total: data.data.process[site][proc].Total,
-            new: data.data.process[site][proc].New,
+            total: data.process[site][proc].Total,
+            new: data.process[site][proc].New,
           })
+        }
+      }
+
+      demand.value = {}
+      created.value = {}
+      for (const site in data.results) {
+        demand.value[site] = {}
+        created.value[site] = {}
+        for (const com in data.results[site]) {
+          demand.value[site][com] = [
+            {
+              name: com,
+              y: data.results[site][com].demand,
+              type: 'bar',
+            },
+          ]
+          created.value[site][com] = []
+          for (const proc in data.results[site][com].created) {
+            created.value[site][com].push({
+              name: proc,
+              y: data.results[site][com].created[proc],
+              type: 'bar',
+            })
+          }
         }
       }
 
@@ -72,6 +128,7 @@ function trigger() {
       })
     },
     onError(error) {
+      console.log(error)
       toast.add({
         summary: 'Simulation error',
         detail: (<AxiosError>error)?.response?.data,

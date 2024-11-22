@@ -39,13 +39,6 @@ function layout(): Partial<Plotly.Layout> {
         text: props.titleY,
       },
     },
-    legend: {
-      orientation: 'h',
-      x: 0.5,
-      y: 1.1,
-      xanchor: 'center',
-      yanchor: 'bottom',
-    },
   }
 }
 
