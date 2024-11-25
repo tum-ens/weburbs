@@ -13,7 +13,7 @@
     />
   </div>
   <div v-else>
-    <span>No processes added</span>
+    <span>No storage added</span>
   </div>
 </template>
 

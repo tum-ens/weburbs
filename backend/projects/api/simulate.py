@@ -4,12 +4,18 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project
-from projects.models import Site, Commodity, Process, ProcessCommodity, SupIm, Demand
+from projects.models import Site, Commodity, Process, ProcessCommodity, SupIm, Demand, Storage
+
+result = None
 
 
 @login_required
 @require_POST
 def trigger_simulation(request, project_name):
+    global result
+    if result is not None:
+        return result
+
     project = get_project(request.user, project_name)
     sites = Site.objects.filter(project=project)
     commodities = Commodity.objects.filter(site__in=sites)
@@ -33,8 +39,24 @@ def trigger_simulation(request, project_name):
                         "price": commodity.price,
                         "max": None if commodity.max is None else commodity.max if commodity.max >= 0 else "inf",
                         "maxperhour": None if commodity.maxperhour is None else commodity.maxperhour if commodity.maxperhour >= 0 else "inf",
-                        "supim": SupIm.objects.filter(commodity=commodity).get().steps if SupIm.objects.filter(commodity=commodity).exists() else None,
-                        "demand": Demand.objects.filter(commodity=commodity).get().steps if Demand.objects.filter(commodity=commodity).exists() else None
+                        "supim": SupIm.objects.filter(commodity=commodity).get().steps if SupIm.objects.filter(
+                            commodity=commodity).exists() else None,
+                        "demand": Demand.objects.filter(commodity=commodity).get().steps if Demand.objects.filter(
+                            commodity=commodity).exists() else None,
+                        "storage": {
+                            storage.name: {
+                                'inst-cap-c': storage.instcapc, 'cap-lo-c': storage.caploc,
+                                'cap-up-c': storage.capupu if storage.capupc >= 0 else "inf",
+                                'inst-cap-p': storage.instcapp, 'cap-lo-p': storage.caplop,
+                                'cap-up-p': storage.capupp if storage.capupp >= 0 else "inf",
+                                'eff-in': storage.effin, 'eff-out': storage.effout,
+                                'inv-cost-p': storage.invcostp, 'inv-cost-c': storage.invcostc,
+                                'fix-cost-p': storage.fixcostp, 'fix-cost-c': storage.fixcostc,
+                                'var-cost-p': storage.varcostp, 'var-cost-c': storage.varcostc,
+                                'wacc': storage.wacc, 'depreciation': storage.depreciation,
+                                'init': storage.init, 'discharge': storage.discharge, 'ep-ratio': storage.epratio
+                            } for storage in Storage.objects.filter(commodity=commodity).all()
+                        } if Storage.objects.filter(commodity=commodity).exists() else None
                     }
                     for commodity in Commodity.objects.filter(site=site)
                 },
@@ -71,6 +93,7 @@ def trigger_simulation(request, project_name):
     if response.status_code != 200:
         return HttpResponse("Simulation failed", status="400")
 
+    result = JsonResponse(response.json())
     return JsonResponse(response.json())
 
 

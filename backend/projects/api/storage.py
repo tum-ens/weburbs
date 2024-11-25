@@ -1,12 +1,10 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Prefetch
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
 from projects.api import commodity
-from projects.models import DefProcess, Process, Site, DefProcessCommodity, ProcComDir, ProcessCommodity, DefStorage, \
-    Storage, DefCommodity, Commodity
+from projects.models import Site, DefStorage, Storage, Commodity
 from django.forms.models import model_to_dict
 
 
@@ -66,7 +64,7 @@ def add_def_storage(request, project_name, site_name, def_storage_name):
     project = get_project(request.user, project_name)
     site = get_site(project, site_name)
 
-    if Storage.objects.filter(site=site, name=def_storage).exists():
+    if Storage.objects.filter(site=site, name=def_storage_name).exists():
         return HttpResponse("Storage with the same name already exists", status=409)
 
     # Start adding process and all process commodities
