@@ -19,6 +19,14 @@
             title-y="kwh"
           />
         </div>
+        <div v-if="props.storageLevel">
+          <BarDiagramm
+            title="Storage Level"
+            :data="props.storageLevel[com.name]"
+            title-x="steps"
+            title-y="kwh"
+          />
+        </div>
       </div>
     </template>
   </div>
@@ -37,6 +45,7 @@ const props = defineProps<{
   site: Site
   demand: { [key: string]: Partial<Plotly.Data>[] }
   created: { [key: string]: Partial<Plotly.Data>[] }
+  storageLevel?: { [key: string]: Partial<Plotly.Data>[] }
 }>()
 
 const { data: coms } = useProjectSiteCommodities(route, props.site.name)

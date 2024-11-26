@@ -117,9 +117,8 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('wacc')"
-          suffix="%"
           v-tooltip.bottom="
-            'Percentage (%) of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
+            'Percentage of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
           "
           id="wacc"
           fluid

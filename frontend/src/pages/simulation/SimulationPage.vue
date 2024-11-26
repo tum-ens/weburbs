@@ -42,6 +42,11 @@
                   :site="site"
                   :demand="demand[site.name]"
                   :created="created[site.name]"
+                  :storageLevel="
+                    site.name in storageLevel
+                      ? storageLevel[site.name]
+                      : undefined
+                  "
                 />
               </AccordionContent>
             </AccordionPanel>
@@ -79,6 +84,9 @@ const demand = ref<{
 const created = ref<{
   [key: string]: { [key: string]: Partial<Plotly.Data>[] }
 }>({})
+const storageLevel = ref<{
+  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
+}>({})
 
 function trigger() {
   triggerSimulation(undefined, {
@@ -98,9 +106,11 @@ function trigger() {
 
       demand.value = {}
       created.value = {}
+      storageLevel.value = {}
       for (const site in data.results) {
         demand.value[site] = {}
         created.value[site] = {}
+        storageLevel.value[site] = {}
         for (const com in data.results[site]) {
           demand.value[site][com] = [
             {
@@ -116,6 +126,18 @@ function trigger() {
               y: data.results[site][com].created[proc],
               type: 'bar',
             })
+          }
+          if (data.results[site][com].storage) {
+            console.log('add something')
+            console.log(site)
+            console.log(com)
+            storageLevel.value[site][com] = [
+              {
+                name: com,
+                y: data.results[site][com].storage.Level,
+                type: 'scatter',
+              },
+            ]
           }
         }
       }
