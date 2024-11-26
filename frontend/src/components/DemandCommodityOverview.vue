@@ -3,7 +3,7 @@
   <div class="grid grid-cols-8">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
-      <Button @click="query" :disabled="!!demand?.data">Query SupIm</Button>
+      <Button @click="query" :disabled="!!demand?.data">Generate Demand</Button>
       <Button @click="del" severity="danger" :disabled="!demand?.data">
         Delete Demand
       </Button>

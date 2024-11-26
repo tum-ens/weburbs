@@ -30,7 +30,7 @@ def load_defaults(apps, schema_editor):
     hydro_plant.save()
     diesel_generator = def_process(name='Diesel Generator', description='Generates electricity from diesel while generating CO2', instcap=0, caplo=0, capup=80000, maxgrad=4.8, minfraction=0.25, invcost=450000, fixcost=6000, varcost=1.6, wacc=0.07, depreciation=30)
     diesel_generator.save()
-    slack = def_process(name='Slack powerplant', description='Consumes overproduced electricity', instcap=0, caplo=0, capup=999999, maxgrad=-1, minfraction=0, invcost=0, fixcost=0, varcost=0, wacc=0, depreciation=1)
+    slack = def_process(name='Curtailpower', description='Consumes overproduced electricity', instcap=0, caplo=0, capup=999999, maxgrad=-1, minfraction=0, invcost=0, fixcost=0, varcost=0, wacc=0, depreciation=1)
     slack.save()
 
     def_process_commodity = apps.get_model('projects', 'DefProcessCommodity')

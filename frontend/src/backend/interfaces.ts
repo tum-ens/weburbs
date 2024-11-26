@@ -15,7 +15,7 @@ export interface Site {
 export interface Commodity {
   site: string
   name: string
-  type: string
+  type: number
   price: number
   max: number
   maxperhour: number

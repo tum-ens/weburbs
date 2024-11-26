@@ -1,12 +1,13 @@
 <template>
   <div class="flex flex-col">
     <template v-if="commodities">
-      <SupImCommodityOverview
-        v-for="com in commodities"
-        :key="com.name"
-        :site="site"
-        :commodity="com"
-      />
+      <template v-for="com in commodities" :key="com.name">
+        <SupImCommodityOverview
+          v-if="com.type == 1"
+          :site="site"
+          :commodity="com"
+        />
+      </template>
     </template>
   </div>
 </template>

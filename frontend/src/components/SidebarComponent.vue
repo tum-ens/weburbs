@@ -116,18 +116,18 @@ const items = computed(() => {
                     },
                   }),
               },
-              {
-                key: 'ProjectCommodity',
-                label: 'Commodities',
-                icon: 'pi pi-bolt',
-                command: () =>
-                  router.push({
-                    name: 'ProjectCommodity',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
+              // {
+              //   key: 'ProjectCommodity',
+              //   label: 'Commodities',
+              //   icon: 'pi pi-bolt',
+              //   command: () =>
+              //     router.push({
+              //       name: 'ProjectCommodity',
+              //       params: {
+              //         proj: p.name,
+              //       },
+              //     }),
+              // },
               {
                 key: 'ProjectProcess',
                 label: 'Processes',
@@ -176,54 +176,54 @@ const items = computed(() => {
                     },
                   }),
               },
-              {
-                key: 'ProjectTransmission',
-                label: 'Transmission',
-                icon: 'pi pi-wifi',
-                command: () =>
-                  router.push({
-                    name: 'ProjectTransmission',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectDSM',
-                label: 'DSM',
-                icon: 'pi pi-sliders-v',
-                command: () =>
-                  router.push({
-                    name: 'ProjectDSM',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectBuySell',
-                label: 'BuySellPrice',
-                icon: 'pi pi-dollar',
-                command: () =>
-                  router.push({
-                    name: 'ProjectBuySell',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectTimeVarEff',
-                label: 'TimeVarEff',
-                icon: 'pi pi-hourglass',
-                command: () =>
-                  router.push({
-                    name: 'ProjectTimeVarEff',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
+              // {
+              //   key: 'ProjectTransmission',
+              //   label: 'Transmission',
+              //   icon: 'pi pi-wifi',
+              //   command: () =>
+              //     router.push({
+              //       name: 'ProjectTransmission',
+              //       params: {
+              //         proj: p.name,
+              //       },
+              //     }),
+              // },
+              // {
+              //   key: 'ProjectDSM',
+              //   label: 'DSM',
+              //   icon: 'pi pi-sliders-v',
+              //   command: () =>
+              //     router.push({
+              //       name: 'ProjectDSM',
+              //       params: {
+              //         proj: p.name,
+              //       },
+              //     }),
+              // },
+              // {
+              //   key: 'ProjectBuySell',
+              //   label: 'BuySellPrice',
+              //   icon: 'pi pi-dollar',
+              //   command: () =>
+              //     router.push({
+              //       name: 'ProjectBuySell',
+              //       params: {
+              //         proj: p.name,
+              //       },
+              //     }),
+              // },
+              // {
+              //   key: 'ProjectTimeVarEff',
+              //   label: 'TimeVarEff',
+              //   icon: 'pi pi-hourglass',
+              //   command: () =>
+              //     router.push({
+              //       name: 'ProjectTimeVarEff',
+              //       params: {
+              //         proj: p.name,
+              //       },
+              //     }),
+              // },
               {
                 key: 'ProjectSimulation',
                 label: 'Simulation',

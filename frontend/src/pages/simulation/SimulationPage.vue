@@ -128,9 +128,6 @@ function trigger() {
             })
           }
           if (data.results[site][com].storage) {
-            console.log('add something')
-            console.log(site)
-            console.log(com)
             storageLevel.value[site][com] = [
               {
                 name: com,

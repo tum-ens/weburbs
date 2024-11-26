@@ -6,15 +6,14 @@ from django.views.decorators.http import require_POST
 from projects.api.helper import get_project
 from projects.models import Site, Commodity, Process, ProcessCommodity, SupIm, Demand, Storage
 
-result = None
-
+result = dict()
 
 @login_required
 @require_POST
 def trigger_simulation(request, project_name):
     global result
-    if result is not None:
-        return result
+    if project_name in result:
+        return result[project_name]
 
     project = get_project(request.user, project_name)
     sites = Site.objects.filter(project=project)
@@ -93,7 +92,7 @@ def trigger_simulation(request, project_name):
     if response.status_code != 200:
         return HttpResponse("Simulation failed", status="400")
 
-    result = JsonResponse(response.json())
+    result[project_name] = JsonResponse(response.json())
     return JsonResponse(response.json())
 
 
