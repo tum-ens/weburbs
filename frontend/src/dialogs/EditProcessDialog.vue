@@ -9,9 +9,11 @@
     <ProcessForm
       :process="process"
       submit-label="Update"
-      :loading="loading"
+      :loading="loading || deleting"
       @submit="update"
       :site_name="site_name"
+      delete
+      @onDelete="deleteProc"
     />
   </Dialog>
 </template>
@@ -19,7 +21,7 @@
 <script setup lang="ts">
 import ProcessForm from '@/forms/ProcessForm.vue'
 import type { Process } from '@/backend/interfaces'
-import { useUpdateProcess } from '@/backend/processes'
+import { useDeleteProcess, useUpdateProcess } from '@/backend/processes'
 import { useRoute } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
@@ -34,6 +36,7 @@ const props = defineProps<{
 }>()
 
 const { mutate: updateProcess, isPending: loading } = useUpdateProcess(route)
+const { mutate: deleteProcess, isPending: deleting } = useDeleteProcess(route)
 
 function update(process: Process): void {
   updateProcess(
@@ -58,6 +61,36 @@ function update(process: Process): void {
           detail:
             (<AxiosError>error)?.response?.data ||
             `An error occurred when updating ${process.name}`,
+          severity: 'error',
+          life: 2000,
+        })
+      },
+    },
+  )
+}
+
+function deleteProc(): void {
+  deleteProcess(
+    {
+      site_name: props.site_name,
+      process_name: props.process.name,
+    },
+    {
+      onSuccess() {
+        visible.value = false
+        toast.add({
+          summary: 'Deleted',
+          detail: `Process ${props.process.name} has been deleted`,
+          severity: 'success',
+          life: 2000,
+        })
+      },
+      onError(error) {
+        toast.add({
+          summary: 'Error deleted',
+          detail:
+            (<AxiosError>error)?.response?.data ||
+            `An error occurred when deleting ${props.process.name}`,
           severity: 'error',
           life: 2000,
         })

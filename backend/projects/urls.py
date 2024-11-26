@@ -13,6 +13,8 @@ urlpatterns = [
     path('project/<str:project_name>/site/<str:site_name>/processes/', process.list_processes),
     path('project/<str:project_name>/site/<str:site_name>/process/<str:process_name>/update/', process.update_process),
     path('def_processes/', process.list_def_processes),
+    path('project/<str:project_name>/site/<str:site_name>/process/<str:process_name>/delete/',
+         process.delete_process),
     path('project/<str:project_name>/site/<str:site_name>/def_processes/<str:def_proc_name>/add/',
          process.add_def_process),
     path('project/<str:project_name>/site/<str:site_name>/storage/', storage.list_storage),

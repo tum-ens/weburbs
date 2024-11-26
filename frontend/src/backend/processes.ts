@@ -74,3 +74,25 @@ export function useUpdateProcess(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useDeleteProcess(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { site_name: string; process_name: string }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/process/${data.process_name}/delete/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['processes', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}

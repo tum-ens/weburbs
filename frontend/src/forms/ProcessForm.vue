@@ -240,7 +240,17 @@
     >
       Default commodities will be added automatically
     </Message>
-    <Button :loading="loading" :label="submitLabel" @click="submit" />
+    <div class="flex flex-row gap-3">
+      <Button
+        v-if="props.delete"
+        fluid
+        :loading="loading"
+        label="Delete"
+        @click="deleteProc"
+        severity="danger"
+      />
+      <Button fluid :loading="loading" :label="submitLabel" @click="submit" />
+    </div>
   </div>
 </template>
 
@@ -262,9 +272,11 @@ const props = defineProps<{
   process?: Process
   loading: boolean
   site_name: string
+  delete?: boolean
 }>()
 const emit = defineEmits<{
   submit: [process: Process]
+  onDelete: []
 }>()
 
 const { data: commodities } = useProjectSiteCommodities(route, props.site_name)
@@ -451,6 +463,10 @@ function submit() {
       }
     }),
   })
+}
+
+function deleteProc() {
+  emit('onDelete')
 }
 </script>
 

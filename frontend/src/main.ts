@@ -12,8 +12,8 @@ import axios from 'axios'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 
-// axios.defaults.baseURL = 'http://localhost:9000'
-axios.defaults.baseURL = 'https://relaxing-griffon-absolutely.ngrok-free.app'
+axios.defaults.baseURL = 'http://localhost:9000'
+// axios.defaults.baseURL = 'https://relaxing-griffon-absolutely.ngrok-free.app'
 axios.defaults.withCredentials = true
 
 createApp(App)

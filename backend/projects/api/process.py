@@ -162,3 +162,14 @@ def update_process(request, project_name, site_name, process_name):
                           ratiomin=out_proccom['ratiomin']).save())
 
     return JsonResponse({'detail': 'Project created'})
+
+@login_required
+@require_POST
+def delete_process(request, project_name, site_name, process_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    process = Process.objects.get(site=site, name=process_name)
+    process.delete()
+
+    return JsonResponse({'detail': 'Process deleted'})
