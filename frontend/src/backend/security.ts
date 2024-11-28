@@ -66,3 +66,22 @@ export async function logout(queryClient: QueryClient) {
       return false
     })
 }
+
+export async function register(
+  csrf: string,
+  username: string,
+  email: string,
+  password: string,
+) {
+  return axios
+    .post(
+      '/api/security/register/',
+      { username, email, password },
+      {
+        headers: {
+          'X-CSRFToken': csrf,
+        },
+      },
+    )
+    .then(isResponseOk)
+}

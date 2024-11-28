@@ -4,7 +4,8 @@ from . import views
 
 urlpatterns = [
     path('csrf/', views.get_csrf, name='security-csrf'),
-    path('login/', views.login_view, name='security-login'),
-    path('logout/', views.logout_view, name='security-logout'),
-    path('session/', views.session_view, name='security-session'),
+    path('login/', views.loginUser, name='security-login'),
+    path('logout/', views.logoutUser, name='security-logout'),
+    path('session/', views.session, name='security-session'),
+    path('register/', views.register, name='security-session'),
 ]

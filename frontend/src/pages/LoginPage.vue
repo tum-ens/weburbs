@@ -20,34 +20,29 @@
         <template #content>
           <div v-if="!authenticated">
             <div>
-              <label
-                for="username"
-                class="text-surface-900 dark:text-surface-0 font-medium mb-2 block"
-                >Username</label
-              >
-              <InputText
-                :disabled="loading"
-                autofocus
-                id="username"
-                v-model="username"
-                type="text"
-                placeholder="Username"
-                class="w-full mb-4"
-              />
+              <FloatLabel variant="on" class="w-full mb-6">
+                <InputText
+                  fluid
+                  :disabled="loading"
+                  id="username"
+                  type="text"
+                  v-model="username"
+                  @keydown.enter="clogin"
+                />
+                <label for="username">Username</label>
+              </FloatLabel>
 
-              <label
-                for="password"
-                class="text-surface-900 dark:text-surface-0 font-medium mb-2 block"
-                >Password</label
-              >
-              <InputText
-                :disabled="loading"
-                id="password"
-                v-model="password"
-                type="password"
-                placehoder="Password"
-                class="w-full mb-4"
-              />
+              <FloatLabel variant="on" class="w-full mb-6">
+                <InputText
+                  fluid
+                  :disabled="loading"
+                  id="password"
+                  type="password"
+                  v-model="password"
+                  @keydown.enter="clogin"
+                />
+                <label for="password">Password</label>
+              </FloatLabel>
 
               <div class="flex justify-end mb-12">
                 <RouterLink
@@ -71,12 +66,6 @@
           </div>
           <div v-else>
             <p>Already authenticated!</p>
-            <Button
-              label="Logout"
-              icon="pi pi-user"
-              class="w-full"
-              @click="clogout"
-            />
           </div>
         </template>
       </Card>
@@ -86,7 +75,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { login, logout, useAuthenticated, useCSRF } from '@/backend/security'
+import { login, useAuthenticated, useCSRF } from '@/backend/security'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -112,6 +101,7 @@ watch(
 )
 
 const queryClient = useQueryClient()
+
 async function clogin() {
   loading.value = true
   if (!(await login(queryClient, csrf.value, username.value, password.value))) {
@@ -119,12 +109,6 @@ async function clogin() {
   } else {
     error.value = ''
   }
-  loading.value = false
-}
-
-async function clogout() {
-  loading.value = true
-  await logout(queryClient)
   loading.value = false
 }
 </script>

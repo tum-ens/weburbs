@@ -1,6 +1,10 @@
 import json
 
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -14,7 +18,7 @@ def get_csrf(request):
 
 
 @require_POST
-def login_view(request):
+def loginUser(request):
     data = json.loads(request.body)
     username = data.get('username')
     password = data.get('password')
@@ -31,7 +35,7 @@ def login_view(request):
     return JsonResponse({'detail': 'Successfully logged in.'})
 
 
-def logout_view(request):
+def logoutUser(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'You\'re not logged in.'}, status=400)
 
@@ -40,8 +44,30 @@ def logout_view(request):
 
 
 @ensure_csrf_cookie
-def session_view(request):
+def session(request):
     if not request.user.is_authenticated:
         return JsonResponse({'isAuthenticated': False})
 
     return JsonResponse({'isAuthenticated': True})
+
+@require_POST
+def register(request):
+    data = json.loads(request.body)
+
+    if len(data['username']) <= 3:
+        return JsonResponse({'detail': 'Username is too short'}, status=400)
+    try:
+        validate_email(data['email'])
+    except ValidationError:
+        return JsonResponse({'detail': 'Invalid E-Mail'}, status=400)
+    if len(data['password']) < 5:
+        return JsonResponse({'detail': 'Password is too short'}, status=400)
+
+    try:
+        User.objects.create_user(**data).save()
+    except IntegrityError:
+        return JsonResponse({'detail': 'User with this name already exists'}, status=409)
+
+    return JsonResponse({'detail': "User was created"})
+
+
