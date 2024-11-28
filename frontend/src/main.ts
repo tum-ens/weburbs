@@ -16,7 +16,7 @@ axios.defaults.withCredentials = true
 fetch('config.json')
   .then(response => response.json())
   .then(data => {
-    axios.defaults.baseURL = data.VUE_APP_API_BASE_URL
+    axios.defaults.baseURL = data.VUE_APP_API_URL
 
     createApp(App)
       .use(router)
