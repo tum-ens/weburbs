@@ -46,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./frontend/Dockerfile
-          context: .
+          context: frontend
           cache-from: |
             user/app:cache
             type=local,src=.
@@ -88,7 +88,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./backend/Dockerfile
-          context: .
+          context: backend
           cache-from: |
             user/app:cache
             type=local,src=.
