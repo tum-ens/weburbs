@@ -1,13 +1,13 @@
 
 services:
-  frontend:
+  backend:
     build: backend
     ports:
       - "8000:8000"
     environment:
       - SECRET_KEY=change_me
       - DJANGO_ALLOWED_HOSTS=localhost
-      - CSRF_TRUSTED_ORIGINS=http://lulhost:8080
+      - CSRF_TRUSTED_ORIGINS=http://localhost:8080
       - RN_KEY=$RN_KEY
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=urbs
@@ -27,6 +27,14 @@ services:
       - POSTGRES_USER=urbs
       - POSTGRES_PASSWORD=urbs
       - POSTGRES_DB=urbs
+
+  frontend:
+    build: frontend
+    ports:
+      - "8080:80"
+    environment:
+      - POSTGRES_USER=urbs
+      - VUE_APP_API_URL=http://localhost:8000
 
 #  reverse-proxy:
 #    image: nginx:alpine

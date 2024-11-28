@@ -12,26 +12,28 @@ import axios from 'axios'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 
-axios.defaults.baseURL = 'http://localhost:8000'
-// axios.defaults.baseURL = 'http://localhost:9000'
-// axios.defaults.baseURL = 'https://relaxing-griffon-absolutely.ngrok-free.app'
 axios.defaults.withCredentials = true
+fetch('config.json')
+  .then(response => response.json())
+  .then(data => {
+    axios.defaults.baseURL = data.VUE_APP_API_BASE_URL
 
-createApp(App)
-  .use(router)
-  .use(VueQueryPlugin)
-  .use(ToastService)
-  .use(PrimeVue, {
-    theme: {
-      preset: Aura,
-      options: {
-        cssLayer: {
-          name: 'primevue',
-          order: 'tailwind-base, primevue, tailwind-utilities',
+    createApp(App)
+      .use(router)
+      .use(VueQueryPlugin)
+      .use(ToastService)
+      .use(PrimeVue, {
+        theme: {
+          preset: Aura,
+          options: {
+            cssLayer: {
+              name: 'primevue',
+              order: 'tailwind-base, primevue, tailwind-utilities',
+            },
+          },
         },
-      },
-    },
+      })
+      .directive('focustrap', FocusTrap)
+      .directive('tooltip', Tooltip)
+      .mount('#app')
   })
-  .directive('focustrap', FocusTrap)
-  .directive('tooltip', Tooltip)
-  .mount('#app')

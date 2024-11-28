@@ -135,7 +135,7 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ['https://relaxing-griffon-absolutely.ngrok-free.app', 'http://localhost:9000']
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:8000"),
 
 CORS_ALLOWED_ORIGINS = []
 CORS_ALLOW_ALL_ORIGINS = True
