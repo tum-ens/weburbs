@@ -4,7 +4,16 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project
-from projects.models import Site, Commodity, Process, ProcessCommodity, SupIm, Demand, Storage
+from projects.models import (
+    Site,
+    Commodity,
+    Process,
+    ProcessCommodity,
+    SupIm,
+    Demand,
+    Storage,
+)
+
 
 @login_required
 @require_POST
@@ -14,15 +23,14 @@ def trigger_simulation(request, project_name):
     commodities = Commodity.objects.filter(site__in=sites)
     supims = SupIm.objects.filter(commodity__in=commodities)
     demands = Demand.objects.filter(commodity__in=commodities)
-    timesteps = min(min(map(lambda supim: len(supim.steps), supims)),
-                    min(map(lambda demand: len(demand.steps), demands)))
+    timesteps = min(
+        min(map(lambda supim: len(supim.steps), supims)),
+        min(map(lambda demand: len(demand.steps), demands)),
+    )
 
     data = {
         "c_timesteps": timesteps,
-        "global": {
-            "CO2 limit": project.co2limit,
-            "Cost limit": project.costlimit
-        },
+        "global": {"CO2 limit": project.co2limit, "Cost limit": project.costlimit},
         "site": {
             site.name: {
                 "area": site.area,
@@ -30,26 +38,54 @@ def trigger_simulation(request, project_name):
                     commodity.name: {
                         "Type": commodity.get_com_type_label(),
                         "price": commodity.price,
-                        "max": None if commodity.max is None else commodity.max if commodity.max >= 0 else "inf",
-                        "maxperhour": None if commodity.maxperhour is None else commodity.maxperhour if commodity.maxperhour >= 0 else "inf",
-                        "supim": SupIm.objects.filter(commodity=commodity).get().steps if SupIm.objects.filter(
-                            commodity=commodity).exists() else None,
-                        "demand": Demand.objects.filter(commodity=commodity).get().steps if Demand.objects.filter(
-                            commodity=commodity).exists() else None,
+                        "max": None
+                        if commodity.max is None
+                        else commodity.max
+                        if commodity.max >= 0
+                        else "inf",
+                        "maxperhour": None
+                        if commodity.maxperhour is None
+                        else commodity.maxperhour
+                        if commodity.maxperhour >= 0
+                        else "inf",
+                        "supim": SupIm.objects.filter(commodity=commodity).get().steps
+                        if SupIm.objects.filter(commodity=commodity).exists()
+                        else None,
+                        "demand": Demand.objects.filter(commodity=commodity).get().steps
+                        if Demand.objects.filter(commodity=commodity).exists()
+                        else None,
                         "storage": {
                             storage.name: {
-                                'inst-cap-c': storage.instcapc, 'cap-lo-c': storage.caploc,
-                                'cap-up-c': storage.capupu if storage.capupc >= 0 else "inf",
-                                'inst-cap-p': storage.instcapp, 'cap-lo-p': storage.caplop,
-                                'cap-up-p': storage.capupp if storage.capupp >= 0 else "inf",
-                                'eff-in': storage.effin, 'eff-out': storage.effout,
-                                'inv-cost-p': storage.invcostp, 'inv-cost-c': storage.invcostc,
-                                'fix-cost-p': storage.fixcostp, 'fix-cost-c': storage.fixcostc,
-                                'var-cost-p': storage.varcostp, 'var-cost-c': storage.varcostc,
-                                'wacc': storage.wacc, 'depreciation': storage.depreciation,
-                                'init': storage.init, 'discharge': storage.discharge, 'ep-ratio': storage.epratio
-                            } for storage in Storage.objects.filter(commodity=commodity).all()
-                        } if Storage.objects.filter(commodity=commodity).exists() else None
+                                "inst-cap-c": storage.instcapc,
+                                "cap-lo-c": storage.caploc,
+                                "cap-up-c": storage.capupu
+                                if storage.capupc >= 0
+                                else "inf",
+                                "inst-cap-p": storage.instcapp,
+                                "cap-lo-p": storage.caplop,
+                                "cap-up-p": storage.capupp
+                                if storage.capupp >= 0
+                                else "inf",
+                                "eff-in": storage.effin,
+                                "eff-out": storage.effout,
+                                "inv-cost-p": storage.invcostp,
+                                "inv-cost-c": storage.invcostc,
+                                "fix-cost-p": storage.fixcostp,
+                                "fix-cost-c": storage.fixcostc,
+                                "var-cost-p": storage.varcostp,
+                                "var-cost-c": storage.varcostc,
+                                "wacc": storage.wacc,
+                                "depreciation": storage.depreciation,
+                                "init": storage.init,
+                                "discharge": storage.discharge,
+                                "ep-ratio": storage.epratio,
+                            }
+                            for storage in Storage.objects.filter(
+                                commodity=commodity
+                            ).all()
+                        }
+                        if Storage.objects.filter(commodity=commodity).exists()
+                        else None,
                     }
                     for commodity in Commodity.objects.filter(site=site)
                 },
@@ -72,11 +108,13 @@ def trigger_simulation(request, project_name):
                                 "ratio": proccom.ratio,
                                 "ratio-min": proccom.ratiomin,
                             }
-                            for proccom in ProcessCommodity.objects.filter(process=process)
-                        }
+                            for proccom in ProcessCommodity.objects.filter(
+                                process=process
+                            )
+                        },
                     }
                     for process in Process.objects.filter(site=site)
-                }
+                },
             }
             for site in sites
         },

@@ -18,6 +18,7 @@ def get_site(project, site_name):
     except Site.DoesNotExist:
         raise Http404("Site not found")
 
+
 def get_commodity(site, commodity_name):
     try:
         commodity = Commodity.objects.get(site=site, name=commodity_name)

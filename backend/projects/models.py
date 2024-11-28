@@ -57,7 +57,9 @@ class DefCommodity(CommodityTypes):
 
 class Commodity(CommodityTypes):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
-    defcommodity = models.ForeignKey(DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defcommodity = models.ForeignKey(
+        DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages"
+    )
 
 
 class ProcessTypes(models.Model):
@@ -103,7 +105,6 @@ class ProcessCommodityTypes(models.Model):
     ratio = models.FloatField(null=False)
     ratiomin = models.FloatField(null=True)
 
-
     def get_direction_type_label(self):
         return ProcComDir(self.direction).name
 
@@ -112,7 +113,9 @@ class ProcessCommodityTypes(models.Model):
 
 
 class DefProcessCommodity(ProcessCommodityTypes):
-    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
+    def_commodity = models.ForeignKey(
+        DefCommodity, on_delete=models.CASCADE, null=False
+    )
     def_process = models.ForeignKey(DefProcess, on_delete=models.CASCADE, null=False)
 
 
@@ -150,7 +153,9 @@ class StorageType(models.Model):
 
 
 class DefStorage(StorageType):
-    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
+    def_commodity = models.ForeignKey(
+        DefCommodity, on_delete=models.CASCADE, null=False
+    )
 
 
 class Storage(StorageType):
@@ -169,12 +174,16 @@ class DemandType(models.Model):
 
 
 class DefDemand(DemandType):
-    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
+    def_commodity = models.ForeignKey(
+        DefCommodity, on_delete=models.CASCADE, null=False
+    )
 
 
 class Demand(DemandType):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    defdemand = models.ForeignKey(DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defdemand = models.ForeignKey(
+        DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages"
+    )
 
 
 class SupImType(models.Model):
@@ -188,12 +197,16 @@ class SupImType(models.Model):
 
 
 class DefSupIm(SupImType):
-    def_commodity = models.ForeignKey(DefCommodity, on_delete=models.CASCADE, null=False)
+    def_commodity = models.ForeignKey(
+        DefCommodity, on_delete=models.CASCADE, null=False
+    )
 
 
 class SupIm(SupImType):
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    defsupim = models.ForeignKey(DefSupIm, on_delete=models.SET_NULL, null=True, related_name="usages")
+    defsupim = models.ForeignKey(
+        DefSupIm, on_delete=models.SET_NULL, null=True, related_name="usages"
+    )
 
 
 class TransType(IntEnum):
@@ -206,8 +219,18 @@ class TransType(IntEnum):
 
 class Transmission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sitein = models.ForeignKey(Site, on_delete=models.CASCADE, null=False, related_name='incoming_transmissions')
-    siteout = models.ForeignKey(Site, on_delete=models.CASCADE, null=False, related_name='outgoing_transmissions')
+    sitein = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="incoming_transmissions",
+    )
+    siteout = models.ForeignKey(
+        Site,
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="outgoing_transmissions",
+    )
     transmission = models.IntegerField(choices=TransType.choices(), null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     eff = models.FloatField(null=False)

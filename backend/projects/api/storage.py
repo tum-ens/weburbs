@@ -11,14 +11,15 @@ from django.forms.models import model_to_dict
 @login_required
 @require_GET
 def list_def_storage(request):
-    storage = (DefStorage.objects
-               .order_by('name'))
+    storage = DefStorage.objects.order_by("name")
 
-    storageList = [{
-        **model_to_dict(sto, exclude=['id', 'def_commodity']),
-        'commodity': sto.def_commodity.name
-    }
-        for sto in storage]
+    storageList = [
+        {
+            **model_to_dict(sto, exclude=["id", "def_commodity"]),
+            "commodity": sto.def_commodity.name,
+        }
+        for sto in storage
+    ]
     return JsonResponse(storageList, safe=False)
 
 
@@ -28,27 +29,44 @@ def list_storage(request, project_name, site_name):
     project = get_project(request.user, project_name)
     site = get_site(project, site_name)
 
-    storage = (Storage.objects
-               .filter(site=site)
-               .order_by('name'))
+    storage = Storage.objects.filter(site=site).order_by("name")
 
-    proclist = [{
-        **model_to_dict(sto, exclude=['id', 'def_commodity']),
-        'commodity': sto.commodity.name
-    }
-        for sto in storage]
+    proclist = [
+        {
+            **model_to_dict(sto, exclude=["id", "def_commodity"]),
+            "commodity": sto.commodity.name,
+        }
+        for sto in storage
+    ]
     return JsonResponse(proclist, safe=False)
 
 
 def add_def_to_project(def_storage: DefStorage, site: Site, com: Commodity):
-    storage = Storage(site=site, commodity=com, name=def_storage.name, description=def_storage.description,
-                      instcapc=def_storage.instcapc, caploc=def_storage.caploc, capupc=def_storage.capupc,
-                      instcapp=def_storage.instcapp, caplop=def_storage.caplop, capupp=def_storage.capupp,
-                      effin=def_storage.effin, effout=def_storage.effout, invcostp=def_storage.invcostp,
-                      invcostc=def_storage.invcostc, fixcostp=def_storage.fixcostp, fixcostc=def_storage.fixcostc,
-                      varcostp=def_storage.varcostp, varcostc=def_storage.varcostc, wacc=def_storage.wacc,
-                      depreciation=def_storage.depreciation, init=def_storage.init, discharge=def_storage.discharge,
-                      epratio=def_storage.epratio)
+    storage = Storage(
+        site=site,
+        commodity=com,
+        name=def_storage.name,
+        description=def_storage.description,
+        instcapc=def_storage.instcapc,
+        caploc=def_storage.caploc,
+        capupc=def_storage.capupc,
+        instcapp=def_storage.instcapp,
+        caplop=def_storage.caplop,
+        capupp=def_storage.capupp,
+        effin=def_storage.effin,
+        effout=def_storage.effout,
+        invcostp=def_storage.invcostp,
+        invcostc=def_storage.invcostc,
+        fixcostp=def_storage.fixcostp,
+        fixcostc=def_storage.fixcostc,
+        varcostp=def_storage.varcostp,
+        varcostc=def_storage.varcostc,
+        wacc=def_storage.wacc,
+        depreciation=def_storage.depreciation,
+        init=def_storage.init,
+        discharge=def_storage.discharge,
+        epratio=def_storage.epratio,
+    )
     storage.save()
     return storage
 
@@ -77,4 +95,4 @@ def add_def_storage(request, project_name, site_name, def_storage_name):
     storage = add_def_to_project(def_storage, site, com)
     storage.save()
 
-    return JsonResponse({'detail': 'Storage added'})
+    return JsonResponse({"detail": "Storage added"})

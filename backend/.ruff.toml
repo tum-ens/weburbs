@@ -1,0 +1,6 @@
+exclude = [
+    "migrations",     # Ignore migrations directory
+    "node_modules",   # Ignore node_modules
+    "build",          # Ignore build artifacts
+    "__pycache__",    # Ignore Python cache
+]
