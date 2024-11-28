@@ -10,7 +10,7 @@
     </div>
 
     <div v-if="supim?.data" class="col-span-7">
-      <BarDiagramm :data title-x="Steps" title-y="kwH" class="h-80" />
+      <BarDiagramm :data title-x="Steps" title-y="kWh" class="h-80" />
     </div>
     <Skeleton v-else-if="pending" class="w-full" style="height: 10rem" />
     <div v-else class="ml-5 italic">No SupIm configured</div>
