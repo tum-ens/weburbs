@@ -2,7 +2,7 @@
   <Card class="w-80">
     <template #content>
       <ScrollPanel>
-        <PanelMenu :model="items" v-model:expanded-keys="expandedKey">
+        <PanelMenu :model="items" :expanded-keys="expandedKey">
           <template #item="{ item }">
             <a class="flex items-center px-4 py-2 cursor-pointer group">
               <span
@@ -26,18 +26,24 @@
             </a>
           </template>
         </PanelMenu>
+        <div class="flex flex-row pt-3 pl-3 gap-3">
+          <label for="advanced" class="select-none">Advanced mode</label>
+          <ToggleSwitch inputId="advanced" v-model="advanced" />
+        </div>
       </ScrollPanel>
     </template>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import {computed, inject, type Ref, ref, watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectList } from '@/backend/projects'
 
 const route = useRoute()
 const router = useRouter()
+
+const advanced = inject<Ref<boolean>>('advanced')
 
 const expandedKey = ref<{ [key: string]: boolean }>({})
 const { data: projects } = useProjectList()
