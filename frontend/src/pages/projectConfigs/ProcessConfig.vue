@@ -4,10 +4,17 @@
       <div class="flex flex-row justify-between">
         <span>Processes</span>
         <SplitButton
+          v-if="advanced"
           :disabled="!curSite"
           label="Add Preset"
           @click="() => (defaultVisible = true)"
           :model="items"
+        />
+        <Button
+          v-else
+          :disabled="!curSite"
+          label="Add Preset"
+          @click="() => (defaultVisible = true)"
         />
       </div>
     </template>
@@ -55,7 +62,7 @@
     :site_name="curSite"
   />
   <CreateProcessDialog
-    v-if="curSite != null"
+    v-if="advanced && curSite != null"
     v-model:visible="createVisible"
     :site_name="curSite"
   />
@@ -70,7 +77,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import ProcessOverviewComponent from '@/components/ProcessOverviewComponent.vue'
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 import DefaultProcessOverviewDialog from '@/dialogs/DefaultProcessOverviewDialog.vue'
 import { useSites } from '@/backend/sites'
 import CreateProcessDialog from '@/dialogs/CreateProcessDialog.vue'
@@ -79,6 +86,8 @@ import type { Process } from '@/backend/interfaces'
 
 const route = useRoute()
 const router = useRouter()
+
+const advanced = inject('advanced')
 
 const curSite = ref()
 const defaultVisible = ref(false)

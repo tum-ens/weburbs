@@ -2,7 +2,7 @@
   <Card>
     <template #title>Demand</template>
     <template #content>
-      <Accordion>
+      <Accordion v-model:value="curSite" lazy>
         <AccordionPanel
           v-for="site in sites"
           :key="site.name"
@@ -37,11 +37,23 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useSites } from '@/backend/sites'
 import DemandOverview from '@/components/DemandOverview.vue'
+import { ref, watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
 
+const curSite = ref('')
+
 const { data: sites } = useSites(route)
+watch(
+  sites,
+  () => {
+    if (!sites.value || sites.value.length === 0) return
+
+    curSite.value = sites.value[0].name
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped></style>

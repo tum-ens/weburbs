@@ -151,89 +151,100 @@
         <label for="areapercap">Area use per capacity (m^2/MW)</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div class="flex flex-col gap-3">
-        <FloatLabel variant="on">
-          <MultiSelect
-            optionLabel="disp_name"
-            dataKey="name"
-            v-model="inComs"
-            display="chip"
-            :options="coms"
-            filter
-            fluid
-            id="inComs"
-          />
-          <label for="inComs">Incoming commodities</label>
-        </FloatLabel>
-        <div
-          v-for="inCom in inComs"
-          :key="inCom.name"
-          class="grid grid-cols-3 gap-3 items-center"
-        >
-          <span>{{ inCom.disp_name }}</span>
-          <FloatLabel variant="on">
-            <InputNumber
-              id="ratio"
-              fluid
-              v-model="inCom.ratio"
-              :invalid="inCom.ratio === undefined || inCom.ratio < 0"
-            />
-            <label for="ratio">Ratio</label>
-          </FloatLabel>
-          <FloatLabel variant="on">
-            <InputNumber
-              id="ratiomin"
-              fluid
-              v-model="inCom.ratiomin"
-              :invalid="inCom.ratiomin === undefined || inCom.ratiomin < 0"
-            />
-            <label for="ratiomin">Minimum ratio</label>
-          </FloatLabel>
-        </div>
-      </div>
 
-      <div class="flex flex-col gap-3">
-        <FloatLabel variant="on">
-          <MultiSelect
-            optionLabel="disp_name"
-            dataKey="name"
-            v-model="outComs"
-            display="chip"
-            :options="coms"
-            filter
-            fluid
-            id="outComs"
-          />
-          <label for="outComs">Outgoing commodities</label>
-        </FloatLabel>
-        <div
-          v-for="outCom in outComs"
-          :key="outCom.name"
-          class="grid grid-cols-3 gap-3 items-center"
-        >
-          <span>{{ outCom.disp_name }}</span>
-          <FloatLabel variant="on">
-            <InputNumber
-              id="ratio"
-              fluid
-              v-model="outCom.ratio"
-              :invalid="outCom.ratio === undefined || outCom.ratio < 0"
-            />
-            <label for="ratio">Ratio</label>
-          </FloatLabel>
-          <FloatLabel variant="on">
-            <InputNumber
-              id="ratiomin"
-              fluid
-              v-model="outCom.ratiomin"
-              :invalid="outCom.ratiomin === undefined || outCom.ratiomin < 0"
-            />
-            <label for="ratiomin">Minimum ratio</label>
-          </FloatLabel>
-        </div>
-      </div>
-    </div>
+    <Accordion value="1" v-if="advanced">
+      <AccordionPanel pt:root:class="border-0" value="0">
+        <AccordionHeader>Advanced</AccordionHeader>
+        <AccordionContent pt:root:class="pt-1">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-3">
+              <FloatLabel variant="on">
+                <MultiSelect
+                  optionLabel="disp_name"
+                  dataKey="name"
+                  v-model="inComs"
+                  display="chip"
+                  :options="coms"
+                  filter
+                  fluid
+                  id="inComs"
+                />
+                <label for="inComs">Incoming commodities</label>
+              </FloatLabel>
+              <div
+                v-for="inCom in inComs"
+                :key="inCom.name"
+                class="grid grid-cols-3 gap-3 items-center"
+              >
+                <span>{{ inCom.disp_name }}</span>
+                <FloatLabel variant="on">
+                  <InputNumber
+                    id="ratio"
+                    fluid
+                    v-model="inCom.ratio"
+                    :invalid="inCom.ratio === undefined || inCom.ratio < 0"
+                  />
+                  <label for="ratio">Ratio</label>
+                </FloatLabel>
+                <FloatLabel variant="on">
+                  <InputNumber
+                    id="ratiomin"
+                    fluid
+                    v-model="inCom.ratiomin"
+                    :invalid="
+                      inCom.ratiomin === undefined || inCom.ratiomin < 0
+                    "
+                  />
+                  <label for="ratiomin">Minimum ratio</label>
+                </FloatLabel>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3">
+              <FloatLabel variant="on">
+                <MultiSelect
+                  optionLabel="disp_name"
+                  dataKey="name"
+                  v-model="outComs"
+                  display="chip"
+                  :options="coms"
+                  filter
+                  fluid
+                  id="outComs"
+                />
+                <label for="outComs">Outgoing commodities</label>
+              </FloatLabel>
+              <div
+                v-for="outCom in outComs"
+                :key="outCom.name"
+                class="grid grid-cols-3 gap-3 items-center"
+              >
+                <span>{{ outCom.disp_name }}</span>
+                <FloatLabel variant="on">
+                  <InputNumber
+                    id="ratio"
+                    fluid
+                    v-model="outCom.ratio"
+                    :invalid="outCom.ratio === undefined || outCom.ratio < 0"
+                  />
+                  <label for="ratio">Ratio</label>
+                </FloatLabel>
+                <FloatLabel variant="on">
+                  <InputNumber
+                    id="ratiomin"
+                    fluid
+                    v-model="outCom.ratiomin"
+                    :invalid="
+                      outCom.ratiomin === undefined || outCom.ratiomin < 0
+                    "
+                  />
+                  <label for="ratiomin">Minimum ratio</label>
+                </FloatLabel>
+              </div>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionPanel>
+    </Accordion>
     <Message
       v-if="inComs.some(com => com.default) || outComs.some(com => com.default)"
       severity="warn"
@@ -255,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import type { Process, ProcessCommodity } from '@/backend/interfaces'
 import {
@@ -266,6 +277,8 @@ import { useRoute } from 'vue-router'
 
 const toast = useToast()
 const route = useRoute()
+
+const advanced = inject('advanced')
 
 const props = defineProps<{
   submitLabel: string

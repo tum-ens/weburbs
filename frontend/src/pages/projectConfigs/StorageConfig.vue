@@ -4,10 +4,17 @@
       <div class="flex flex-row justify-between">
         <span>Storage</span>
         <SplitButton
+          v-if="advanced"
           :disabled="!curSite"
           label="Add Preset"
           @click="() => (defaultVisible = true)"
           :model="items"
+        />
+        <Button
+          v-else
+          :disabled="!curSite"
+          label="Add Preset"
+          @click="() => (defaultVisible = true)"
         />
       </div>
     </template>
@@ -51,7 +58,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 import { useSites } from '@/backend/sites'
 import DefaultStorageOverviewDialog from '@/dialogs/DefaultStorageOverviewDialog.vue'
 import StorageOverviewComponent from '@/components/StorageOverviewComponent.vue'
@@ -59,6 +66,8 @@ import StorageOverviewComponent from '@/components/StorageOverviewComponent.vue'
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
+
+const advanced = inject('advanced')
 
 const curSite = ref()
 const defaultVisible = ref(false)

@@ -35,8 +35,8 @@
     <Accordion value="1" v-if="advanced">
       <AccordionPanel pt:root:class="border-0" value="0">
         <AccordionHeader>Advanced</AccordionHeader>
-        <AccordionContent>
-          <FloatLabel variant="on" class="mt-1">
+        <AccordionContent pt:root:class="pt-1">
+          <FloatLabel variant="on">
             <InputNumber
               :invalid="areaInvalid"
               class="w-full"

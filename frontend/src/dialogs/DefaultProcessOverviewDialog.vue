@@ -10,15 +10,18 @@
       v-if="def_processes?.length"
       class="grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-3"
     >
-      <Transformer
-        v-for="def_proc in def_processes"
-        :key="def_proc.name"
-        :title="def_proc.name"
-        :description="def_proc.description"
-        :in="def_proc.in.map(proccom => proccom.name)"
-        :out="def_proc.out.map(proccom => proccom.name)"
-        @click="() => add(def_proc.name)"
-      />
+      <template v-for="def_proc in def_processes" :key="def_proc.name">
+        <Transformer
+          v-if="
+            (def_proc.in.length !== 0 && def_proc.out.length !== 0) || advanced
+          "
+          :title="def_proc.name"
+          :description="def_proc.description"
+          :in="def_proc.in.map(proccom => proccom.name)"
+          :out="def_proc.out.map(proccom => proccom.name)"
+          @click="() => add(def_proc.name)"
+        />
+      </template>
     </div>
     <div v-else>
       <span>No default processes defined</span>
@@ -32,9 +35,12 @@ import { useAddDefProcess, useDefProcesses } from '@/backend/processes'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
+import { inject } from 'vue'
 
 const toast = useToast()
 const route = useRoute()
+
+const advanced = inject('advanced')
 
 const visible = defineModel<boolean>('visible', { default: false })
 const props = defineProps<{

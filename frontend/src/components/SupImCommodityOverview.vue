@@ -1,6 +1,6 @@
 <template>
   <divider />
-  <div class="grid grid-cols-8">
+  <div class="grid grid-cols-8 gap-3">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
       <Button @click="query" :disabled="!!supim?.data">Query SupIm</Button>
@@ -12,7 +12,7 @@
     <div v-if="supim?.data" class="col-span-7">
       <BarDiagramm :data title-x="Steps" title-y="kWh" class="h-80" />
     </div>
-    <Skeleton v-else-if="pending" class="w-full" style="height: 10rem" />
+    <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
     <div v-else class="ml-5 italic">No SupIm configured</div>
   </div>
   <QuerySupImDialog :site :commodity v-model="queryVisible" />

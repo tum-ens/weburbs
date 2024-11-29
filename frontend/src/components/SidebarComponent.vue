@@ -2,7 +2,7 @@
   <Card class="w-80">
     <template #content>
       <ScrollPanel>
-        <PanelMenu :model="items" :expanded-keys="expandedKey">
+        <PanelMenu :model="items" v-model:expanded-keys="expandedKey">
           <template #item="{ item }">
             <a class="flex items-center px-4 py-2 cursor-pointer group">
               <span
@@ -90,13 +90,6 @@ const items = computed(() => {
             key: 'proj:' + p.name,
             label: p.name,
             icon: 'pi pi-receipt',
-            command: () =>
-              router.push({
-                name: 'Project',
-                params: {
-                  proj: p.name,
-                },
-              }),
             items: [
               {
                 key: 'ProjectConfig',
@@ -122,18 +115,31 @@ const items = computed(() => {
                     },
                   }),
               },
-              // {
-              //   key: 'ProjectCommodity',
-              //   label: 'Commodities',
-              //   icon: 'pi pi-bolt',
-              //   command: () =>
-              //     router.push({
-              //       name: 'ProjectCommodity',
-              //       params: {
-              //         proj: p.name,
-              //       },
-              //     }),
-              // },
+              {
+                key: 'ProjectDemand',
+                label: 'Demand',
+                icon: 'pi pi-gauge',
+                command: () =>
+                  router.push({
+                    name: 'ProjectDemand',
+                    params: {
+                      proj: p.name,
+                    },
+                  }),
+              },
+              {
+                key: 'ProjectSupIm',
+                label: 'SupIm',
+                icon: 'pi pi-sun',
+                advanced: true,
+                command: () =>
+                  router.push({
+                    name: 'ProjectSupIm',
+                    params: {
+                      proj: p.name,
+                    },
+                  }),
+              },
               {
                 key: 'ProjectProcess',
                 label: 'Processes',
@@ -159,78 +165,6 @@ const items = computed(() => {
                   }),
               },
               {
-                key: 'ProjectDemand',
-                label: 'Demand',
-                icon: 'pi pi-gauge',
-                command: () =>
-                  router.push({
-                    name: 'ProjectDemand',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectSupIm',
-                label: 'SupIm',
-                icon: 'pi pi-sun',
-                command: () =>
-                  router.push({
-                    name: 'ProjectSupIm',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              // {
-              //   key: 'ProjectTransmission',
-              //   label: 'Transmission',
-              //   icon: 'pi pi-wifi',
-              //   command: () =>
-              //     router.push({
-              //       name: 'ProjectTransmission',
-              //       params: {
-              //         proj: p.name,
-              //       },
-              //     }),
-              // },
-              // {
-              //   key: 'ProjectDSM',
-              //   label: 'DSM',
-              //   icon: 'pi pi-sliders-v',
-              //   command: () =>
-              //     router.push({
-              //       name: 'ProjectDSM',
-              //       params: {
-              //         proj: p.name,
-              //       },
-              //     }),
-              // },
-              // {
-              //   key: 'ProjectBuySell',
-              //   label: 'BuySellPrice',
-              //   icon: 'pi pi-dollar',
-              //   command: () =>
-              //     router.push({
-              //       name: 'ProjectBuySell',
-              //       params: {
-              //         proj: p.name,
-              //       },
-              //     }),
-              // },
-              // {
-              //   key: 'ProjectTimeVarEff',
-              //   label: 'TimeVarEff',
-              //   icon: 'pi pi-hourglass',
-              //   command: () =>
-              //     router.push({
-              //       name: 'ProjectTimeVarEff',
-              //       params: {
-              //         proj: p.name,
-              //       },
-              //     }),
-              // },
-              {
                 key: 'ProjectSimulation',
                 label: 'Simulation',
                 icon: 'pi pi-play-circle',
@@ -242,7 +176,75 @@ const items = computed(() => {
                     },
                   }),
               },
-            ],
+              {
+                key: 'Advanced',
+                label: 'Advanced',
+                advanced: true,
+                icon: 'pi pi-sparkles',
+                items: [
+                  {
+                    key: 'ProjectCommodity',
+                    label: 'Commodities',
+                    icon: 'pi pi-bolt',
+                    command: () =>
+                      router.push({
+                        name: 'ProjectCommodity',
+                        params: {
+                          proj: p.name,
+                        },
+                      }),
+                  },
+                  {
+                    key: 'ProjectTransmission',
+                    label: 'Transmission',
+                    icon: 'pi pi-wifi',
+                    command: () =>
+                      router.push({
+                        name: 'ProjectTransmission',
+                        params: {
+                          proj: p.name,
+                        },
+                      }),
+                  },
+                  {
+                    key: 'ProjectDSM',
+                    label: 'DSM',
+                    icon: 'pi pi-sliders-v',
+                    command: () =>
+                      router.push({
+                        name: 'ProjectDSM',
+                        params: {
+                          proj: p.name,
+                        },
+                      }),
+                  },
+                  {
+                    key: 'ProjectBuySell',
+                    label: 'BuySellPrice',
+                    icon: 'pi pi-dollar',
+                    command: () =>
+                      router.push({
+                        name: 'ProjectBuySell',
+                        params: {
+                          proj: p.name,
+                        },
+                      }),
+                  },
+                  {
+                    key: 'ProjectTimeVarEff',
+                    label: 'TimeVarEff',
+                    icon: 'pi pi-hourglass',
+                    command: () =>
+                      router.push({
+                        name: 'ProjectTimeVarEff',
+                        params: {
+                          proj: p.name,
+                        },
+                      }),
+                  },
+                ],
+              },
+            ].filter(item => !item.advanced || advanced?.value),
           }
         }),
       ],
