@@ -13,7 +13,7 @@ import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 
 axios.defaults.withCredentials = true
-fetch('config.json')
+fetch('/config.json')
   .then(response => response.json())
   .then(data => {
     axios.defaults.baseURL = data.VUE_APP_API_URL

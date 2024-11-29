@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full h-14 p-3 bg-surface-0 flex flex-row justify-between items-center"
+    class="w-full h-14 p-3 bg-surface-0 dark:bg-surface-800 flex flex-row justify-between items-center"
   >
     <Button
       class="invisible"
