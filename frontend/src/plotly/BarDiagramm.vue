@@ -14,12 +14,14 @@ const props = defineProps<{
   title?: string
   titleX: string
   titleY: string
+  bargap?: number
+  bargroupgap?: number
 }>()
 
 function layout(): Partial<Plotly.Layout> {
   return {
-    bargap: 0,
-    bargroupgap: 0,
+    bargap: props.bargap || 0,
+    bargroupgap: props.bargroupgap || 0,
     barmode: 'stack',
     title: props.title
       ? {

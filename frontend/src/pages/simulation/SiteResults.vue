@@ -9,6 +9,7 @@
             :data="props.demand[com.name]"
             title-x="steps"
             title-y="kwh"
+            :bargroupgap="0.1"
           />
         </div>
         <div>
@@ -17,6 +18,7 @@
             :data="props.created[com.name]"
             title-x="steps"
             title-y="kwh"
+            :bargroupgap="0.1"
           />
         </div>
         <div v-if="props.storageLevel">
@@ -25,6 +27,7 @@
             :data="props.storageLevel[com.name]"
             title-x="steps"
             title-y="kwh"
+            :bargroupgap="0.1"
           />
         </div>
       </div>

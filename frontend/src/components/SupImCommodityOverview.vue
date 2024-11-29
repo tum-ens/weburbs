@@ -7,10 +7,26 @@
       <Button @click="del" severity="danger" :disabled="!supim?.data">
         Delete SupIm
       </Button>
+      <FloatLabel variant="on">
+        <Select
+          fluid
+          id="groupoptions"
+          :options="groupOptions"
+          optionLabel="name"
+          v-model="groupOption"
+        />
+        <label for="groupoptions">Group values</label>
+      </FloatLabel>
     </div>
 
     <div v-if="supim?.data" class="col-span-7">
-      <BarDiagramm :data title-x="Steps" title-y="kWh" class="h-80" />
+      <BarDiagramm
+        :data
+        title-x="Steps"
+        title-y="kWh"
+        class="h-80"
+        :bargroupgap="0.1"
+      />
     </div>
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
     <div v-else class="ml-5 italic">No SupIm configured</div>
@@ -27,6 +43,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import BarDiagramm from '@/plotly/BarDiagramm.vue'
 import QuerySupImDialog from '@/dialogs/QuerySupImDialog.vue'
+import { chunkAdd, groupOptions } from '@/helper/diagrams'
 
 const route = useRoute()
 const toast = useToast()
@@ -37,6 +54,8 @@ const props = defineProps<{
   site: Site
   commodity: Commodity
 }>()
+
+const groupOption = ref(groupOptions[0])
 
 const { data: supim, isPending: pending } = useGetSupIm(
   route,
@@ -54,7 +73,8 @@ const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
   return [
     {
       name: props.commodity.name,
-      y: supim.value.data,
+      y: chunkAdd(supim.value.data, groupOption.value.groupSize),
+      x: Array.from({ length: groupOption.value.groups }, (_, i) => i + 1),
       type: 'bar',
       marker: {
         color: props.commodity.name.includes('Solar') ? 'gold' : undefined,

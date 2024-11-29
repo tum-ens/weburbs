@@ -68,7 +68,6 @@ def queryDemand(request, project_name, site_name, com_name):
 
 
 elec_def = [
-    0.000,
     4.877,
     4.647,
     4.36,

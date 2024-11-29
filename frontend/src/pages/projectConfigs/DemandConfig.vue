@@ -33,14 +33,14 @@
           v-else
           @click="
             router.push({
-              name: 'ProjectSupIm',
+              name: 'ProjectProcess',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          SupIm >>
+          Processes >>
         </Button>
       </div></template
     >

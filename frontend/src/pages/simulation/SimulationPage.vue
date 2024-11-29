@@ -66,6 +66,7 @@ import { ref } from 'vue'
 import { useSites } from '@/backend/sites'
 import Plotly from 'plotly.js-dist'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
+import { chunkAdd, chunkAvg, groupOptions } from '@/helper/diagrams'
 
 const route = useRoute()
 const toast = useToast()
@@ -115,7 +116,14 @@ function trigger() {
           demand.value[site][com] = [
             {
               name: com,
-              y: data.results[site][com].demand,
+              y: chunkAdd(
+                data.results[site][com].demand,
+                groupOptions[0].groupSize,
+              ),
+              x: Array.from(
+                { length: groupOptions[0].groupSize },
+                (_, i) => i + 1,
+              ),
               type: 'bar',
             },
           ]
@@ -123,7 +131,14 @@ function trigger() {
           for (const proc in data.results[site][com].created) {
             created.value[site][com].push({
               name: proc,
-              y: data.results[site][com].created[proc],
+              y: chunkAdd(
+                data.results[site][com].created[proc],
+                groupOptions[0].groupSize,
+              ),
+              x: Array.from(
+                { length: groupOptions[0].groupSize },
+                (_, i) => i + 1,
+              ),
               type: 'bar',
             })
           }
@@ -131,7 +146,14 @@ function trigger() {
             storageLevel.value[site][com] = [
               {
                 name: com,
-                y: data.results[site][com].storage.Level,
+                y: chunkAvg(
+                  data.results[site][com].storage.Level,
+                  groupOptions[0].groupSize,
+                ),
+                x: Array.from(
+                  { length: groupOptions[0].groupSize },
+                  (_, i) => i + 1,
+                ),
                 type: 'scatter',
               },
             ]
