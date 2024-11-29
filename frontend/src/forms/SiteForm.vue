@@ -10,15 +10,6 @@
       <label for="name">Name</label>
     </FloatLabel>
     <FloatLabel variant="on">
-      <InputNumber
-        :invalid="areaInvalid"
-        class="w-full"
-        id="area"
-        v-model="area"
-      />
-      <label for="area">Area</label>
-    </FloatLabel>
-    <FloatLabel variant="on">
       <InputMask
         :auto-clear="false"
         :invalid="latInvalid"
@@ -40,17 +31,39 @@
       />
       <label for="lon">Longitude</label>
     </FloatLabel>
+
+    <Accordion value="1" v-if="advanced">
+      <AccordionPanel pt:root:class="border-0" value="0">
+        <AccordionHeader>Advanced</AccordionHeader>
+        <AccordionContent>
+          <FloatLabel variant="on" class="mt-1">
+            <InputNumber
+              :invalid="areaInvalid"
+              class="w-full"
+              id="area"
+              v-model="area"
+              v-tooltip.bottom="
+                'Gives the total usable area at a site. A constraint is set for all processes that take up a given area per capacity (e.g. Photovoltaics). If no constraint is to be set, leave empty.'
+              "
+            />
+            <label for="area">Area</label>
+          </FloatLabel>
+        </AccordionContent>
+      </AccordionPanel>
+    </Accordion>
+
     <Button @click="submit">{{ !!site ? 'Update' : 'Create' }}</Button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Site } from '@/backend/interfaces'
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
 import { useUpdateSite } from '@/backend/sites'
+import { defaultSite } from '@/backend/defaults'
 
 const toast = useToast()
 const route = useRoute()
@@ -63,10 +76,16 @@ const emit = defineEmits<{
   deleteMarker: []
 }>()
 
-const name = ref(props.site?.name || '')
-const area = ref(props.site?.area || undefined)
-const lat = ref(props.site ? decimalToDms(props.site.lat, false) : '')
-const lon = ref(props.site ? decimalToDms(props.site.lon, true) : '')
+const advanced = inject('advanced')
+
+const name = ref(props.site?.name || defaultSite.name)
+const area = ref(props.site?.area || defaultSite.area)
+const lat = ref(
+  props.site ? decimalToDms(props.site.lat, false) : defaultSite.lat,
+)
+const lon = ref(
+  props.site ? decimalToDms(props.site.lon, true) : defaultSite.lon,
+)
 
 const nameInvalid = ref(false)
 const areaInvalid = ref(false)
@@ -93,6 +112,7 @@ function mapClick(event: L.LeafletMouseEvent) {
   lat.value = decimalToDms(event.latlng.lat, false)
   lon.value = decimalToDms(event.latlng.lng, true)
 }
+
 defineExpose({ mapClick })
 
 const { mutate: updateSite } = useUpdateSite(route)
@@ -104,12 +124,6 @@ function submit() {
     nameInvalid.value = true
   } else {
     nameInvalid.value = false
-  }
-  if (!area.value || area.value < 0) {
-    error = true
-    areaInvalid.value = true
-  } else {
-    areaInvalid.value = false
   }
   if (!lon.value || !lon.value.match(lonReg)) {
     error = true

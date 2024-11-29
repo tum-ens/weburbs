@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, inject, type Ref, ref, watch} from 'vue'
+import { computed, inject, type Ref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectList } from '@/backend/projects'
 

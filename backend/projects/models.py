@@ -18,7 +18,7 @@ class Site(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=255, null=False)
-    area = models.IntegerField(null=False)
+    area = models.IntegerField(null=True)
     lon = models.DecimalField(null=False, decimal_places=9, max_digits=12)
     lat = models.DecimalField(null=False, decimal_places=9, max_digits=12)
 

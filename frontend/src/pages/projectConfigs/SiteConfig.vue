@@ -25,7 +25,7 @@
               />
             </AccordionContent>
           </AccordionPanel>
-          <AccordionPanel value="__new">
+          <AccordionPanel value="__new" v-if="sites.length === 0 || advanced">
             <AccordionHeader>New Site</AccordionHeader>
             <AccordionContent>
               <SiteForm
@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import SiteForm from '@/forms/SiteForm.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { computed, ref } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { LMap, LMarker, LTileLayer } from '@vue-leaflet/vue-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useSites } from '@/backend/sites'
@@ -97,10 +97,21 @@ import { useSites } from '@/backend/sites'
 const route = useRoute()
 const router = useRouter()
 
+const advanced = inject('advanced')
+
 const { data: sites } = useSites(route)
 
 const curSite = ref('__new')
 const form = ref<InstanceType<typeof SiteForm>>()
+watch(
+  sites,
+  () => {
+    if (!sites.value || sites.value.length === 0) return
+
+    curSite.value = sites.value[0].name
+  },
+  { immediate: true },
+)
 
 const marker = ref<[number, number] | undefined>(undefined)
 const markers = computed<[number, number][]>(() => {

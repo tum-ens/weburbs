@@ -13,6 +13,7 @@ import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
 
 axios.defaults.withCredentials = true
+
 fetch('/config.json')
   .then(response => response.json())
   .then(data => {

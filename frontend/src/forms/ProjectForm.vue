@@ -14,8 +14,7 @@
       <label for="description">Description</label>
     </FloatLabel>
 
-    <Accordion value="1">
-      <!-- @vue-ignore -->
+    <Accordion value="1" v-if="advanced">
       <AccordionPanel pt:root:class="border-0" value="0">
         <AccordionHeader>Advanced</AccordionHeader>
         <AccordionContent>
@@ -70,11 +69,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { inject, ref } from 'vue'
 import type { Project } from '@/backend/interfaces'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
+
+const advanced = inject('advanced')
 
 const props = defineProps<{
   submitLabel: string
