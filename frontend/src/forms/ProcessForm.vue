@@ -22,7 +22,7 @@
           fluid
           v-model="instcap"
         />
-        <label for="instcap">Installed capacity (MW)</label>
+        <label for="instcap">Installed capacity (kW)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -34,7 +34,7 @@
           fluid
           v-model="caplo"
         />
-        <label for="caplo">Minimum capacity (MW)</label>
+        <label for="caplo">Minimum capacity (kW)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -46,7 +46,7 @@
           fluid
           v-model="capup"
         />
-        <label for="capup">Maximum capacity (MW)</label>
+        <label for="capup">Maximum capacity (kW)</label>
       </FloatLabel>
     </div>
     <div class="grid grid-cols-2 gap-3">
@@ -86,31 +86,31 @@
           fluid
           v-model="invcost"
         />
-        <label for="invcost">Investment cost (€/MW)</label>
+        <label for="invcost">Investment cost (€/kW)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('fixcost')"
           v-tooltip.bottom="
-            'Operation independent costs for existing and new capacities per MW throughput power.'
+            'Operation independent costs for existing and new capacities per kW throughput power.'
           "
           id="fixcost"
           fluid
           v-model="fixcost"
         />
-        <label for="fixcost">Annual fix cost (€/MW/a)</label>
+        <label for="fixcost">Annual fix cost (€/kW/a)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('varcost')"
           v-tooltip.bottom="
-            'Variable costs per throughput energy unit (MWh) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.'
+            'Variable costs per throughput energy unit (kWh) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.'
           "
           id="varcost"
           fluid
           v-model="varcost"
         />
-        <label for="varcost">Variable costs (€/MWh)</label>
+        <label for="varcost">Variable costs (€/kWh)</label>
       </FloatLabel>
     </div>
     <div class="grid grid-cols-3 gap-3">
@@ -148,7 +148,7 @@
           fluid
           v-model="areapercap"
         />
-        <label for="areapercap">Area use per capacity (m^2/MW)</label>
+        <label for="areapercap">Area use per capacity (m^2/kW)</label>
       </FloatLabel>
     </div>
 
