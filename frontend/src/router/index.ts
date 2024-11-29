@@ -27,125 +27,95 @@ const router = createRouter({
       name: 'Home',
       path: '/home',
       component: () => import('@/pages/HomePage.vue'),
+    },
+    {
+      name: 'CreateProject',
+      path: '/createproj',
+      component: () => import('@/pages/projectConfigs/ProjectCreatePage.vue'),
+    },
+    {
+      name: 'Project',
+      path: '/project/:proj',
+      component: () => import('@/pages/ProjectPage.vue'),
       children: [
         {
-          name: 'ProjectList',
-          path: 'project',
-          component: () => import('@/pages/ProjectListPage.vue'),
-        },
-        {
-          name: 'CreateProject',
-          path: 'project/create',
-          meta: {
-            parents: ['ProjectList'],
-          },
-          component: () =>
-            import('@/pages/projectConfigs/ProjectCreatePage.vue'),
-        },
-        {
-          name: 'Project',
-          path: 'project/:proj',
-          meta: {
-            parents: ['ProjectList'],
-          },
-          component: () => import('@/pages/projectConfigs/ProjectPage.vue'),
-        },
-        {
           name: 'ProjectConfig',
-          path: 'project/:proj/config',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'config',
           component: () => import('@/pages/projectConfigs/ProjectConfig.vue'),
         },
         {
           name: 'ProjectSites',
-          path: 'project/:proj/sites',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'sites',
           component: () => import('@/pages/projectConfigs/SiteConfig.vue'),
         },
         {
           name: 'ProjectProcess',
-          path: 'project/:proj/process',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'process',
           component: () => import('@/pages/projectConfigs/ProcessConfig.vue'),
         },
         {
           name: 'ProjectCommodity',
-          path: 'project/:proj/commodity',
+          path: 'commodity',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () => import('@/pages/projectConfigs/CommodityConfig.vue'),
         },
         {
           name: 'ProjectTransmission',
-          path: 'project/:proj/transmission',
+          path: 'transmission',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () =>
             import('@/pages/projectConfigs/TransmissionConfig.vue'),
         },
         {
           name: 'ProjectStorage',
-          path: 'project/:proj/storage',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'storage',
           component: () => import('@/pages/projectConfigs/StorageConfig.vue'),
         },
         {
           name: 'ProjectDSM',
-          path: 'project/:proj/dsm',
+          path: 'dsm',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () => import('@/pages/projectConfigs/DSMConfig.vue'),
         },
         {
           name: 'ProjectDemand',
-          path: 'project/:proj/demand',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'demand',
           component: () => import('@/pages/projectConfigs/DemandConfig.vue'),
         },
         {
           name: 'ProjectSupIm',
-          path: 'project/:proj/supim',
-          meta: {
-            parents: ['ProjectList'],
-          },
+          path: 'supim',
           component: () => import('@/pages/projectConfigs/SupImConfig.vue'),
         },
         {
           name: 'ProjectBuySell',
-          path: 'project/:proj/buysell',
+          path: 'buysell',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () =>
             import('@/pages/projectConfigs/BuySellPriceConfig.vue'),
         },
         {
           name: 'ProjectTimeVarEff',
-          path: 'project/:proj/timevareff',
+          path: 'timevareff',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () =>
             import('@/pages/projectConfigs/TimeVarEffConfig.vue'),
         },
         {
           name: 'ProjectSimulation',
-          path: 'project/:proj/simulation',
+          path: 'simulation',
           meta: {
-            parents: ['ProjectList'],
+            parents: ['advanced'],
           },
           component: () => import('@/pages/simulation/SimulationPage.vue'),
         },

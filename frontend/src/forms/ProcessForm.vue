@@ -3,6 +3,7 @@
     <FloatLabel variant="on">
       <InputText
         :invalid="invalids.includes('name')"
+        :disabled="!advanced"
         fluid
         id="name"
         v-model="name"
@@ -10,7 +11,12 @@
       <label for="name">Name</label>
     </FloatLabel>
     <FloatLabel variant="on">
-      <Textarea fluid id="description" v-model="description" />
+      <Textarea
+        fluid
+        id="description"
+        v-model="description"
+        :disabled="!advanced"
+      />
       <label for="description">Description</label>
     </FloatLabel>
     <div class="grid grid-cols-3 gap-3">

@@ -21,6 +21,7 @@
                   'ml-2',
                   { 'font-semibold': expandedKey[<string>item.key] },
                 ]"
+                class="select-none"
                 >{{ item.label }}</span
               >
             </a>
@@ -56,8 +57,7 @@ watch(
       for (const parent of <string[]>route.meta.parents) {
         expandedKey.value[parent] = true
       }
-    if (route.params.proj)
-      expandedKey.value['proj:' + <string>route.params.proj] = true
+    if (route.params.proj) expandedKey.value['project'] = true
   },
   { immediate: true },
 )
@@ -71,183 +71,131 @@ const items = computed(() => {
       command: () => router.push({ name: 'Home' }),
     },
     {
-      key: 'ProjectList',
-      label: 'Projects',
-      icon: 'pi pi-folder',
-      command: () => router.push({ name: 'ProjectList' }),
+      key: 'project',
+      label: <string>route.params.proj || 'Project',
+      disabled: !route.params.proj,
+      icon: 'pi pi-receipt',
       items: [
         {
-          key: 'CreateProject',
-          label: 'Create',
-          icon: 'pi pi-pencil',
+          key: 'ProjectConfig',
+          label: 'Global',
+          icon: 'pi pi-globe',
           command: () =>
             router.push({
-              name: 'CreateProject',
+              name: 'ProjectConfig',
             }),
         },
-        ...(projects.value || []).map(p => {
-          return {
-            key: 'proj:' + p.name,
-            label: p.name,
-            icon: 'pi pi-receipt',
-            items: [
-              {
-                key: 'ProjectConfig',
-                label: 'Global',
-                icon: 'pi pi-globe',
-                command: () =>
-                  router.push({
-                    name: 'ProjectConfig',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectSites',
-                label: 'Sites',
-                icon: 'pi pi-map-marker',
-                command: () =>
-                  router.push({
-                    name: 'ProjectSites',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectDemand',
-                label: 'Demand',
-                icon: 'pi pi-gauge',
-                command: () =>
-                  router.push({
-                    name: 'ProjectDemand',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectSupIm',
-                label: 'SupIm',
-                icon: 'pi pi-sun',
-                advanced: true,
-                command: () =>
-                  router.push({
-                    name: 'ProjectSupIm',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectProcess',
-                label: 'Processes',
-                icon: 'pi pi-hammer',
-                command: () =>
-                  router.push({
-                    name: 'ProjectProcess',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectStorage',
-                label: 'Storage',
-                icon: 'pi pi-warehouse',
-                command: () =>
-                  router.push({
-                    name: 'ProjectStorage',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'ProjectSimulation',
-                label: 'Simulation',
-                icon: 'pi pi-play-circle',
-                command: () =>
-                  router.push({
-                    name: 'ProjectSimulation',
-                    params: {
-                      proj: p.name,
-                    },
-                  }),
-              },
-              {
-                key: 'Advanced',
-                label: 'Advanced',
-                advanced: true,
-                icon: 'pi pi-sparkles',
-                items: [
-                  {
-                    key: 'ProjectCommodity',
-                    label: 'Commodities',
-                    icon: 'pi pi-bolt',
-                    command: () =>
-                      router.push({
-                        name: 'ProjectCommodity',
-                        params: {
-                          proj: p.name,
-                        },
-                      }),
-                  },
-                  {
-                    key: 'ProjectTransmission',
-                    label: 'Transmission',
-                    icon: 'pi pi-wifi',
-                    command: () =>
-                      router.push({
-                        name: 'ProjectTransmission',
-                        params: {
-                          proj: p.name,
-                        },
-                      }),
-                  },
-                  {
-                    key: 'ProjectDSM',
-                    label: 'DSM',
-                    icon: 'pi pi-sliders-v',
-                    command: () =>
-                      router.push({
-                        name: 'ProjectDSM',
-                        params: {
-                          proj: p.name,
-                        },
-                      }),
-                  },
-                  {
-                    key: 'ProjectBuySell',
-                    label: 'BuySellPrice',
-                    icon: 'pi pi-dollar',
-                    command: () =>
-                      router.push({
-                        name: 'ProjectBuySell',
-                        params: {
-                          proj: p.name,
-                        },
-                      }),
-                  },
-                  {
-                    key: 'ProjectTimeVarEff',
-                    label: 'TimeVarEff',
-                    icon: 'pi pi-hourglass',
-                    command: () =>
-                      router.push({
-                        name: 'ProjectTimeVarEff',
-                        params: {
-                          proj: p.name,
-                        },
-                      }),
-                  },
-                ],
-              },
-            ].filter(item => !item.advanced || advanced?.value),
-          }
-        }),
-      ],
+        {
+          key: 'ProjectSites',
+          label: 'Sites',
+          icon: 'pi pi-map-marker',
+          command: () =>
+            router.push({
+              name: 'ProjectSites',
+            }),
+        },
+        {
+          key: 'ProjectDemand',
+          label: 'Demand',
+          icon: 'pi pi-gauge',
+          command: () =>
+            router.push({
+              name: 'ProjectDemand',
+            }),
+        },
+        {
+          key: 'ProjectSupIm',
+          label: 'SupIm',
+          icon: 'pi pi-sun',
+          advanced: true,
+          command: () =>
+            router.push({
+              name: 'ProjectSupIm',
+            }),
+        },
+        {
+          key: 'ProjectProcess',
+          label: 'Processes',
+          icon: 'pi pi-hammer',
+          command: () =>
+            router.push({
+              name: 'ProjectProcess',
+            }),
+        },
+        {
+          key: 'ProjectStorage',
+          label: 'Storage',
+          icon: 'pi pi-warehouse',
+          command: () =>
+            router.push({
+              name: 'ProjectStorage',
+            }),
+        },
+        {
+          key: 'ProjectSimulation',
+          label: 'Simulation',
+          icon: 'pi pi-play-circle',
+          command: () =>
+            router.push({
+              name: 'ProjectSimulation',
+            }),
+        },
+        {
+          key: 'advanced',
+          label: 'Advanced',
+          advanced: true,
+          icon: 'pi pi-sparkles',
+          items: [
+            {
+              key: 'ProjectCommodity',
+              label: 'Commodities',
+              icon: 'pi pi-bolt',
+              command: () =>
+                router.push({
+                  name: 'ProjectCommodity',
+                }),
+            },
+            {
+              key: 'ProjectTransmission',
+              label: 'Transmission',
+              icon: 'pi pi-wifi',
+              command: () =>
+                router.push({
+                  name: 'ProjectTransmission',
+                }),
+            },
+            {
+              key: 'ProjectDSM',
+              label: 'DSM',
+              icon: 'pi pi-sliders-v',
+              command: () =>
+                router.push({
+                  name: 'ProjectDSM',
+                }),
+            },
+            {
+              key: 'ProjectBuySell',
+              label: 'BuySellPrice',
+              icon: 'pi pi-dollar',
+              command: () =>
+                router.push({
+                  name: 'ProjectBuySell',
+                }),
+            },
+            {
+              key: 'ProjectTimeVarEff',
+              label: 'TimeVarEff',
+              icon: 'pi pi-hourglass',
+              command: () =>
+                router.push({
+                  name: 'ProjectTimeVarEff',
+                }),
+            },
+          ],
+        },
+      ].filter(
+        item => (!item.advanced || advanced?.value) && route.params.proj,
+      ),
     },
   ]
 })

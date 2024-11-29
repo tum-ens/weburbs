@@ -11,7 +11,10 @@
         <span v-for="i in props.in" :key="i">{{ i }}</span>
       </div>
       <div class="flex flex-col justify-center min-h-20">
-        <span class="pi pi-arrow-right"></span>
+        <span
+          v-if="props.in.length > 0 || props.out.length > 0"
+          class="pi pi-arrow-right"
+        ></span>
       </div>
       <div class="flex flex-col justify-center">
         <span v-for="o in props.out" :key="o">{{ o }}</span>
