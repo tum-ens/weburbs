@@ -10,6 +10,15 @@
       :description="sto.description"
       :in="[sto.commodity]"
       :out="[sto.commodity]"
+      @click="
+        () =>
+          toast.add({
+            severity: 'info',
+            summary: 'TODO',
+            detail: 'Not yet implemented',
+            life: 3000,
+          })
+      "
     />
   </div>
   <div v-else>
@@ -22,8 +31,10 @@ import Transformer from '@/components/TransformerComponent.vue'
 import { useRoute } from 'vue-router'
 import type { Site } from '@/backend/interfaces'
 import { useStorage } from '@/backend/storage'
+import { useToast } from 'primevue/usetoast'
 
 const route = useRoute()
+const toast = useToast()
 
 const props = defineProps<{
   site: Site

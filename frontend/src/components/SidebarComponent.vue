@@ -2,7 +2,7 @@
   <Card class="w-80">
     <template #content>
       <ScrollPanel>
-        <PanelMenu :model="items" v-model:expanded-keys="expandedKey">
+        <PanelMenu :model="items" :expanded-keys="expandedKey">
           <template #item="{ item }">
             <a class="flex items-center px-4 py-2 cursor-pointer group">
               <span
@@ -145,6 +145,15 @@ const items = computed(() => {
           label: 'Advanced',
           advanced: true,
           icon: 'pi pi-sparkles',
+          command: () => {
+            const newKeys = { ...expandedKey.value }
+            if (newKeys['advanced']) {
+              delete newKeys['advanced']
+            } else {
+              newKeys['advanced'] = true
+            }
+            expandedKey.value = newKeys
+          },
           items: [
             {
               key: 'ProjectCommodity',
