@@ -32,18 +32,32 @@
         </AccordionPanel>
       </Accordion>
 
-      <div class="mt-3 flex justify-end">
+      <div class="mt-3 flex justify-end gap-3">
         <Button
+          v-if="advanced"
+          severity="info"
           @click="
             router.push({
-              name: 'ProjectDemand',
+              name: 'ProjectTransmission',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          Demand >>
+          Transmission >>
+        </Button>
+        <Button
+          @click="
+            router.push({
+              name: 'ProjectSimulation',
+              params: {
+                proj: route.params.proj,
+              },
+            })
+          "
+        >
+          Simulation >>
         </Button>
       </div>
     </template>

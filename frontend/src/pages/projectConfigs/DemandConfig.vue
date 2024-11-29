@@ -17,6 +17,20 @@
 
       <div class="mt-3 flex justify-end">
         <Button
+          v-if="advanced"
+          @click="
+            router.push({
+              name: 'ProjectProcess',
+              params: {
+                proj: route.params.proj,
+              },
+            })
+          "
+        >
+          Processes >>
+        </Button>
+        <Button
+          v-else
           @click="
             router.push({
               name: 'ProjectSupIm',
@@ -37,10 +51,12 @@
 import { useRoute, useRouter } from 'vue-router'
 import { useSites } from '@/backend/sites'
 import DemandOverview from '@/components/DemandOverview.vue'
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
+
+const advanced = inject('advanced')
 
 const curSite = ref('')
 

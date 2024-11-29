@@ -72,14 +72,14 @@
           :disabled="sites.length === 0"
           @click="
             router.push({
-              name: 'ProjectProcess',
+              name: 'ProjectDemand',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          Processes >>
+          Demand >>
         </Button>
       </div>
     </template>

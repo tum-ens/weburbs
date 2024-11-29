@@ -17,29 +17,16 @@
 
       <div class="mt-3 flex justify-end gap-3">
         <Button
-          severity="info"
           @click="
             router.push({
-              name: 'ProjectTransmission',
+              name: 'ProjectProcess',
               params: {
                 proj: route.params.proj,
               },
             })
           "
         >
-          Transmission >>
-        </Button>
-        <Button
-          @click="
-            router.push({
-              name: 'ProjectSimulation',
-              params: {
-                proj: route.params.proj,
-              },
-            })
-          "
-        >
-          Simulation >>
+          Processes >>
         </Button>
       </div>
     </template>
