@@ -117,7 +117,7 @@ watch(
 
 async function cregister() {
   loading.value = true
-  register(csrf.value, username.value, email.value, password.value)
+  await register(csrf.value, username.value, email.value, password.value)
     .then(() => {
       toast.add({
         summary: 'Success',
