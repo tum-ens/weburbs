@@ -5,7 +5,7 @@ services:
     environment:
       - SECRET_KEY=change_me
       - DJANGO_ALLOWED_HOSTS=localhost
-      - CSRF_TRUSTED_ORIGINS=http://localhost:9000
+      - ORIGINS=http://localhost:9000
       - RN_KEY=$RN_KEY
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=urbs
