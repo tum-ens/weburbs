@@ -2,14 +2,14 @@
 
 from django.db import migrations
 
-from projects.models import ComType, ProcComDir
+from projects.models import ComType, ProcComDir, AutoQuery
 
 
 def load_defaults(apps, schema_editor):
     def_commodity = apps.get_model('projects', 'DefCommodity')
-    solar = def_commodity(name='Solar', type=ComType.SupIm)
+    solar = def_commodity(name='Solar', type=ComType.SupIm, autoquery=AutoQuery.Solar)
     solar.save()
-    wind = def_commodity(name='Wind', type=ComType.SupIm)
+    wind = def_commodity(name='Wind', type=ComType.SupIm, autoquery=AutoQuery.Wind)
     wind.save()
     hydro = def_commodity(name='Hydro', type=ComType.SupIm)
     hydro.save()

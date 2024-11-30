@@ -58,61 +58,67 @@ def querySupIm(request, project_name, site_name, com_name, type):
         return HttpResponse("SupIm already exists for this commodity", status=409)
 
     if type == "Solar":
-        response = requests.get(
-            "https://www.renewables.ninja/api/data/pv",
-            {
-                "lat": site.lat,
-                "lon": site.lon,
-                "date_from": "2023-01-01",
-                "date_to": "2023-12-31",
-                "dataset": "merra2",
-                "system_loss": 0.1,
-                "tracking": 0,
-                "azim": 180,
-                "format": "json",
-                "capacity": 1,
-                "tilt": 35,
-            },
-            headers={"Authorization": f"Token {api_key}"},
-        )
-        if response.status_code != 200:
-            return HttpResponse("Data query failed", status="400")
-
-        supim = SupIm(
-            name="Solar_Example",
-            description="Simple example",
-            commodity=commodity,
-            steps=[entry["electricity"] for entry in response.json()["data"].values()],
-        )
-        supim.save()
+        querySolar(site, commodity)
     elif type == "Wind":
-        response = requests.get(
-            "https://www.renewables.ninja/api/data/wind",
-            {
-                "lat": site.lat,
-                "lon": site.lon,
-                "date_from": "2023-01-01",
-                "date_to": "2023-12-31",
-                "dataset": "merra2",
-                "height": 100,
-                "capacity": 1,
-                "turbine": "Vestas V80 2000",
-                "format": "json",
-            },
-            headers={"Authorization": f"Token {api_key}"},
-        )
-        if response.status_code != 200:
-            return HttpResponse("Data query failed", status="400")
-        supim = SupIm(
-            name="Wind_Example",
-            description="Wind example",
-            commodity=commodity,
-            steps=[entry["electricity"] for entry in response.json()["data"].values()],
-        )
-        supim.save()
+        queryWind(site, commodity)
     else:
         return HttpResponse(
             "This commodity does not provide a default supim", status=404
         )
 
     return JsonResponse({"detail": "SupIm added"})
+
+def querySolar(site, commodity):
+    response = requests.get(
+        "https://www.renewables.ninja/api/data/pv",
+        {
+            "lat": site.lat,
+            "lon": site.lon,
+            "date_from": "2023-01-01",
+            "date_to": "2023-12-31",
+            "dataset": "merra2",
+            "system_loss": 0.1,
+            "tracking": 0,
+            "azim": 180,
+            "format": "json",
+            "capacity": 1,
+            "tilt": 35,
+        },
+        headers={"Authorization": f"Token {api_key}"},
+    )
+    if response.status_code != 200:
+        return HttpResponse("Data query failed", status="400")
+
+    supim = SupIm(
+        name="Solar_Example",
+        description="Simple example",
+        commodity=commodity,
+        steps=[entry["electricity"] for entry in response.json()["data"].values()],
+    )
+    supim.save()
+
+def queryWind(site, commodity):
+    response = requests.get(
+        "https://www.renewables.ninja/api/data/wind",
+        {
+            "lat": site.lat,
+            "lon": site.lon,
+            "date_from": "2023-01-01",
+            "date_to": "2023-12-31",
+            "dataset": "merra2",
+            "height": 100,
+            "capacity": 1,
+            "turbine": "Vestas V80 2000",
+            "format": "json",
+        },
+        headers={"Authorization": f"Token {api_key}"},
+    )
+    if response.status_code != 200:
+        return HttpResponse("Data query failed", status="400")
+    supim = SupIm(
+        name="Wind_Example",
+        description="Wind example",
+        commodity=commodity,
+        steps=[entry["electricity"] for entry in response.json()["data"].values()],
+    )
+    supim.save()

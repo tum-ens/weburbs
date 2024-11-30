@@ -29,7 +29,7 @@
       />
     </div>
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
-    <div v-else class="ml-5 italic">No SupIm configured</div>
+    <div v-else class="ml-5 italic col-span-7">No SupIm configured</div>
   </div>
   <QuerySupImDialog :site :commodity v-model="queryVisible" />
 </template>

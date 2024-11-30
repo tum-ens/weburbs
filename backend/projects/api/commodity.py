@@ -1,9 +1,12 @@
+import threading
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from projects.api.helper import get_project, get_site
-from projects.models import Commodity, DefCommodity, Site
+from projects.api.supim import querySolar, queryWind
+from projects.models import Commodity, DefCommodity, Site, AutoQuery
 
 
 @login_required
@@ -44,4 +47,10 @@ def add_def_to_project(def_commodity: DefCommodity, site: Site):
         maxperhour=def_commodity.maxperhour,
     )
     commodity.save()
+
+    if def_commodity.autoquery is not None:
+        if def_commodity.autoquery == AutoQuery.Solar:
+            threading.Thread(target=querySolar, args=(site, commodity)).start()
+        elif def_commodity.autoquery == AutoQuery.Wind:
+            threading.Thread(target=queryWind, args=(site, commodity)).start()
     return commodity

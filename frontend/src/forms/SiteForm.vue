@@ -57,13 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import type {Site} from '@/backend/interfaces'
-import {inject, ref, watch} from 'vue'
-import {useRoute} from 'vue-router'
-import {useToast} from 'primevue/usetoast'
-import {decimalToDms, dmsToDecimal} from '@/helper/coordinates'
-import {useUpdateSite} from '@/backend/sites'
-import {defaultSite} from '@/backend/defaults'
+import type { Site } from '@/backend/interfaces'
+import { inject, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useToast } from 'primevue/usetoast'
+import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
+import { useUpdateSite } from '@/backend/sites'
+import { defaultSite } from '@/backend/defaults'
 
 const toast = useToast()
 const route = useRoute()
@@ -113,9 +113,9 @@ function mapClick(event: L.LeafletMouseEvent) {
   lon.value = decimalToDms(event.latlng.lng, true)
 }
 
-defineExpose({mapClick})
+defineExpose({ mapClick })
 
-const {mutate: updateSite} = useUpdateSite(route)
+const { mutate: updateSite } = useUpdateSite(route)
 
 function submit() {
   let error = false
