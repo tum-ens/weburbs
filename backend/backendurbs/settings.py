@@ -136,10 +136,10 @@ SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_TRUSTED_ORIGINS = (
-    os.environ.get("ORIGINS", "http://localhost:8000"),
+    os.environ.get("ORIGINS", "http://localhost:8080"),
 )
 
-CORS_ALLOWED_ORIGINS = [os.environ.get("ORIGINS", "http://localhost:8000")]
+CORS_ALLOWED_ORIGINS = [os.environ.get("ORIGINS", "http://localhost:8080")]
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 CORS_ALLOW_CREDENTIALS = True
 
