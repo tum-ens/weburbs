@@ -57,13 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Site } from '@/backend/interfaces'
-import { inject, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { useToast } from 'primevue/usetoast'
-import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
-import { useUpdateSite } from '@/backend/sites'
-import { defaultSite } from '@/backend/defaults'
+import type {Site} from '@/backend/interfaces'
+import {inject, ref, watch} from 'vue'
+import {useRoute} from 'vue-router'
+import {useToast} from 'primevue/usetoast'
+import {decimalToDms, dmsToDecimal} from '@/helper/coordinates'
+import {useUpdateSite} from '@/backend/sites'
+import {defaultSite} from '@/backend/defaults'
 
 const toast = useToast()
 const route = useRoute()
@@ -113,9 +113,9 @@ function mapClick(event: L.LeafletMouseEvent) {
   lon.value = decimalToDms(event.latlng.lng, true)
 }
 
-defineExpose({ mapClick })
+defineExpose({mapClick})
 
-const { mutate: updateSite } = useUpdateSite(route)
+const {mutate: updateSite} = useUpdateSite(route)
 
 function submit() {
   let error = false
@@ -148,29 +148,28 @@ function submit() {
     return
   }
 
-  if (area.value && lon.value && lat.value)
-    updateSite(
-      {
-        name: props.site?.name || name.value,
-        site: {
-          name: name.value,
-          area: area.value,
-          lon: dmsToDecimal(lon.value),
-          lat: dmsToDecimal(lat.value),
-        },
+  updateSite(
+    {
+      name: props.site?.name || name.value,
+      site: {
+        name: name.value,
+        area: area.value,
+        lon: dmsToDecimal(lon.value),
+        lat: dmsToDecimal(lat.value),
       },
-      {
-        onSuccess() {
-          toast.add({
-            summary: 'Success',
-            detail: props.site ? 'Site was updated' : 'Site was created',
-            severity: 'success',
-            life: 2000,
-          })
-          emit('update', name.value)
-        },
+    },
+    {
+      onSuccess() {
+        toast.add({
+          summary: 'Success',
+          detail: props.site ? 'Site was updated' : 'Site was created',
+          severity: 'success',
+          life: 2000,
+        })
+        emit('update', name.value)
       },
-    )
+    },
+  )
 }
 </script>
 

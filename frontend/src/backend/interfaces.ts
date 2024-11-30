@@ -7,7 +7,7 @@ export interface Project {
 
 export interface Site {
   name: string
-  area: number
+  area?: number
   lon: number
   lat: number
 }

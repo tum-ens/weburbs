@@ -33,7 +33,7 @@ def edit_site(request, project_name, site_name):
 
         if request.method == "POST":
             site.name = data["name"]
-            site.area = data["area"]
+            site.area = data["area"] if 'area' in data else None
             site.lon = data["lon"]
             site.lat = data["lat"]
             site.save()
@@ -48,13 +48,14 @@ def edit_site(request, project_name, site_name):
             site = Site(
                 project=project,
                 name=data["name"],
-                area=data["area"],
+                area=data["area"] if 'area' in data else None,
                 lon=data["lon"],
                 lat=data["lat"],
             )
             site.save()
 
             add_def_to_project(DefCommodity.objects.get(name="CO2"), site)
+            add_def_to_project(DefCommodity.objects.get(name="Elec"), site)
 
             return JsonResponse({"detail": "Site created"})
         else:
