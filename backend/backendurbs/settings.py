@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-ylzhf!80db3#hwy2%dc)_9!vl#vdg0sl5&1xun2t$u2+9v%*$-"
 
-DEBUG = os.getenv('DJANGO_DEBUG', 'False')
+DEBUG = os.getenv('DJANGO_DEBUG', False)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -143,5 +143,5 @@ CORS_ALLOWED_ORIGINS = [os.environ.get("ORIGINS", "http://localhost:8080")]
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = os.environ.get("HTTPS_ONLY", True)
+SESSION_COOKIE_SECURE = os.environ.get("HTTPS_ONLY", True)
