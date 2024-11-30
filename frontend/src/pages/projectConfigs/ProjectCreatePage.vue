@@ -28,6 +28,7 @@ import ProjectForm from '@/forms/ProjectForm.vue'
 import { defaultProject } from '@/backend/defaults'
 import SidebarComponent from '@/components/SidebarComponent.vue'
 import Header from '@/components/HeaderComponent.vue'
+import type { AxiosError } from 'axios'
 
 const toast = useToast()
 const route = useRoute()
@@ -56,6 +57,16 @@ function create(
           params: {
             proj: name,
           },
+        })
+      },
+      onError(error) {
+        toast.add({
+          summary: 'Error',
+          detail:
+            (<AxiosError>error)?.response?.data ||
+            `An error occurred when creating ${name}`,
+          severity: 'error',
+          life: 2000,
         })
       },
     },

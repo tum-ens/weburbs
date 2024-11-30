@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project
@@ -40,6 +40,11 @@ def project_details(request, project_name):
 @require_POST
 def update_project(request, project_name):
     data = json.loads(request.body)
+
+    if data["name"] != project_name and Project.objects.filter(name=data["name"]).exists():
+        return HttpResponse("A project with this name already exists", status=409)
+    if data["name"] == "__new":
+        return HttpResponse("Invalid name", status=400)
 
     try:
         project = Project.objects.get(name=project_name)

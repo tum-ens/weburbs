@@ -17,6 +17,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectDetails, useUpdateProject } from '@/backend/projects'
 import { useToast } from 'primevue/usetoast'
 import ProjectForm from '@/forms/ProjectForm.vue'
+import type { AxiosError } from 'axios'
 
 const toast = useToast()
 const route = useRoute()
@@ -51,6 +52,16 @@ function update(
           params: {
             proj: name,
           },
+        })
+      },
+      onError(error) {
+        toast.add({
+          summary: 'Error',
+          detail:
+            (<AxiosError>error)?.response?.data ||
+            `An error occurred when creating ${name}`,
+          severity: 'error',
+          life: 2000,
         })
       },
     },

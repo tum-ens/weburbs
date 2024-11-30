@@ -5,7 +5,20 @@
       <SidebarComponent />
       <div class="flex-grow">
         <Card>
-          <template #title> Homepage </template>
+          <template #title>
+            <div class="flex flex-row justify-between">
+              <span>Homepage</span>
+              <Button
+                label="CreateProject"
+                @click="
+                  () =>
+                    router.push({
+                      name: 'CreateProject',
+                    })
+                "
+              />
+            </div>
+          </template>
           <template #content>
             <div
               v-if="projects?.length"

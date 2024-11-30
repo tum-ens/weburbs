@@ -10,15 +10,11 @@ export function useUpdateProject(route: RouteLocationNormalized) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (data: Project) =>
-      axios.post(
-        `/api/project/${route.params.proj || data.name}/update/`,
-        data,
-        {
-          headers: {
-            'X-CSRFToken': csrf.value,
-          },
+      axios.post(`/api/project/${route.params.proj || '__new'}/update/`, data, {
+        headers: {
+          'X-CSRFToken': csrf.value,
         },
-      ),
+      }),
     async onSuccess() {
       await client.invalidateQueries({ queryKey: ['projects'] })
     },
