@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    name = models.CharField(max_length=255, unique=True, null=False)
+    name = models.CharField(max_length=255, null=False)
     description = models.TextField()
     co2limit = models.BigIntegerField(null=False)
     costlimit = models.BigIntegerField(null=False)
