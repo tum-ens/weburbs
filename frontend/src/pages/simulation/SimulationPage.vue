@@ -162,6 +162,16 @@ function trigger() {
   })
 }
 
+watch(
+  simulations,
+  () => {
+    if (selSimulation.value || !simulations.value) return
+
+    selSimulation.value = simulations.value[0]
+  },
+  { immediate: true },
+)
+
 watch(simulation, () => {
   if (!simulation.value) {
     resultsExist.value = false
