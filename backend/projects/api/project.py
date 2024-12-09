@@ -41,7 +41,10 @@ def project_details(request, project_name):
 def update_project(request, project_name):
     data = json.loads(request.body)
 
-    if data["name"] != project_name and Project.objects.filter(user=request.user, name=data["name"]).exists():
+    if (
+        data["name"] != project_name
+        and Project.objects.filter(user=request.user, name=data["name"]).exists()
+    ):
         return HttpResponse("A project with this name already exists", status=409)
     if data["name"] == "__new":
         return HttpResponse("Invalid name", status=400)

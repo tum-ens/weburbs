@@ -16,8 +16,10 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 def getBoolEnv(name: str, default: bool):
-    return os.getenv(name, str(default)).lower() in ('true', '1', 'yes')
+    return os.getenv(name, str(default)).lower() in ("true", "1", "yes")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -25,7 +27,7 @@ def getBoolEnv(name: str, default: bool):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-ylzhf!80db3#hwy2%dc)_9!vl#vdg0sl5&1xun2t$u2+9v%*$-"
 
-DEBUG = getBoolEnv('DJANGO_DEBUG', False)
+DEBUG = getBoolEnv("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -137,9 +139,7 @@ CSRF_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_HTTPONLY = True
 SESSION_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = (
-    os.environ.get("ORIGINS", "http://localhost:8080"),
-)
+CSRF_TRUSTED_ORIGINS = (os.environ.get("ORIGINS", "http://localhost:8080"),)
 
 CORS_ALLOWED_ORIGINS = [os.environ.get("ORIGINS", "http://localhost:8080")]
 CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken"]

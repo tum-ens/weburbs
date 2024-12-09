@@ -35,6 +35,7 @@ class ComType(IntEnum):
     def choices(cls):
         return [(key.value, key.name) for key in cls]
 
+
 class AutoQuery(IntEnum):
     Solar = 1
     Wind = 2
@@ -42,6 +43,7 @@ class AutoQuery(IntEnum):
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]
+
 
 class CommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

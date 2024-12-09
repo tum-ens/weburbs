@@ -68,6 +68,7 @@ def querySupIm(request, project_name, site_name, com_name, type):
 
     return JsonResponse({"detail": "SupIm added"})
 
+
 def querySolar(site, commodity):
     response = requests.get(
         "https://www.renewables.ninja/api/data/pv",
@@ -96,6 +97,7 @@ def querySolar(site, commodity):
         steps=[entry["electricity"] for entry in response.json()["data"].values()],
     )
     supim.save()
+
 
 def queryWind(site, commodity):
     response = requests.get(
