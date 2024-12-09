@@ -1,4 +1,5 @@
 import json
+import threading
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotAllowed
@@ -6,7 +7,8 @@ from django.views.decorators.http import require_POST, require_GET
 
 from projects.api.helper import get_project
 from projects.api.commodity import add_def_to_project
-from projects.models import Site, DefCommodity
+from projects.api.supim import querySolar, queryWind
+from projects.models import Site, DefCommodity, Commodity, AutoQuery, SupIm
 
 
 @login_required
@@ -33,10 +35,12 @@ def edit_site(request, project_name, site_name):
 
         if request.method == "POST":
             site.name = data["name"]
-            site.area = data["area"] if 'area' in data else None
+            site.area = data["area"] if "area" in data else None
             site.lon = data["lon"]
             site.lat = data["lat"]
             site.save()
+
+            threading.Thread(target=reload_supim, args=[site]).start()
             return JsonResponse({"detail": "Site updated"})
         elif request.method == "DELETE":
             site.delete()
@@ -48,7 +52,7 @@ def edit_site(request, project_name, site_name):
             site = Site(
                 project=project,
                 name=data["name"],
-                area=data["area"] if 'area' in data else None,
+                area=data["area"] if "area" in data else None,
                 lon=data["lon"],
                 lat=data["lat"],
             )
@@ -60,3 +64,16 @@ def edit_site(request, project_name, site_name):
             return JsonResponse({"detail": "Site created"})
         else:
             return HttpResponseNotAllowed(["POST", "DELETE"])
+
+
+def reload_supim(site: Site):
+    commodities = Commodity.objects.filter(site=site)
+    for commodity in commodities:
+        def_commodity = commodity.defcommodity
+        if def_commodity is not None and def_commodity.autoquery is not None:
+            if SupIm.objects.filter(commodity=commodity).exists():
+                SupIm.objects.get(commodity=commodity).delete()
+            if def_commodity.autoquery == AutoQuery.Solar:
+                querySolar(site, commodity)
+            elif def_commodity.autoquery == AutoQuery.Wind:
+                queryWind(site, commodity)
