@@ -1,7 +1,11 @@
+import json
+import os
+
 import requests
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST, require_GET
 
 from projects.api.helper import get_project
 from projects.models import (
@@ -12,6 +16,7 @@ from projects.models import (
     SupIm,
     Demand,
     Storage,
+    SimulationResult,
 )
 
 
@@ -28,12 +33,15 @@ def trigger_simulation(request, project_name):
         min(map(lambda demand: len(demand.steps), demands)),
     )
 
+    simres = SimulationResult(project=project)
+    simres.save()
     data = {
+        "callback": os.getenv("URBS_CALLBACK") + f"/callback/simulation/{simres.id}/",
         "c_timesteps": timesteps,
         "global": {"CO2 limit": project.co2limit, "Cost limit": project.costlimit},
         "site": {
             site.name: {
-                "area": site.area,
+                "area": "inf" if site.area is None else site.area,
                 "commodity": {
                     commodity.name: {
                         "Type": commodity.get_com_type_label(),
@@ -124,7 +132,64 @@ def trigger_simulation(request, project_name):
     if response.status_code != 200:
         return HttpResponse("Simulation failed", status="400")
 
-    return JsonResponse(response.json())
+    return JsonResponse(
+        {"id": simres.id, "timestamp": simres.timestamp, "completed": False}
+    )
+
+
+@csrf_exempt
+@require_POST
+def report_simulation(request, simid):
+    try:
+        simres = SimulationResult.objects.get(id=simid)
+        if simres.result is not None:
+            return HttpResponse("Result already reported", status="400")
+
+        simres.result = json.loads(request.body)
+        simres.save()
+        return HttpResponse("Simulation saved", status="200")
+    except SimulationResult.DoesNotExist:
+        return HttpResponse("Invalid simid", status="401")
+
+
+@login_required
+@require_GET
+def get_simulations(request, project_name):
+    project = get_project(request.user, project_name)
+
+    simres = (
+        SimulationResult.objects.filter(project=project)
+        .order_by("timestamp")
+        .reverse()
+        .values("id", "timestamp", "result")
+    )
+    return JsonResponse(
+        list(
+            map(
+                lambda res: {
+                    "id": res["id"],
+                    "timestamp": res["timestamp"],
+                    "completed": res["result"] is not None,
+                },
+                simres,
+            )
+        ),
+        status=200,
+        safe=False,
+    )
+
+
+@login_required
+@require_GET
+def get_simulation_result(request, project_name, simid):
+    project = get_project(request.user, project_name)
+
+    simres = SimulationResult.objects.get(id=simid, project=project)
+
+    if simres.result is None:
+        return HttpResponse("No result has been reported...", status="204")
+
+    return JsonResponse(simres.result)
 
 
 def remove_none(d):

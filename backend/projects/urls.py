@@ -64,4 +64,9 @@ urlpatterns = [
         demand.queryDemand,
     ),
     path("project/<str:project_name>/simulate/trigger/", simulate.trigger_simulation),
+    path("project/<str:project_name>/simulate/results/", simulate.get_simulations),
+    path(
+        "project/<str:project_name>/simulate/result/<uuid:simid>/",
+        simulate.get_simulation_result,
+    ),
 ]

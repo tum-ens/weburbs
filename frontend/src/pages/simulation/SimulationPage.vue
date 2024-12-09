@@ -1,15 +1,47 @@
 <template>
   <Card>
-    <template #title>Simulations</template>
+    <template #title>
+      <div class="flex flex-row justify-between">
+        <span>Simulations</span>
+        <div class="flex flex-row gap-3">
+          <Select
+            v-model="selSimulation"
+            :options="simulations"
+            placeholder="Select a simulation"
+            empty-message="No simulation found yet"
+          >
+            <template #option="{ option }">
+              <div
+                class="w-full flex flex-row justify-between items-center gap-3"
+              >
+                <span>{{ option.timestamp.toLocaleString() }}</span>
+                <i v-if="option.completed" class="pi pi-check-circle"></i>
+                <i v-else class="pi pi-hourglass"></i>
+              </div>
+            </template>
+            <template #value="{ value, placeholder }">
+              <div
+                v-if="value"
+                class="w-full flex flex-row justify-between items-center gap-3"
+              >
+                <span>{{ value.timestamp.toLocaleString() }}</span>
+                <i v-if="value.completed" class="pi pi-check-circle"></i>
+                <i v-else class="pi pi-hourglass"></i>
+              </div>
+              <span v-else>{{ placeholder }}</span>
+            </template>
+          </Select>
+          <Button
+            icon="pi pi-caret-right"
+            label="Simulate"
+            :loading="simulating"
+            @click="trigger"
+          />
+        </div>
+      </div>
+    </template>
     <template #content>
-      <Button
-        icon="pi pi-caret-right"
-        label="Simulate"
-        :loading="simulating"
-        @click="trigger"
-      />
-
-      <template v-if="overview">
+      <template v-if="resultsExist">
         <div class="flex flex-col gap-3">
           <div class="grid grid-cols-4 gap-3">
             <Fieldset legend="Overview">
@@ -53,27 +85,45 @@
           </Accordion>
         </div>
       </template>
+      <div
+        v-else-if="selSimulation"
+        class="flex flex-col gap-3 items-center justify-start"
+      >
+        <ProgressSpinner />
+        <span>Waiting for results...</span>
+      </div>
+      <div v-else>Select a simulation</div>
     </template>
   </Card>
 </template>
 
 <script setup lang="ts">
-import { useTriggerSimulation } from '@/backend/simulate'
+import {
+  useGetSimulation,
+  useListSimulations,
+  useTriggerSimulation,
+} from '@/backend/simulate'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useSites } from '@/backend/sites'
 import Plotly from 'plotly.js-dist'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
 import { chunkAdd, chunkAvg, groupOptions } from '@/helper/diagrams'
+import type { SimulationResult } from '@/backend/interfaces'
 
 const route = useRoute()
 const toast = useToast()
 
+const selSimulation = ref<SimulationResult>()
+const resultsExist = ref(false)
+
 const { data: sites } = useSites(route)
 const { mutate: triggerSimulation, isPending: simulating } =
   useTriggerSimulation(route)
+const { data: simulations } = useListSimulations(route)
+const { data: simulation } = useGetSimulation(route, selSimulation)
 
 const overview = ref()
 const procs = ref<{ site: string; proc: string; total: number; new: number }[]>(
@@ -92,78 +142,10 @@ const storageLevel = ref<{
 function trigger() {
   triggerSimulation(undefined, {
     onSuccess(data) {
-      procs.value = []
-      overview.value = data.costs
-      for (const site in data.process) {
-        for (const proc in data.process[site]) {
-          procs.value.push({
-            site,
-            proc,
-            total: data.process[site][proc].Total,
-            new: data.process[site][proc].New,
-          })
-        }
-      }
-
-      demand.value = {}
-      created.value = {}
-      storageLevel.value = {}
-      for (const site in data.results) {
-        demand.value[site] = {}
-        created.value[site] = {}
-        storageLevel.value[site] = {}
-        for (const com in data.results[site]) {
-          demand.value[site][com] = [
-            {
-              name: com,
-              y: chunkAdd(
-                data.results[site][com].demand,
-                groupOptions[0].groupSize,
-              ),
-              x: Array.from(
-                { length: groupOptions[0].groupSize },
-                (_, i) => i + 1,
-              ),
-              type: 'bar',
-            },
-          ]
-          created.value[site][com] = []
-          for (const proc in data.results[site][com].created) {
-            created.value[site][com].push({
-              name: proc,
-              y: chunkAdd(
-                data.results[site][com].created[proc],
-                groupOptions[0].groupSize,
-              ),
-              x: Array.from(
-                { length: groupOptions[0].groupSize },
-                (_, i) => i + 1,
-              ),
-              type: 'bar',
-            })
-          }
-          if (data.results[site][com].storage) {
-            storageLevel.value[site][com] = [
-              {
-                name: com,
-                y: chunkAvg(
-                  data.results[site][com].storage.Level,
-                  groupOptions[0].groupSize,
-                ),
-                x: Array.from(
-                  { length: groupOptions[0].groupSize },
-                  (_, i) => i + 1,
-                ),
-                type: 'scatter',
-              },
-            ]
-          }
-        }
-      }
-
+      selSimulation.value = data
       toast.add({
         summary: 'Success',
-        detail: 'Simulation completed',
+        detail: 'Simulation started',
         severity: 'success',
         life: 2000,
       })
@@ -171,7 +153,7 @@ function trigger() {
     onError(error) {
       console.log(error)
       toast.add({
-        summary: 'Simulation error',
+        summary: 'Simulation could not be started',
         detail: (<AxiosError>error)?.response?.data,
         severity: 'error',
         life: 2000,
@@ -179,6 +161,78 @@ function trigger() {
     },
   })
 }
+
+watch(simulation, () => {
+  if (!simulation.value) {
+    resultsExist.value = false
+    return
+  }
+  if (selSimulation.value) selSimulation.value.completed = true
+
+  procs.value = []
+  overview.value = simulation.value.costs
+  for (const site in simulation.value.process) {
+    for (const proc in simulation.value.process[site]) {
+      procs.value.push({
+        site,
+        proc,
+        total: simulation.value.process[site][proc].Total,
+        new: simulation.value.process[site][proc].New,
+      })
+    }
+  }
+
+  demand.value = {}
+  created.value = {}
+  storageLevel.value = {}
+  for (const site in simulation.value.results) {
+    demand.value[site] = {}
+    created.value[site] = {}
+    storageLevel.value[site] = {}
+    for (const com in simulation.value.results[site]) {
+      demand.value[site][com] = [
+        {
+          name: com,
+          y: chunkAdd(
+            simulation.value.results[site][com].demand,
+            groupOptions[0].groupSize,
+          ),
+          x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
+          type: 'bar',
+        },
+      ]
+      created.value[site][com] = []
+      for (const proc in simulation.value.results[site][com].created) {
+        created.value[site][com].push({
+          name: proc,
+          y: chunkAdd(
+            simulation.value.results[site][com].created[proc],
+            groupOptions[0].groupSize,
+          ),
+          x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
+          type: 'bar',
+        })
+      }
+      if (simulation.value.results[site][com].storage) {
+        storageLevel.value[site][com] = [
+          {
+            name: com,
+            y: chunkAvg(
+              simulation.value.results[site][com].storage.Level,
+              groupOptions[0].groupSize,
+            ),
+            x: Array.from(
+              { length: groupOptions[0].groupSize },
+              (_, i) => i + 1,
+            ),
+            type: 'scatter',
+          },
+        ]
+      }
+    }
+  }
+  resultsExist.value = true
+})
 </script>
 
 <style scoped></style>

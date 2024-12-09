@@ -23,4 +23,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/security/", include("security.urls")),
     path("api/", include("projects.urls")),
+    path("callback/", include("projects.callbackurls")),
 ]

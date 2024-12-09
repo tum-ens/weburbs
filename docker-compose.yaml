@@ -5,6 +5,8 @@ services:
     container_name: weburbs-backend
     environment:
       - SECRET_KEY=change_me
+      - URBS_CALLBACK=http://backend:9000
+      - URBS=http://optimizer:5000
       - DJANGO_ALLOWED_HOSTS=localhost
       - ORIGINS=http://localhost:9000
       - RN_KEY=$RN_KEY

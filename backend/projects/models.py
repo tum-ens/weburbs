@@ -271,3 +271,10 @@ class TimeVarEff(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
     steps = models.FloatField(null=False)
+
+
+class SimulationResult(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    timestamp = models.DateTimeField(null=False, auto_now_add=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
+    result = models.JSONField(null=True)

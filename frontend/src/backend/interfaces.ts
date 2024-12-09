@@ -73,3 +73,9 @@ export interface Storage {
 export interface Steps {
   data?: number[]
 }
+
+export interface SimulationResult {
+  id: string
+  timestamp: Date
+  completed: boolean
+}
