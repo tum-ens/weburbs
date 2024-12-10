@@ -23,6 +23,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('instcap')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="'Existing power throughput capacity per process'"
           id="instcap"
           fluid
@@ -33,6 +34,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('caplo')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Minimum required power throughput capacity that is allowed per process. Must be smaller or equal to \'cap-up\', but can be bigger than \'inst-cap\' to force investment.'
           "
@@ -45,6 +47,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('capup')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Maximum allowed power throughput capacity per process. Must be bigger than or equal to max(\'cap-lo\', \'inst-cap\').'
           "
@@ -59,6 +62,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('maxgrad')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Maximum allowed power gradient relative to power throughput capacity. Set value to negative or greater than 1/dt to disable it. '
           "
@@ -71,6 +75,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('minfraction')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'This value sets the minimum possible fraction of the process capacity which the process can run at. Must be greater equal 0.'
           "
@@ -85,6 +90,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('invcost')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Total investement cost for adding capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
           "
@@ -97,6 +103,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('fixcost')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Operation independent costs for existing and new capacities per kW throughput power.'
           "
@@ -109,6 +116,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('varcost')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Variable costs per throughput energy unit (kWh) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.'
           "
@@ -123,6 +131,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('wacc')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Percentage of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
           "
@@ -135,6 +144,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('depreciation')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'Economic lifetime (more conservative than technical lifetime) of a process investment in years (a). Used to calculate annuity factor for investment costs.'
           "
@@ -147,6 +157,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('areapercap')"
+          :max-fraction-digits="2"
           v-tooltip.bottom="
             'If a process requires area set value here. If no area use is to be considered leave empty.'
           "
@@ -186,6 +197,7 @@
                 <FloatLabel variant="on">
                   <InputNumber
                     id="ratio"
+                    :max-fraction-digits="2"
                     fluid
                     v-model="inCom.ratio"
                     :invalid="inCom.ratio === undefined || inCom.ratio < 0"
@@ -195,6 +207,7 @@
                 <FloatLabel variant="on">
                   <InputNumber
                     id="ratiomin"
+                    :max-fraction-digits="2"
                     fluid
                     v-model="inCom.ratiomin"
                     :invalid="
@@ -228,6 +241,7 @@
                 <FloatLabel variant="on">
                   <InputNumber
                     id="ratio"
+                    :max-fraction-digits="2"
                     fluid
                     v-model="outCom.ratio"
                     :invalid="outCom.ratio === undefined || outCom.ratio < 0"
@@ -237,6 +251,7 @@
                 <FloatLabel variant="on">
                   <InputNumber
                     id="ratiomin"
+                    :max-fraction-digits="2"
                     fluid
                     v-model="outCom.ratiomin"
                     :invalid="

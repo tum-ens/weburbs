@@ -46,3 +46,51 @@ export function useAddDefStorage(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useUpdateStorage(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: {
+      site_name: string
+      storage_name: string
+      storage: Storage
+    }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/storage/${data.storage_name}/update/`,
+        data.storage,
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['storage', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}
+
+export function useDeleteStorage(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { site_name: string; storage_name: string }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/storage/${data.storage_name}/delete/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['storage', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}

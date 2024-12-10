@@ -31,7 +31,7 @@
               :site="site"
               @clickProcess="
                 proc => {
-                  clickedProces = proc
+                  clickedProcess = proc
                   editVisible = true
                 }
               "
@@ -67,8 +67,8 @@
     :site_name="curSite"
   />
   <EditProcessDialog
-    v-if="curSite != null && clickedProces"
-    :process="clickedProces"
+    v-if="curSite != null && clickedProcess"
+    :process="clickedProcess"
     v-model:visible="editVisible"
     :site_name="curSite"
   />
@@ -94,7 +94,7 @@ const defaultVisible = ref(false)
 const createVisible = ref(false)
 const editVisible = ref(false)
 
-const clickedProces = ref<Process | null>(null)
+const clickedProcess = ref<Process | null>(null)
 
 const { data: sites } = useSites(route)
 watch(

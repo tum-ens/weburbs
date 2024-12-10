@@ -27,7 +27,15 @@
         >
           <AccordionHeader>{{ site.name }}</AccordionHeader>
           <AccordionContent>
-            <StorageOverviewComponent :site="site" />
+            <StorageOverviewComponent
+              :site="site"
+              @clickStorage="
+                sto => {
+                  clickedStorage = sto
+                  editVisible = true
+                }
+              "
+            />
           </AccordionContent>
         </AccordionPanel>
       </Accordion>
@@ -67,17 +75,29 @@
     v-model:visible="defaultVisible"
     :site_name="curSite"
   />
+  <CreateStorageDialog
+    v-if="advanced && curSite != null"
+    v-model:visible="createVisible"
+    :site_name="curSite"
+  />
+  <EditStorageDialog
+    v-if="curSite != null && clickedStorage"
+    :storage="clickedStorage"
+    v-model:visible="editVisible"
+    :site_name="curSite"
+  />
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { useToast } from 'primevue/usetoast'
 import { inject, ref, watch } from 'vue'
 import { useSites } from '@/backend/sites'
 import DefaultStorageOverviewDialog from '@/dialogs/DefaultStorageOverviewDialog.vue'
 import StorageOverviewComponent from '@/components/StorageOverviewComponent.vue'
+import CreateStorageDialog from '@/dialogs/CreateStorageDialog.vue'
+import EditStorageDialog from '@/dialogs/EditStorageDialog.vue'
+import type { Storage } from '@/backend/interfaces'
 
-const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
@@ -85,6 +105,10 @@ const advanced = inject('advanced')
 
 const curSite = ref()
 const defaultVisible = ref(false)
+const createVisible = ref(false)
+const editVisible = ref(false)
+
+const clickedStorage = ref<Storage | null>(null)
 
 const { data: sites } = useSites(route)
 watch(
@@ -101,12 +125,7 @@ const items = [
   {
     label: 'Add Custom',
     command: () => {
-      toast.add({
-        severity: 'info',
-        summary: 'TODO',
-        detail: 'Not yet implemented',
-        life: 3000,
-      })
+      createVisible.value = true
     },
   },
 ]

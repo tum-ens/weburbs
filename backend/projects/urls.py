@@ -42,6 +42,14 @@ urlpatterns = [
     path(
         "project/<str:project_name>/site/<str:site_name>/storage/", storage.list_storage
     ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/storage/<str:storage_name>/update/",
+        storage.update_storage,
+    ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/storage/<str:storage_name>/delete/",
+        storage.delete_storage,
+    ),
     path("def_storage/", storage.list_def_storage),
     path(
         "project/<str:project_name>/site/<str:site_name>/def_storage/<str:def_storage_name>/add/",
