@@ -128,8 +128,9 @@ def trigger_simulation(request, project_name):
         },
     }
 
-    response = requests.post("http://localhost:5000/simulate", json=remove_none(data))
+    response = requests.post(os.getenv("URBS"), json=remove_none(data))
     if response.status_code != 200:
+        print(response.text)
         return HttpResponse("Simulation failed", status="400")
 
     return JsonResponse(
