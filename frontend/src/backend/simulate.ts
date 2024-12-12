@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
 import { computed, type Ref } from 'vue'
-import type { SimulationResult } from '@/backend/interfaces'
+import type { SimulationDetails, SimulationResult } from '@/backend/interfaces'
 
 export function useTriggerSimulation(route: RouteLocationNormalized) {
   const { data: csrf } = useCSRF()
@@ -82,6 +82,6 @@ export function useGetSimulation(
           })
           return response
         })
-        .then(response => response.data),
+        .then<SimulationDetails>(response => response.data),
   })
 }

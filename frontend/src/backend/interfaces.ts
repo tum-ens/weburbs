@@ -74,8 +74,20 @@ export interface Steps {
   data?: number[]
 }
 
+export enum SimulationResultStatus {
+  Optimal = 1,
+  Infeasible = 2,
+  Error = 3,
+}
+
 export interface SimulationResult {
   id: string
   timestamp: Date
   completed: boolean
+  status: SimulationResultStatus
+}
+
+export interface SimulationDetails extends SimulationResult {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  result: any
 }

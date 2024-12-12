@@ -15,8 +15,10 @@
                 class="w-full flex flex-row justify-between items-center gap-3"
               >
                 <span>{{ option.timestamp.toLocaleString() }}</span>
-                <i v-if="option.completed" class="pi pi-check-circle"></i>
-                <i v-else class="pi pi-hourglass"></i>
+                <ResultIcon
+                  :completed="option.completed"
+                  :status="option.status"
+                />
               </div>
             </template>
             <template #value="{ value, placeholder }">
@@ -25,8 +27,10 @@
                 class="w-full flex flex-row justify-between items-center gap-3"
               >
                 <span>{{ value.timestamp.toLocaleString() }}</span>
-                <i v-if="value.completed" class="pi pi-check-circle"></i>
-                <i v-else class="pi pi-hourglass"></i>
+                <ResultIcon
+                  :completed="value.completed"
+                  :status="value.status"
+                />
               </div>
               <span v-else>{{ placeholder }}</span>
             </template>
@@ -41,7 +45,13 @@
       </div>
     </template>
     <template #content>
-      <template v-if="resultsExist">
+      <template
+        v-if="
+          resultsExist &&
+          simulation &&
+          simulation.status === SimulationResultStatus.Optimal
+        "
+      >
         <div class="flex flex-col gap-3">
           <div class="grid grid-cols-4 gap-3">
             <Fieldset legend="Overview">
@@ -85,14 +95,17 @@
           </Accordion>
         </div>
       </template>
+      <div v-else-if="!selSimulation">Select a simulation</div>
       <div
-        v-else-if="selSimulation"
+        v-else-if="simulation"
         class="flex flex-col gap-3 items-center justify-start"
       >
-        <ProgressSpinner />
-        <span>Waiting for results...</span>
+        <template v-if="simulation.status === SimulationResultStatus.Optimal">
+          <ProgressSpinner />
+          <span>Waiting for results...</span>
+        </template>
+        <template v-else> The simulation run into an error. </template>
       </div>
-      <div v-else>Select a simulation</div>
     </template>
   </Card>
 </template>
@@ -111,7 +124,11 @@ import { useSites } from '@/backend/sites'
 import Plotly from 'plotly.js-dist'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
 import { chunkAdd, chunkAvg, groupOptions } from '@/helper/diagrams'
-import type { SimulationResult } from '@/backend/interfaces'
+import ResultIcon from '@/pages/simulation/ResultIcon.vue'
+import {
+  type SimulationResult,
+  SimulationResultStatus,
+} from '@/backend/interfaces'
 
 const route = useRoute()
 const toast = useToast()
@@ -177,17 +194,25 @@ watch(simulation, () => {
     resultsExist.value = false
     return
   }
-  if (selSimulation.value) selSimulation.value.completed = true
+  console.log(simulation.value.status)
+  if (selSimulation.value) {
+    selSimulation.value = {
+      ...selSimulation.value,
+      completed: true,
+      status: simulation.value.status,
+    }
+  }
+  resultsExist.value = true
 
   procs.value = []
-  overview.value = simulation.value.costs
-  for (const site in simulation.value.process) {
-    for (const proc in simulation.value.process[site]) {
+  overview.value = simulation.value.result.costs
+  for (const site in simulation.value.result.process) {
+    for (const proc in simulation.value.result.process[site]) {
       procs.value.push({
         site,
         proc,
-        total: simulation.value.process[site][proc].Total,
-        new: simulation.value.process[site][proc].New,
+        total: simulation.value.result.process[site][proc].Total,
+        new: simulation.value.result.process[site][proc].New,
       })
     }
   }
@@ -195,16 +220,16 @@ watch(simulation, () => {
   demand.value = {}
   created.value = {}
   storageLevel.value = {}
-  for (const site in simulation.value.results) {
+  for (const site in simulation.value.result.results) {
     demand.value[site] = {}
     created.value[site] = {}
     storageLevel.value[site] = {}
-    for (const com in simulation.value.results[site]) {
+    for (const com in simulation.value.result.results[site]) {
       demand.value[site][com] = [
         {
           name: com,
           y: chunkAdd(
-            simulation.value.results[site][com].demand,
+            simulation.value.result.results[site][com].demand,
             groupOptions[0].groupSize,
           ),
           x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
@@ -212,23 +237,23 @@ watch(simulation, () => {
         },
       ]
       created.value[site][com] = []
-      for (const proc in simulation.value.results[site][com].created) {
+      for (const proc in simulation.value.result.results[site][com].created) {
         created.value[site][com].push({
           name: proc,
           y: chunkAdd(
-            simulation.value.results[site][com].created[proc],
+            simulation.value.result.results[site][com].created[proc],
             groupOptions[0].groupSize,
           ),
           x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
           type: 'bar',
         })
       }
-      if (simulation.value.results[site][com].storage) {
+      if (simulation.value.result.results[site][com].storage) {
         storageLevel.value[site][com] = [
           {
             name: com,
             y: chunkAvg(
-              simulation.value.results[site][com].storage.Level,
+              simulation.value.result.results[site][com].storage.Level,
               groupOptions[0].groupSize,
             ),
             x: Array.from(
@@ -241,7 +266,6 @@ watch(simulation, () => {
       }
     }
   }
-  resultsExist.value = true
 })
 </script>
 

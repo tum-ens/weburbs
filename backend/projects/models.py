@@ -273,8 +273,22 @@ class TimeVarEff(models.Model):
     steps = models.FloatField(null=False)
 
 
+class SimulationResultStatus(IntEnum):
+    Optimal = 1
+    Infeasible = 2
+    Error = 3
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+
 class SimulationResult(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp = models.DateTimeField(null=False, auto_now_add=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
+    completed = models.BooleanField(default=False)
+    config = models.JSONField(null=False)
+    status = models.IntegerField(choices=SimulationResultStatus.choices(), null=True)
     result = models.JSONField(null=True)
+    log = models.TextField(null=True)

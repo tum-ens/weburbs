@@ -20,12 +20,11 @@
 
 <script setup lang="ts">
 import type { Storage } from '@/backend/interfaces'
-import { useDeleteProcess } from '@/backend/processes'
 import { useRoute } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
 import StorageForm from '@/forms/StorageForm.vue'
-import { useUpdateStorage } from '@/backend/storage'
+import { useDeleteStorage, useUpdateStorage } from '@/backend/storage'
 
 const route = useRoute()
 const toast = useToast()
@@ -37,7 +36,7 @@ const props = defineProps<{
 }>()
 
 const { mutate: updateStorage, isPending: loading } = useUpdateStorage(route)
-const { mutate: deleteStorage, isPending: deleting } = useDeleteProcess(route)
+const { mutate: deleteStorage, isPending: deleting } = useDeleteStorage(route)
 
 function update(storage: Storage): void {
   updateStorage(
@@ -74,7 +73,7 @@ function deleteProc(): void {
   deleteStorage(
     {
       site_name: props.site_name,
-      process_name: props.storage.name,
+      storage_name: props.storage.name,
     },
     {
       onSuccess() {

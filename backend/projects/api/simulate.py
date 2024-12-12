@@ -17,6 +17,7 @@ from projects.models import (
     Demand,
     Storage,
     SimulationResult,
+    SimulationResultStatus,
 )
 
 
@@ -34,9 +35,7 @@ def trigger_simulation(request, project_name):
     )
 
     simres = SimulationResult(project=project)
-    simres.save()
-    data = {
-        "callback": os.getenv("URBS_CALLBACK") + f"/callback/simulation/{simres.id}/",
+    config = {
         "c_timesteps": timesteps,
         "global": {"CO2 limit": project.co2limit, "Cost limit": project.costlimit},
         "site": {
@@ -66,7 +65,7 @@ def trigger_simulation(request, project_name):
                             storage.name: {
                                 "inst-cap-c": storage.instcapc,
                                 "cap-lo-c": storage.caploc,
-                                "cap-up-c": storage.capupu
+                                "cap-up-c": storage.capupc
                                 if storage.capupc >= 0
                                 else "inf",
                                 "inst-cap-p": storage.instcapp,
@@ -127,8 +126,13 @@ def trigger_simulation(request, project_name):
             for site in sites
         },
     }
+    simres.config = config
+    simres.save()
+    config["callback"] = (
+        os.getenv("URBS_CALLBACK") + f"/callback/simulation/{simres.id}/"
+    )
 
-    response = requests.post(os.getenv("URBS"), json=remove_none(data))
+    response = requests.post(os.getenv("URBS"), json=remove_none(config))
     if response.status_code != 200:
         print(response.text)
         return HttpResponse("Simulation failed", status="400")
@@ -146,7 +150,16 @@ def report_simulation(request, simid):
         if simres.result is not None:
             return HttpResponse("Result already reported", status="400")
 
-        simres.result = json.loads(request.body)
+        simulation = json.loads(request.body)
+        simres.completed = True
+        simres.result = simulation["data"]
+        simres.log = simulation["log"]
+        if simulation["status"] == "optimal":
+            simres.status = SimulationResultStatus.Optimal
+        elif simulation["status"] == "infeasible":
+            simres.status = SimulationResultStatus.Infeasible
+        else:
+            simres.status = SimulationResultStatus.Error
         simres.save()
         return HttpResponse("Simulation saved", status="200")
     except SimulationResult.DoesNotExist:
@@ -162,7 +175,7 @@ def get_simulations(request, project_name):
         SimulationResult.objects.filter(project=project)
         .order_by("timestamp")
         .reverse()
-        .values("id", "timestamp", "result")
+        .values("id", "timestamp", "completed", "status")
     )
     return JsonResponse(
         list(
@@ -170,7 +183,8 @@ def get_simulations(request, project_name):
                 lambda res: {
                     "id": res["id"],
                     "timestamp": res["timestamp"],
-                    "completed": res["result"] is not None,
+                    "completed": res["completed"],
+                    "status": res["status"],
                 },
                 simres,
             )
@@ -190,7 +204,15 @@ def get_simulation_result(request, project_name, simid):
     if simres.result is None:
         return HttpResponse("No result has been reported...", status="204")
 
-    return JsonResponse(simres.result)
+    return JsonResponse(
+        {
+            "id": simres.id,
+            "timestamp": simres.timestamp,
+            "completed": simres.completed,
+            "status": simres.status,
+            "result": simres.result,
+        }
+    )
 
 
 def remove_none(d):
