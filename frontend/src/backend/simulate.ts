@@ -85,3 +85,72 @@ export function useGetSimulation(
         .then<SimulationDetails>(response => response.data),
   })
 }
+
+export function useGetSimulationLogs(
+  route: RouteLocationNormalized,
+  result: SimulationResult,
+) {
+  const queryClient = useQueryClient()
+  return useQuery({
+    queryKey: [
+      'simulationLogs',
+      computed(() => route.params.projId),
+      computed(() => result.id),
+    ],
+    enabled: computed(() => !!result),
+    retry: true,
+    retryDelay: 2000,
+    queryFn: () =>
+      axios
+        .get(
+          `/api/project/${route.params.proj}/simulate/result/${result.id}/logs`,
+          {},
+        )
+        .then(response => {
+          if (response.status === 204)
+            throw new Error(
+              'Fail if no data available to enable automatic refetch',
+            )
+          queryClient.invalidateQueries({
+            queryKey: ['simulations', <string>route.params.projId],
+          })
+          return response
+        })
+        .then<string>(response => response.data),
+  })
+}
+
+export function useGetSimulationConfig(
+  route: RouteLocationNormalized,
+  result: SimulationResult,
+) {
+  const queryClient = useQueryClient()
+  return useQuery({
+    queryKey: [
+      'simulationConfig',
+      computed(() => route.params.projId),
+      computed(() => result.id),
+    ],
+    enabled: computed(() => !!result),
+    retry: true,
+    retryDelay: 2000,
+    queryFn: () =>
+      axios
+        .get(
+          `/api/project/${route.params.proj}/simulate/result/${result.id}/config`,
+          {},
+        )
+        .then(response => {
+          if (response.status === 204)
+            throw new Error(
+              'Fail if no data available to enable automatic refetch',
+            )
+          queryClient.invalidateQueries({
+            queryKey: ['simulations', <string>route.params.projId],
+          })
+          return response
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then<any>(response => response.data),
+  })
+}

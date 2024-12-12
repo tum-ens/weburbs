@@ -4,6 +4,18 @@
       <div class="flex flex-row justify-between">
         <span>Simulations</span>
         <div class="flex flex-row gap-3">
+          <Button
+            v-if="advanced && selSimulation"
+            severity="info"
+            label="Configuration"
+            @click="configVisible = true"
+          />
+          <Button
+            v-if="advanced && selSimulation"
+            severity="info"
+            label="Logs"
+            @click="logsVisible = true"
+          />
           <Select
             v-model="selSimulation"
             :options="simulations"
@@ -104,10 +116,21 @@
           <ProgressSpinner />
           <span>Waiting for results...</span>
         </template>
-        <template v-else> The simulation run into an error. </template>
+        <template v-else> The simulation run into an error.</template>
       </div>
     </template>
   </Card>
+
+  <SimulationLogsDialog
+    v-if="logsVisible && selSimulation"
+    v-model:visible="logsVisible"
+    :result="selSimulation"
+  />
+  <SimulationConfigDialog
+    v-if="configVisible && selSimulation"
+    v-model:visible="configVisible"
+    :result="selSimulation"
+  />
 </template>
 
 <script setup lang="ts">
@@ -119,7 +142,7 @@ import {
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
 import { useSites } from '@/backend/sites'
 import Plotly from 'plotly.js-dist'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
@@ -129,12 +152,18 @@ import {
   type SimulationResult,
   SimulationResultStatus,
 } from '@/backend/interfaces'
+import SimulationLogsDialog from '@/pages/simulation/SimulationLogsDialog.vue'
+import SimulationConfigDialog from '@/pages/simulation/SimulationConfigDialog.vue'
 
 const route = useRoute()
 const toast = useToast()
 
 const selSimulation = ref<SimulationResult>()
 const resultsExist = ref(false)
+
+const advanced = inject('advanced')
+const logsVisible = ref(false)
+const configVisible = ref(false)
 
 const { data: sites } = useSites(route)
 const { mutate: triggerSimulation, isPending: simulating } =
@@ -194,7 +223,6 @@ watch(simulation, () => {
     resultsExist.value = false
     return
   }
-  console.log(simulation.value.status)
   if (selSimulation.value) {
     selSimulation.value = {
       ...selSimulation.value,

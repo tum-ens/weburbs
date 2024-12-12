@@ -201,7 +201,7 @@ def get_simulation_result(request, project_name, simid):
 
     simres = SimulationResult.objects.get(id=simid, project=project)
 
-    if simres.result is None:
+    if not simres.completed:
         return HttpResponse("No result has been reported...", status="204")
 
     return JsonResponse(
@@ -213,6 +213,32 @@ def get_simulation_result(request, project_name, simid):
             "result": simres.result,
         }
     )
+
+
+@login_required
+@require_GET
+def get_simulation_logs(request, project_name, simid):
+    project = get_project(request.user, project_name)
+
+    simres = SimulationResult.objects.get(id=simid, project=project)
+
+    if not simres.completed:
+        return HttpResponse("No result has been reported...", status="204")
+
+    return HttpResponse(simres.log)
+
+
+@login_required
+@require_GET
+def get_simulation_config(request, project_name, simid):
+    project = get_project(request.user, project_name)
+
+    simres = SimulationResult.objects.get(id=simid, project=project)
+
+    if not simres.completed:
+        return HttpResponse("No result has been reported...", status="204")
+
+    return JsonResponse(simres.config)
 
 
 def remove_none(d):

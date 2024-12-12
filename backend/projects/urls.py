@@ -77,4 +77,12 @@ urlpatterns = [
         "project/<str:project_name>/simulate/result/<uuid:simid>/",
         simulate.get_simulation_result,
     ),
+    path(
+        "project/<str:project_name>/simulate/result/<uuid:simid>/logs",
+        simulate.get_simulation_logs,
+    ),
+    path(
+        "project/<str:project_name>/simulate/result/<uuid:simid>/config",
+        simulate.get_simulation_config,
+    ),
 ]

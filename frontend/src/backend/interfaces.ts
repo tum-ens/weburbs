@@ -84,7 +84,7 @@ export interface SimulationResult {
   id: string
   timestamp: Date
   completed: boolean
-  status: SimulationResultStatus
+  status: SimulationResultStatus | null
 }
 
 export interface SimulationDetails extends SimulationResult {
