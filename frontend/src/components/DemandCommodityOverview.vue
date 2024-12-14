@@ -3,10 +3,11 @@
   <div class="grid grid-cols-8 gap-3">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
-      <Button @click="query" :disabled="!!demand?.data">Generate Demand</Button>
-      <Button @click="del" severity="danger" :disabled="!demand?.data">
-        Delete Demand
-      </Button>
+      <Button
+        @click="() => (configureVisible = true)"
+        severity="info"
+        label="Configure"
+      />
       <FloatLabel variant="on">
         <Select
           fluid
@@ -31,6 +32,8 @@
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
     <div v-else class="ml-5 italic col-span-7">No Demand configured</div>
   </div>
+
+  <ConfigureDemandDialog v-model:visible="configureVisible" />
 </template>
 
 <script setup lang="ts">
@@ -46,10 +49,12 @@ import {
   useGetDemand,
 } from '@/backend/demand'
 import { groupOptions, chunkAdd } from '@/helper/diagrams'
+import ConfigureDemandDialog from '@/dialogs/ConfigureDemandDialog.vue'
 
 const route = useRoute()
 const toast = useToast()
 
+const configureVisible = ref(false)
 const props = defineProps<{
   site: Site
   commodity: Commodity
