@@ -47,7 +47,6 @@ class AutoQuery(IntEnum):
 
 class CommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255, null=False)
     type = models.IntegerField(choices=ComType.choices(), null=False)
     price = models.IntegerField(null=True)
     max = models.IntegerField(null=True)
@@ -61,11 +60,14 @@ class CommodityTypes(models.Model):
 
 
 class DefCommodity(CommodityTypes):
+    name = models.CharField(max_length=255, null=False, unique=True)
     autoquery = models.IntegerField(choices=AutoQuery.choices(), null=True)
+    autoadd = models.BooleanField(default=False)
 
 
 class Commodity(CommodityTypes):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
+    name = models.CharField(max_length=255, null=False, unique=False)
     defcommodity = models.ForeignKey(
         DefCommodity, on_delete=models.SET_NULL, null=True, related_name="usages"
     )
@@ -92,7 +94,7 @@ class ProcessTypes(models.Model):
 
 
 class DefProcess(ProcessTypes):
-    pass
+    autoadd = models.BooleanField(default=False)
 
 
 class Process(ProcessTypes):
@@ -165,6 +167,7 @@ class DefStorage(StorageType):
     def_commodity = models.ForeignKey(
         DefCommodity, on_delete=models.CASCADE, null=False
     )
+    autoadd = models.BooleanField(default=False)
 
 
 class Storage(StorageType):
@@ -193,6 +196,7 @@ class Demand(DemandType):
     defdemand = models.ForeignKey(
         DefDemand, on_delete=models.SET_NULL, null=True, related_name="usages"
     )
+    quantity = models.IntegerField(null=False)
 
 
 class SupImType(models.Model):

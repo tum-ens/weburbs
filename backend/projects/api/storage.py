@@ -43,7 +43,13 @@ def list_storage(request, project_name, site_name):
     return JsonResponse(proclist, safe=False)
 
 
-def add_def_to_project(def_storage: DefStorage, site: Site, com: Commodity):
+def add_def_to_project(def_storage: DefStorage, site: Site):
+    coms = def_storage.def_commodity.usages.filter(site=site)
+    if len(coms) == 1:
+        com = coms[0]
+    else:
+        com = commodity.add_def_to_project(def_storage.def_commodity, site)
+
     storage = Storage(
         site=site,
         commodity=com,
@@ -87,14 +93,7 @@ def add_def_storage(request, project_name, site_name, def_storage_name):
     if Storage.objects.filter(site=site, name=def_storage_name).exists():
         return HttpResponse("Storage with the same name already exists", status=409)
 
-    # Start adding process and all process commodities
-    coms = def_storage.def_commodity.usages.filter(site=site)
-    if len(coms) == 1:
-        com = coms[0]
-    else:
-        com = commodity.add_def_to_project(def_storage.def_commodity, site)
-
-    storage = add_def_to_project(def_storage, site, com)
+    storage = add_def_to_project(def_storage, site)
     storage.save()
 
     return JsonResponse({"detail": "Storage added"})

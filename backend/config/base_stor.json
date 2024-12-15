@@ -1,0 +1,29 @@
+{
+  "storage": {
+    "Battery": {
+      "description": "Example battery",
+      "commodity": "Elec",
+      "instcapc": 0,
+      "caploc": 0,
+      "capupc": -1,
+      "instcapp": 0,
+      "caplop": 0,
+      "capupp": -1,
+
+      "effin": 0.80,
+      "effout": 0.80,
+
+      "invcostc": 9.7,
+      "fixcostc": 0,
+      "varcostc": 0,
+      "invcostp": 1000,
+      "fixcostp": 0,
+      "varcostp": 0,
+
+      "wacc": 0.007,
+      "depreciation": 50,
+      "init": 0.5,
+      "discharge": 0.0000035
+    }
+  }
+}

@@ -9,5 +9,6 @@ done
 echo "Database started"
 
 python manage.py migrate
+python manage.py load_config
 
 gunicorn backendurbs.wsgi:application --bind 0.0.0.0:8000

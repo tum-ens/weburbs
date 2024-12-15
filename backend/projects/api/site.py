@@ -5,10 +5,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.decorators.http import require_POST, require_GET
 
+from projects.api import process, commodity, storage
 from projects.api.helper import get_project
-from projects.api.commodity import add_def_to_project
 from projects.api.supim import querySolar, queryWind
-from projects.models import Site, DefCommodity, Commodity, AutoQuery, SupIm
+from projects.models import (
+    Site,
+    DefCommodity,
+    Commodity,
+    AutoQuery,
+    SupIm,
+    DefProcess,
+    DefStorage,
+)
 
 
 @login_required
@@ -58,8 +66,13 @@ def edit_site(request, project_name, site_name):
             )
             site.save()
 
-            add_def_to_project(DefCommodity.objects.get(name="CO2"), site)
-            add_def_to_project(DefCommodity.objects.get(name="Elec"), site)
+            for def_com in DefCommodity.objects.filter(autoadd=True).all():
+                commodity.add_def_to_project(def_com, site)
+            for def_proc in DefProcess.objects.filter(autoadd=True).all():
+                print("found one")
+                process.add_def_to_project(def_proc, site)
+            for def_stor in DefStorage.objects.filter(autoadd=True).all():
+                storage.add_def_to_project(def_stor, site)
 
             return JsonResponse({"detail": "Site created"})
         else:
@@ -68,12 +81,12 @@ def edit_site(request, project_name, site_name):
 
 def reload_supim(site: Site):
     commodities = Commodity.objects.filter(site=site)
-    for commodity in commodities:
-        def_commodity = commodity.defcommodity
+    for com in commodities:
+        def_commodity = com.defcommodity
         if def_commodity is not None and def_commodity.autoquery is not None:
-            if SupIm.objects.filter(commodity=commodity).exists():
-                SupIm.objects.get(commodity=commodity).delete()
+            if SupIm.objects.filter(commodity=com).exists():
+                SupIm.objects.get(commodity=com).delete()
             if def_commodity.autoquery == AutoQuery.Solar:
-                querySolar(site, commodity)
+                querySolar(site, com)
             elif def_commodity.autoquery == AutoQuery.Wind:
-                queryWind(site, commodity)
+                queryWind(site, com)

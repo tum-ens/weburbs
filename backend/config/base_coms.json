@@ -1,0 +1,23 @@
+{
+  "commodity": {
+    "Solar": {
+      "type": "SupIm",
+      "autoquery": "Solar"
+    },
+    "Wind": {
+      "type": "SupIm",
+      "autoquery": "Wind"
+    },
+    "Elec": {
+      "type": "Demand",
+      "autoadd": true
+    },
+    "CO2": {
+      "type": "Env",
+      "price": 0,
+      "max": -1,
+      "maxperour": -1,
+      "autoadd": true
+    }
+  }
+}

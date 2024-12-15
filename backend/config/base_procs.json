@@ -1,0 +1,76 @@
+{
+  "process": {
+    "Photovoltaics": {
+      "description": "Generates electricity from sun",
+      "instcap": 0,
+      "caplo": 15000,
+      "capup": 160000,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 600000,
+      "fixcost": 12000,
+      "varcost": 0,
+      "wacc": 0.07,
+      "depreciation": 25,
+      "areapercap": 14000,
+      "commodities": {
+        "Solar": {
+          "direction": "In",
+          "ratio": 1,
+          "ratiomin": 1
+        },
+        "Elec": {
+          "direction": "Out",
+          "ratio": 1,
+          "ratiomin": 1
+        }
+      }
+    },
+    "Wind park": {
+      "description": "Generates electricity from wind",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": 13000,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 1500000,
+      "fixcost": 30000,
+      "varcost": 0,
+      "wacc": 0.07,
+      "depreciation": 25,
+      "commodities": {
+        "Wind": {
+          "direction": "In",
+          "ratio": 1,
+          "ratiomin": 1
+        },
+        "Elec": {
+          "direction": "Out",
+          "ratio": 1,
+          "ratiomin": 1
+        }
+      }
+    },
+    "Curtailpower": {
+      "description": "Consumes overproduced electricity",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": 999999,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 0,
+      "fixcost": 0,
+      "varcost": 0,
+      "wacc": 0,
+      "depreciation": 1,
+      "commodities": {
+        "Elec": {
+          "direction": "Out",
+          "ratio": 1,
+          "ratiomin": 1
+        }
+      },
+      "autoadd": true
+    }
+  }
+}

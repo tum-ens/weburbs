@@ -127,25 +127,6 @@ def add_def_to_project(def_process: DefProcess, site: Site):
         areapercap=def_process.areapercap,
     )
     process.save()
-    return process
-
-
-@login_required
-@require_POST
-def add_def_process(request, project_name, site_name, def_proc_name):
-    try:
-        def_process = DefProcess.objects.get(name=def_proc_name)
-    except DefProcess.DoesNotExist:
-        return HttpResponse("Default process not found", status="404")
-
-    project = get_project(request.user, project_name)
-    site = get_site(project, site_name)
-
-    if Process.objects.filter(site=site, name=def_proc_name).exists():
-        return HttpResponse("Process with the same name already exists", status=409)
-
-    # Start adding process and all process commodities
-    process = add_def_to_project(def_process, site)
 
     for def_proccom in DefProcessCommodity.objects.filter(def_process=def_process):
         def_com = def_proccom.def_commodity
@@ -169,6 +150,25 @@ def add_def_process(request, project_name, site_name, def_proc_name):
             ratiomin=def_proccom.ratiomin,
         )
         proccom.save()
+    return process
+
+
+@login_required
+@require_POST
+def add_def_process(request, project_name, site_name, def_proc_name):
+    try:
+        def_process = DefProcess.objects.get(name=def_proc_name)
+    except DefProcess.DoesNotExist:
+        return HttpResponse("Default process not found", status="404")
+
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    if Process.objects.filter(site=site, name=def_proc_name).exists():
+        return HttpResponse("Process with the same name already exists", status=409)
+
+    # Start adding process and all process commodities
+    add_def_to_project(def_process, site)
 
     return JsonResponse({"detail": "Process added"})
 
