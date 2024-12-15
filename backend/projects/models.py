@@ -186,9 +186,7 @@ class DemandType(models.Model):
 
 
 class DefDemand(DemandType):
-    def_commodity = models.ForeignKey(
-        DefCommodity, on_delete=models.CASCADE, null=False
-    )
+    pass
 
 
 class Demand(DemandType):
@@ -210,9 +208,7 @@ class SupImType(models.Model):
 
 
 class DefSupIm(SupImType):
-    def_commodity = models.ForeignKey(
-        DefCommodity, on_delete=models.CASCADE, null=False
-    )
+    pass
 
 
 class SupIm(SupImType):

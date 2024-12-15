@@ -11,7 +11,7 @@ from projects.models import (
     DefProcess,
     DefProcessCommodity,
     ProcComDir,
-    DefStorage,
+    DefStorage, DefSupIm, DefDemand,
 )
 
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         processes = {}
         storages = {}
         supims = {}
-        demands = defaultdict(dict)
+        demands = {}
 
         for filename in os.listdir(folder_path):
             if filename.endswith(".json"):
@@ -62,17 +62,16 @@ class Command(BaseCommand):
                             for name, supim in data["supim"].items():
                                 if name in supims:
                                     raise Exception(
-                                        f"Supim for commodity {name} is configured twice"
+                                        f"Supim {name} is configured twice"
                                     )
                                 supims[name] = supim
                         if "demand" in data:
-                            for com_name, com_demands in data["demand"].items():
-                                for demand_name, demand in com_demands.items():
-                                    if demand_name in demands["com_name"]:
-                                        raise Exception(
-                                            f"Demand for commodity {com_name} with name {demand_name} is configured twice"
-                                        )
-                                    demands[com_name][demand_name] = demand
+                            for name, demand in data["demand"].items():
+                                if name in demands:
+                                    raise Exception(
+                                        f"Demand {name} is configured twice"
+                                    )
+                                demands[name] = demand
                         print("\033[92mOK\033[0m")
                 except Exception as e:
                     self.stdout.write(
@@ -184,6 +183,38 @@ class Command(BaseCommand):
             def_stor.discharge = stor["discharge"]
             def_stor.epratio = getDefault(stor, "epratio", None)
             def_stor.save()
+            print("\033[92mOK\033[0m")
+
+        for def_supim in DefSupIm.objects.all():
+            if def_supim.name not in supims.keys():
+                def_supim.delete()
+        for name, supim in supims.items():
+            def_supims = DefSupIm.objects.filter(name=name).all()
+            if len(def_supims) > 0:
+                print(f"Updating supim {name}... ", end="")
+                def_supim = def_supims[0]
+            else:
+                print(f"Adding supim {name}... ", end="")
+                def_supim = DefSupIm(name=name)
+            def_supim.description = getDefault(supim, "description", "")
+            def_supim.steps = supim['steps']
+            def_supim.save()
+            print("\033[92mOK\033[0m")
+
+        for def_demand in DefDemand.objects.all():
+            if def_demand.name not in demands.keys():
+                def_demand.delete()
+        for name, demand in demands.items():
+            def_demands = DefSupIm.objects.filter(name=name).all()
+            if len(def_demands) > 0:
+                print(f"Updating demand {name}... ", end="")
+                def_demand = def_demands[0]
+            else:
+                print(f"Adding demand {name}... ", end="")
+                def_demand = DefDemand(name=name)
+            def_demand.description = getDefault(demand, "description", "")
+            def_demand.steps = demand['steps']
+            def_demand.save()
             print("\033[92mOK\033[0m")
 
 
