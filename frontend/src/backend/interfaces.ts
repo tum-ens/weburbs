@@ -70,6 +70,10 @@ export interface Storage {
   commodity: string
 }
 
+export interface Steps {
+  data?: number[]
+}
+
 export interface Demand {
   name: string
   description: string

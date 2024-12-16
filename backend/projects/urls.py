@@ -68,13 +68,13 @@ urlpatterns = [
         demand.getDefaultDemands,
     ),
     path(
-        "project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/",
-        demand.handleDemand,
+        "project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/update/",
+        demand.updateDemands,
     ),
-    # path(
-    #     "project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/generate/",
-    #     demand.queryDemand,
-    # ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/",
+        demand.getDemand,
+    ),
     path("project/<str:project_name>/simulate/trigger/", simulate.trigger_simulation),
     path("project/<str:project_name>/simulate/results/", simulate.get_simulations),
     path(

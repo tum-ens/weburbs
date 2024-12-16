@@ -1,6 +1,5 @@
 import json
 import os
-from collections import defaultdict
 
 from django.core.management.base import BaseCommand
 
@@ -11,7 +10,9 @@ from projects.models import (
     DefProcess,
     DefProcessCommodity,
     ProcComDir,
-    DefStorage, DefSupIm, DefDemand,
+    DefStorage,
+    DefSupIm,
+    DefDemand,
 )
 
 
@@ -61,9 +62,7 @@ class Command(BaseCommand):
                         if "supim" in data:
                             for name, supim in data["supim"].items():
                                 if name in supims:
-                                    raise Exception(
-                                        f"Supim {name} is configured twice"
-                                    )
+                                    raise Exception(f"Supim {name} is configured twice")
                                 supims[name] = supim
                         if "demand" in data:
                             for name, demand in data["demand"].items():
@@ -197,7 +196,7 @@ class Command(BaseCommand):
                 print(f"Adding supim {name}... ", end="")
                 def_supim = DefSupIm(name=name)
             def_supim.description = getDefault(supim, "description", "")
-            def_supim.steps = supim['steps']
+            def_supim.steps = supim["steps"]
             def_supim.save()
             print("\033[92mOK\033[0m")
 
@@ -213,7 +212,7 @@ class Command(BaseCommand):
                 print(f"Adding demand {name}... ", end="")
                 def_demand = DefDemand(name=name)
             def_demand.description = getDefault(demand, "description", "")
-            def_demand.steps = demand['steps']
+            def_demand.steps = demand["steps"]
             def_demand.save()
             print("\033[92mOK\033[0m")
 
