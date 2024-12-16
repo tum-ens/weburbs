@@ -204,7 +204,7 @@ class Command(BaseCommand):
             if def_demand.name not in demands.keys():
                 def_demand.delete()
         for name, demand in demands.items():
-            def_demands = DefSupIm.objects.filter(name=name).all()
+            def_demands = list(DefDemand.objects.filter(name=name).all())
             if len(def_demands) > 0:
                 print(f"Updating demand {name}... ", end="")
                 def_demand = def_demands[0]

@@ -29,7 +29,7 @@ export function useTriggerSimulation(route: RouteLocationNormalized) {
         }),
     onSuccess() {
       queryClient.invalidateQueries({
-        queryKey: ['simulations', <string>route.params.projId],
+        queryKey: ['simulations', <string>route.params.proj],
       })
     },
   })
@@ -37,7 +37,7 @@ export function useTriggerSimulation(route: RouteLocationNormalized) {
 
 export function useListSimulations(route: RouteLocationNormalized) {
   return useQuery({
-    queryKey: ['simulations', computed(() => route.params.projId)],
+    queryKey: ['simulations', computed(() => route.params.proj)],
     queryFn: () =>
       axios
         .get(`/api/project/${route.params.proj}/simulate/results/`, {})
@@ -60,7 +60,7 @@ export function useGetSimulation(
   return useQuery({
     queryKey: [
       'simulation',
-      computed(() => route.params.projId),
+      computed(() => route.params.proj),
       computed(() => result.value?.id),
     ],
     enabled: computed(() => !!result.value),
@@ -78,7 +78,7 @@ export function useGetSimulation(
               'Fail if no data available to enable automatic refetch',
             )
           queryClient.invalidateQueries({
-            queryKey: ['simulations', <string>route.params.projId],
+            queryKey: ['simulations', <string>route.params.proj],
           })
           return response
         })
@@ -94,7 +94,7 @@ export function useGetSimulationLogs(
   return useQuery({
     queryKey: [
       'simulationLogs',
-      computed(() => route.params.projId),
+      computed(() => route.params.proj),
       computed(() => result.id),
     ],
     enabled: computed(() => !!result),
@@ -112,7 +112,7 @@ export function useGetSimulationLogs(
               'Fail if no data available to enable automatic refetch',
             )
           queryClient.invalidateQueries({
-            queryKey: ['simulations', <string>route.params.projId],
+            queryKey: ['simulations', <string>route.params.proj],
           })
           return response
         })
@@ -128,7 +128,7 @@ export function useGetSimulationConfig(
   return useQuery({
     queryKey: [
       'simulationConfig',
-      computed(() => route.params.projId),
+      computed(() => route.params.proj),
       computed(() => result.id),
     ],
     enabled: computed(() => !!result),
@@ -146,7 +146,7 @@ export function useGetSimulationConfig(
               'Fail if no data available to enable automatic refetch',
             )
           queryClient.invalidateQueries({
-            queryKey: ['simulations', <string>route.params.projId],
+            queryKey: ['simulations', <string>route.params.proj],
           })
           return response
         })

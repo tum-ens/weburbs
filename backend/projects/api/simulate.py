@@ -58,7 +58,10 @@ def trigger_simulation(request, project_name):
                         "supim": SupIm.objects.filter(commodity=commodity).get().steps
                         if SupIm.objects.filter(commodity=commodity).exists()
                         else None,
-                        "demand": Demand.objects.filter(commodity=commodity).get().steps
+                        "demand": calculateDemand(
+                            timesteps,
+                            list(Demand.objects.filter(commodity=commodity).all()),
+                        )
                         if Demand.objects.filter(commodity=commodity).exists()
                         else None,
                         "storage": {
@@ -140,6 +143,14 @@ def trigger_simulation(request, project_name):
     return JsonResponse(
         {"id": simres.id, "timestamp": simres.timestamp, "completed": False}
     )
+
+
+def calculateDemand(timesteps, demands):
+    result = [0] * timesteps
+    for demand in demands:
+        for i in range(timesteps):
+            result[i] += demand.steps[i] * demand.quantity
+    return result
 
 
 @csrf_exempt

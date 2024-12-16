@@ -65,7 +65,7 @@
       "depreciation": 1,
       "commodities": {
         "Elec": {
-          "direction": "Out",
+          "direction": "In",
           "ratio": 1,
           "ratiomin": 1
         }

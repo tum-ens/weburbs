@@ -98,10 +98,8 @@ const availDefDemands = computed(() => {
 watch(
   exDemands,
   () => {
-    if (!exDemands.value) {
-      demands.value = []
-      return
-    }
+    demands.value = []
+    if (!exDemands.value) return
     demands.value = exDemands.value.map(dem => {
       return {
         name: dem.name,

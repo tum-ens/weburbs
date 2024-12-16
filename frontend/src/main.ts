@@ -21,7 +21,9 @@ fetch('/config.json')
 
     createApp(App)
       .use(router)
-      .use(VueQueryPlugin)
+      .use(VueQueryPlugin, {
+        enableDevtoolsV6Plugin: true,
+      })
       .use(ToastService)
       .use(PrimeVue, {
         theme: {
