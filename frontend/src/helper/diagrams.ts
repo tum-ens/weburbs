@@ -21,11 +21,11 @@ export const groupOptions = [
   },
 ]
 
-export function chunkAdd(data: number[], chunkSize: number) {
+export function chunkAdd(data: number[], chunkSize: number, quantity = 1) {
   const res = []
   let buffer = 0
   for (let i = 0; i < data.length; i++) {
-    buffer += data[i]
+    buffer += data[i] * quantity
     if ((i + 1) % chunkSize === 0) {
       res.push(buffer)
       buffer = 0

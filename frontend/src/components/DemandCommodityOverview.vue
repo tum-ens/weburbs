@@ -21,13 +21,13 @@
     </div>
 
     <div v-if="demands && demands?.length > 0" class="col-span-7">
-      <!--      <BarDiagramm-->
-      <!--        :data-->
-      <!--        title-x="Steps"-->
-      <!--        title-y="kwH"-->
-      <!--        class="h-80"-->
-      <!--        :bargroupgap="0.1"-->
-      <!--      />-->
+      <BarDiagramm
+        :data="data"
+        title-x="Steps"
+        title-y="kwH"
+        class="h-80"
+        :bargroupgap="0.1"
+      />
     </div>
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
     <div v-else class="ml-5 italic col-span-7">No Demand configured</div>
@@ -42,11 +42,12 @@
 
 <script setup lang="ts">
 import type { Commodity, Site } from '@/backend/interfaces'
-import { ref } from 'vue'
+import { computed, type Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useGetDemand } from '@/backend/demand'
-import { groupOptions } from '@/helper/diagrams'
+import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import ConfigureDemandDialog from '@/dialogs/ConfigureDemandDialog.vue'
+import BarDiagramm from '@/plotly/BarDiagramm.vue'
 
 const route = useRoute()
 
@@ -64,20 +65,20 @@ const { data: demands, isPending: pending } = useGetDemand(
   props.commodity,
 )
 
-// const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
-//   if (!demand.value?.data) return []
-//   return [
-//     {
-//       name: props.commodity.name,
-//       y: chunkAdd(demand.value.data, groupOption.value.groupSize),
-//       x: Array.from({ length: groupOption.value.groups }, (_, i) => i + 1),
-//       type: 'bar',
-//       marker: {
-//         color: props.commodity.name.includes('Solar') ? 'gold' : undefined,
-//       },
-//     },
-//   ]
-// })
+const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
+  if (!demands.value) return []
+  return demands.value.map(demand => {
+    return {
+      name: demand.name,
+      y: chunkAdd(demand.steps, groupOption.value.groupSize, demand.quantity),
+      x: Array.from({ length: groupOption.value.groups }, (_, i) => i + 1),
+      type: 'bar',
+      marker: {
+        color: props.commodity.name.includes('Solar') ? 'gold' : undefined,
+      },
+    }
+  })
+})
 </script>
 
 <style scoped></style>

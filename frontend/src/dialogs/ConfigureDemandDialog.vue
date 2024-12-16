@@ -127,6 +127,7 @@ function remove(demand: DemandConfig) {
 
 function save() {
   updateDemands(demands.value)
+  visible.value = false
 }
 </script>
 

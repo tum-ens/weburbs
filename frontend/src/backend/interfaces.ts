@@ -84,7 +84,7 @@ export interface DemandConfig extends Demand {
 }
 
 export interface DemandProfile extends DemandConfig {
-  data: number[]
+  steps: number[]
 }
 
 export enum SimulationResultStatus {
