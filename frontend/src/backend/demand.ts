@@ -2,8 +2,18 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
-import type { Commodity, Site, Steps } from '@/backend/interfaces'
+import type {Commodity, Demand, Process, Site} from '@/backend/interfaces'
 import { computed } from 'vue'
+
+export function useGetDefDemand() {
+  return useQuery({
+    queryKey: ['defDemand'],
+    queryFn: () =>
+      axios
+        .get<Process[]>(`/api/def_demands/`)
+        .then<Demand[]>(response => response.data),
+  })
+}
 
 export function useGetDemand(
   route: RouteLocationNormalized,

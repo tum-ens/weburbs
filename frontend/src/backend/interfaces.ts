@@ -70,8 +70,17 @@ export interface Storage {
   commodity: string
 }
 
-export interface Steps {
-  data?: number[]
+export interface Demand {
+  name: string
+  description: string
+}
+
+export interface DemandConfig extends Demand {
+  quantity: number
+}
+
+export interface DemandProfile extends DemandConfig {
+  data: number[]
 }
 
 export enum SimulationResultStatus {
