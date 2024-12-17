@@ -1,39 +1,28 @@
 <template>
-  <Card class="w-80">
-    <template #content>
-      <ScrollPanel>
-        <PanelMenu :model="items" :expanded-keys="expandedKey">
-          <template #item="{ item }">
-            <a class="flex items-center px-4 py-2 cursor-pointer group">
-              <span
-                v-if="item.items"
-                class="pi text-primary mr-2"
-                :class="{
-                  'pi-angle-right': !expandedKey[<string>item.key],
-                  'pi-angle-down': expandedKey[<string>item.key],
-                }"
-              />
-              <span
-                :class="[item.icon, 'text-primary group-hover:text-inherit']"
-              />
-              <span
-                :class="[
-                  'ml-2',
-                  { 'font-semibold': expandedKey[<string>item.key] },
-                ]"
-                class="select-none"
-                >{{ item.label }}</span
-              >
-            </a>
-          </template>
-        </PanelMenu>
-        <div class="flex flex-row pt-3 pl-3 gap-3">
-          <label for="advanced" class="select-none">Advanced mode</label>
-          <ToggleSwitch inputId="advanced" v-model="advanced" />
-        </div>
-      </ScrollPanel>
+  <PanelMenu :model="items" :expanded-keys="expandedKey">
+    <template #item="{ item }">
+      <a class="flex items-center px-4 py-2 cursor-pointer group">
+        <span
+          v-if="item.items"
+          class="pi text-primary mr-2"
+          :class="{
+            'pi-angle-right': !expandedKey[<string>item.key],
+            'pi-angle-down': expandedKey[<string>item.key],
+          }"
+        />
+        <span :class="[item.icon, 'text-primary group-hover:text-inherit']" />
+        <span
+          :class="['ml-2', { 'font-semibold': expandedKey[<string>item.key] }]"
+          class="select-none"
+          >{{ item.label }}</span
+        >
+      </a>
     </template>
-  </Card>
+  </PanelMenu>
+  <div class="flex flex-row pt-3 pl-3 gap-3">
+    <label for="advanced" class="select-none">Advanced mode</label>
+    <ToggleSwitch inputId="advanced" v-model="advanced" />
+  </div>
 </template>
 
 <script setup lang="ts">
