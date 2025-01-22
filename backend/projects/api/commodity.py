@@ -1,8 +1,9 @@
+import json
 import threading
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
 from projects.api.supim import querySolar, queryWind
@@ -54,3 +55,63 @@ def add_def_to_project(def_commodity: DefCommodity, site: Site):
         elif def_commodity.autoquery == AutoQuery.Wind:
             threading.Thread(target=queryWind, args=(site, commodity)).start()
     return commodity
+
+
+@login_required
+@require_POST
+def add_def_commodity(request, project_name, site_name, def_com_name):
+    try:
+        def_commodity = DefCommodity.objects.get(name=def_com_name)
+    except DefCommodity.DoesNotExist:
+        return HttpResponse("Default commodity not found", status="404")
+
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    if Commodity.objects.filter(site=site, name=def_com_name).exists():
+        return HttpResponse("Commodity with the same name already exists", status=409)
+
+    # Start adding commodity
+    add_def_to_project(def_commodity, site)
+
+    return JsonResponse({"detail": "Commodity added"})
+
+
+@login_required
+@require_POST
+def update_commodity(request, project_name, site_name, commodity_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    data = json.loads(request.body)
+
+    if commodity_name != data["name"]:
+        if Commodity.objects.filter(site=site, name=data["name"]).exists():
+            return HttpResponse(
+                "Commodity with the same name already exists", status=409
+            )
+
+    try:
+        commodity = Commodity.objects.get(site=site, name=commodity_name)
+    except Commodity.DoesNotExist:
+        commodity = Commodity(site=site)
+    commodity.name = data["name"]
+    commodity.type = data["type"]
+    commodity.price = data["price"] if "price" in data else None
+    commodity.max = data["max"] if "max" in data else None
+    commodity.maxperhour = data["maxperhour"] if "maxperhour" in data else None
+    commodity.save()
+
+    return JsonResponse({"detail": "Commodity updated"})
+
+
+@login_required
+@require_POST
+def delete_commodity(request, project_name, site_name, commodity_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    commodity = Commodity.objects.get(site=site, name=commodity_name)
+    commodity.delete()
+
+    return JsonResponse({"detail": "Commodity deleted"})

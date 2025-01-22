@@ -140,7 +140,7 @@ def add_def_to_project(def_process: DefProcess, site: Site):
         if len(coms) == 1:
             com = coms[0]
         else:
-            com = commodity.add_def_to_project(def_com, site)
+            com = commodity.add_def_commodity(def_com, site)
 
         proccom = ProcessCommodity(
             commodity=com,
@@ -214,7 +214,7 @@ def update_process(request, project_name, site_name, process_name):
             com = Commodity.objects.get(site=site, name=in_proccom["name"])
         except Commodity.DoesNotExist:
             def_com = DefCommodity.objects.get(name=in_proccom["name"])
-            com = commodity.add_def_to_project(def_com, site)
+            com = commodity.add_def_commodity(def_com, site)
         ProcessCommodity(
             process=process,
             commodity=com,
@@ -227,7 +227,7 @@ def update_process(request, project_name, site_name, process_name):
             com = Commodity.objects.get(site=site, name=out_proccom["name"])
         except Commodity.DoesNotExist:
             def_com = DefCommodity.objects.get(name=out_proccom["name"])
-            com = commodity.add_def_to_project(def_com, site)
+            com = commodity.add_def_commodity(def_com, site)
         (
             ProcessCommodity(
                 process=process,
@@ -238,7 +238,7 @@ def update_process(request, project_name, site_name, process_name):
             ).save()
         )
 
-    return JsonResponse({"detail": "Project created"})
+    return JsonResponse({"detail": "Process updated"})
 
 
 @login_required

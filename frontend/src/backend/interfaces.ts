@@ -12,13 +12,28 @@ export interface Site {
   lat: number
 }
 
+export enum CommodityType {
+  SupIm = 1,
+  Demand = 2,
+  Stock = 3,
+  Env = 4,
+  Buy = 5,
+  Sell = 6,
+}
+
+export const CommodityTypes = ['SupIm', 'Demand', 'Stock', 'Env', 'Buy', 'Sell']
+
+export function commodityTypeToName(type: CommodityType): string {
+  return CommodityTypes[type - 1]
+}
+
 export interface Commodity {
   site: string
   name: string
-  type: number
-  price: number
-  max: number
-  maxperhour: number
+  type: CommodityType
+  price: number | undefined
+  max: number | undefined
+  maxperhour: number | undefined
 }
 
 export interface ProcessCommodity {

@@ -4,7 +4,7 @@
     :draggable="false"
     modal
     header="Create commodity"
-    class="w-11/12 md:w-10/12 xl:w-1/2 min-h-96"
+    class="w-11/12 md:w-10/12 xl:w-1/2"
   >
     <CommodityForm
       submit-label="Create"
@@ -20,8 +20,8 @@ import type { Commodity } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
-import CommodityForm from '@/forms/CommodityForm.vue'
 import { useUpdateCommodity } from '@/backend/commodities'
+import CommodityForm from '@/forms/CommodityForm.vue'
 
 const route = useRoute()
 const toast = useToast()

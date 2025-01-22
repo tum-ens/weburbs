@@ -3,28 +3,28 @@
     v-model:visible="visible"
     :draggable="false"
     modal
-    :header="'Edit \'' + props.process.name + '\''"
+    :header="'Edit \'' + props.commodity.name + '\''"
     class="w-11/12 md:w-10/12 lg:w-1/2"
   >
-    <ProcessForm
-      :commodity="process"
+    <CommodityForm
+      :commodity="commodity"
       submit-label="Update"
       :loading="loading || deleting"
       @submit="update"
       :site_name="site_name"
       delete
-      @onDelete="deleteProc"
+      @onDelete="deleteCom"
     />
   </Dialog>
 </template>
 
 <script setup lang="ts">
-import ProcessForm from '@/forms/ProcessForm.vue'
-import type { Process } from '@/backend/interfaces'
-import { useDeleteProcess, useUpdateProcess } from '@/backend/processes'
+import type { Commodity } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
+import { useDeleteCommodity, useUpdateCommodity } from '@/backend/commodities'
+import CommodityForm from '@/forms/CommodityForm.vue'
 
 const route = useRoute()
 const toast = useToast()
@@ -32,25 +32,27 @@ const toast = useToast()
 const visible = defineModel<boolean>('visible', { default: false })
 const props = defineProps<{
   site_name: string
-  process: Process
+  commodity: Commodity
 }>()
 
-const { mutate: updateProcess, isPending: loading } = useUpdateProcess(route)
-const { mutate: deleteProcess, isPending: deleting } = useDeleteProcess(route)
+const { mutate: updateCommodity, isPending: loading } =
+  useUpdateCommodity(route)
+const { mutate: deleteCommodity, isPending: deleting } =
+  useDeleteCommodity(route)
 
-function update(process: Process): void {
-  updateProcess(
+function update(commodity: Commodity): void {
+  updateCommodity(
     {
       site_name: props.site_name,
-      process_name: props.process.name,
-      process,
+      commodity_name: props.commodity.name,
+      commodity,
     },
     {
       onSuccess() {
         visible.value = false
         toast.add({
           summary: 'Added',
-          detail: `Process ${process.name} has been updated`,
+          detail: `Commodity ${commodity.name} has been updated`,
           severity: 'success',
           life: 2000,
         })
@@ -60,7 +62,7 @@ function update(process: Process): void {
           summary: 'Error adding',
           detail:
             (<AxiosError>error)?.response?.data ||
-            `An error occurred when updating ${process.name}`,
+            `An error occurred when updating ${commodity.name}`,
           severity: 'error',
           life: 2000,
         })
@@ -69,18 +71,18 @@ function update(process: Process): void {
   )
 }
 
-function deleteProc(): void {
-  deleteProcess(
+function deleteCom(): void {
+  deleteCommodity(
     {
       site_name: props.site_name,
-      process_name: props.process.name,
+      commodity_name: props.commodity.name,
     },
     {
       onSuccess() {
         visible.value = false
         toast.add({
           summary: 'Deleted',
-          detail: `Process ${props.process.name} has been deleted`,
+          detail: `Commodity ${props.commodity.name} has been deleted`,
           severity: 'success',
           life: 2000,
         })
@@ -90,7 +92,7 @@ function deleteProc(): void {
           summary: 'Error deleted',
           detail:
             (<AxiosError>error)?.response?.data ||
-            `An error occurred when deleting ${props.process.name}`,
+            `An error occurred when deleting ${props.commodity.name}`,
           severity: 'error',
           life: 2000,
         })
