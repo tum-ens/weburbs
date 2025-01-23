@@ -3,19 +3,17 @@
     <template #item="{ item }">
       <a class="flex items-center px-4 py-2 cursor-pointer group">
         <span
-          v-if="item.items"
-          class="pi text-primary mr-2"
-          :class="{
-            'pi-angle-right': !expandedKey[<string>item.key],
-            'pi-angle-down': expandedKey[<string>item.key],
-          }"
+          :class="[
+            item.icon,
+            item.advanced ? 'text-orange-400' : 'text-primary',
+          ]"
         />
-        <span :class="[item.icon, 'text-primary group-hover:text-inherit']" />
         <span
           :class="['ml-2', { 'font-semibold': expandedKey[<string>item.key] }]"
           class="select-none"
-          >{{ item.label }}</span
         >
+          {{ item.label }}
+        </span>
       </a>
     </template>
   </PanelMenu>
@@ -84,6 +82,16 @@ const items = computed(() => {
             }),
         },
         {
+          key: 'ProjectCommodity',
+          label: 'Commodities',
+          advanced: true,
+          icon: 'pi pi-bolt',
+          command: () =>
+            router.push({
+              name: 'ProjectCommodity',
+            }),
+        },
+        {
           key: 'ProjectDemand',
           label: 'Demand',
           icon: 'pi pi-gauge',
@@ -129,7 +137,7 @@ const items = computed(() => {
               name: 'ProjectSimulation',
             }),
         },
-        {
+        /*{
           key: 'advanced',
           label: 'Advanced',
           advanced: true,
@@ -144,15 +152,6 @@ const items = computed(() => {
             expandedKey.value = newKeys
           },
           items: [
-            {
-              key: 'ProjectCommodity',
-              label: 'Commodities',
-              icon: 'pi pi-bolt',
-              command: () =>
-                router.push({
-                  name: 'ProjectCommodity',
-                }),
-            },
             {
               key: 'ProjectTransmission',
               label: 'Transmission',
@@ -190,7 +189,7 @@ const items = computed(() => {
                 }),
             },
           ],
-        },
+        },*/
       ].filter(
         item => (!item.advanced || advanced?.value) && route.params.proj,
       ),
