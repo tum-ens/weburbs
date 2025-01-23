@@ -185,7 +185,11 @@
                   filter
                   fluid
                   id="inComs"
-                />
+                >
+                  <template #emptyfilter
+                    >Create commodities before using them</template
+                  >
+                </MultiSelect>
                 <label for="inComs">Incoming commodities</label>
               </FloatLabel>
               <div
@@ -229,7 +233,11 @@
                   filter
                   fluid
                   id="outComs"
-                />
+                >
+                  <template #emptyfilter
+                    >Create commodities before using them</template
+                  >
+                </MultiSelect>
                 <label for="outComs">Outgoing commodities</label>
               </FloatLabel>
               <div
