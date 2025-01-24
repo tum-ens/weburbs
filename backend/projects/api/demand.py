@@ -31,7 +31,10 @@ def updateDemands(request, project_name, site_name, com_name):
         demand = next(
             (demand for demand in demands if demand.name == ndemand["name"]), None
         )
-        if demand is None:
+
+        if "default" in ndemand and ndemand["default"]:
+            if demand is not None:
+                demand.delete()
             defdemand = DefDemand.objects.get(name=ndemand["name"])
             demand = Demand(
                 name=ndemand["name"],
@@ -40,6 +43,21 @@ def updateDemands(request, project_name, site_name, com_name):
                 defdemand=defdemand,
                 commodity=commodity,
             )
+        elif "steps" in ndemand and ndemand["steps"]:
+            if demand is not None:
+                demand.delete()
+            demand = Demand(
+                name=ndemand["name"],
+                description=ndemand["description"],
+                steps=ndemand["steps"],
+                defdemand=None,
+                commodity=commodity,
+            )
+        else:
+            if demand is None:
+                return HttpResponse(
+                    "Not existing profile needs to be default or upload", status=400
+                )
         demand.quantity = ndemand["quantity"]
         demand.save()
     return HttpResponse("Demand was updated", status=200)

@@ -46,10 +46,40 @@
         <Select
           v-model="newDefault"
           :options="availDefDemands"
+          filter
           option-label="name"
         />
         <Button label="Add" @click="addDefault" :disabled="!newDefault" />
       </div>
+      <template v-if="advanced">
+        <divider />
+        <div class="grid grid-cols-3 gap-3 items-center">
+          <FileUpload
+            :disabled="checkingUpload"
+            ref="profileUpload"
+            mode="basic"
+            custom-upload
+            choose-icon="pi pi-upload"
+            choose-label="Upload"
+            @select="onFileSelect"
+            pt:root:class="justify-start"
+          />
+          <FloatLabel variant="on">
+            <InputText
+              id="uploadName"
+              :disabled="!uploadSteps"
+              v-model="uploadName"
+            />
+            <label for="uploadName">Name of Demand</label>
+          </FloatLabel>
+          <Button
+            :disabled="!uploadSteps || !uploadName"
+            :loading="checkingUpload"
+            label="Add"
+            @click="uploadProfile"
+          />
+        </div>
+      </template>
       <divider />
       <div class="grid grid-cols-2 gap-3 items-center">
         <Button class="col-start-2" label="Save" @click="save" />
@@ -64,10 +94,15 @@ import {
   useGetDemand,
   useUpdateDemand,
 } from '@/backend/demand'
-import { computed, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import type { Commodity, DemandConfig, Site } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
+import { FileUpload, type FileUploadSelectEvent } from 'primevue'
+import { useToast } from 'primevue/usetoast'
 
+const advanced = inject('advanced')
+
+const toast = useToast()
 const route = useRoute()
 
 const props = defineProps<{
@@ -111,12 +146,44 @@ watch(
   { immediate: true },
 )
 
+function nameAlreadyExists(name: string) {
+  if (demands.value.some(demand => demand.name === name)) {
+    toast.add({
+      summary: 'Conflict',
+      detail: `A profile with this name already exists`,
+      severity: 'error',
+      life: 2000,
+    })
+    return true
+  }
+  return false
+}
+
 function addDefault() {
+  if (nameAlreadyExists(newDefault.value.name)) return
+
   demands.value.push({
     quantity: 1,
+    default: true,
     ...newDefault.value,
   })
   newDefault.value = undefined
+}
+
+function uploadProfile() {
+  if (!uploadSteps.value) return
+  if (nameAlreadyExists(uploadName.value)) return
+
+  demands.value.push({
+    quantity: 1,
+    steps: uploadSteps.value,
+    name: uploadName.value,
+    description: '',
+  })
+  uploadSteps.value = null
+  uploadName.value = ''
+  // @ts-expect-error Wrong type description
+  if (profileUpload.value) profileUpload.value.clear()
 }
 
 function remove(demand: DemandConfig) {
@@ -126,6 +193,69 @@ function remove(demand: DemandConfig) {
 function save() {
   updateDemands(demands.value)
   visible.value = false
+}
+
+const profileUpload = ref<InstanceType<typeof FileUpload>>()
+const uploadSteps = ref<number[] | null>(null)
+const uploadName = ref('')
+const checkingUpload = ref(false)
+
+function onFileSelect(event: FileUploadSelectEvent) {
+  checkingUpload.value = true
+  const file = event.files[0]
+  const reader = new FileReader()
+
+  reader.onload = async e => {
+    if (e.target) {
+      if (checkUploadFile(e.target.result)) {
+        uploadSteps.value = JSON.parse(<string>e.target.result)
+        uploadName.value = file.name.split('.').slice(0, -1).join('.')
+      } else {
+        uploadSteps.value = null
+        uploadName.value = ''
+        // @ts-expect-error Wrong type description
+        if (profileUpload.value) profileUpload.value.clear()
+      }
+    } else {
+      toast.add({
+        summary: 'Upload error',
+        detail: `Something went wrong when reading file ${file.name}`,
+        severity: 'error',
+        life: 2000,
+      })
+    }
+    checkingUpload.value = false
+  }
+  reader.readAsText(file)
+}
+
+function checkUploadFile(file: string | ArrayBuffer | null) {
+  try {
+    const parsed = JSON.parse(<string>file)
+    if (
+      !Array.isArray(parsed) ||
+      parsed.length !== 8760 ||
+      !parsed.every(item => typeof item === 'number')
+    ) {
+      toast.add({
+        summary: 'Upload error',
+        detail: `JSON needs to contain an error with exactly 8760 numbers`,
+        severity: 'error',
+        life: 2000,
+      })
+      return false
+    }
+  } catch (error) {
+    toast.add({
+      summary: 'Upload error',
+      detail: `File needs to be a JSON`,
+      severity: 'error',
+      life: 2000,
+    })
+    console.log(error)
+    return false
+  }
+  return true
 }
 </script>
 

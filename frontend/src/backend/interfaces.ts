@@ -96,6 +96,8 @@ export interface Demand {
 
 export interface DemandConfig extends Demand {
   quantity: number
+  default?: boolean
+  steps?: number[]
 }
 
 export interface DemandProfile extends DemandConfig {
