@@ -1,7 +1,7 @@
 {
   "storage": {
-    "Battery": {
-      "description": "Example battery",
+    "Lead-Acid Battery": {
+      "description": "Lead-Acid battery",
       "commodity": "Elec",
       "instcapc": 0,
       "caploc": 0,
@@ -13,10 +13,85 @@
       "effin": 0.80,
       "effout": 0.80,
 
-      "invcostc": 9.7,
+      "invcostc": 200,
       "fixcostc": 0,
       "varcostc": 0,
-      "invcostp": 1000,
+      "invcostp": 0,
+      "fixcostp": 0,
+      "varcostp": 0,
+
+      "wacc": 0.007,
+      "depreciation": 5,
+      "init": 0.5,
+      "discharge": 0.0000035
+    },
+    "Lithium-ion Battery": {
+      "description": "Lithium-ion battery",
+      "commodity": "Elec",
+      "instcapc": 0,
+      "caploc": 0,
+      "capupc": -1,
+      "instcapp": 0,
+      "caplop": 0,
+      "capupp": -1,
+
+      "effin": 0.90,
+      "effout": 0.90,
+
+      "invcostc": 1000,
+      "fixcostc": 0,
+      "varcostc": 0,
+      "invcostp": 0,
+      "fixcostp": 0,
+      "varcostp": 0,
+
+      "wacc": 0.007,
+      "depreciation": 20,
+      "init": 0.5,
+      "discharge": 0.0000035
+    },
+    "LiFePO4 battery": {
+      "description": "LiFePO4 battery",
+      "commodity": "Elec",
+      "instcapc": 0,
+      "caploc": 0,
+      "capupc": -1,
+      "instcapp": 0,
+      "caplop": 0,
+      "capupp": -1,
+
+      "effin": 0.90,
+      "effout": 0.90,
+
+      "invcostc": 500,
+      "fixcostc": 0,
+      "varcostc": 0,
+      "invcostp": 0,
+      "fixcostp": 0,
+      "varcostp": 0,
+
+      "wacc": 0.007,
+      "depreciation": 20,
+      "init": 0.5,
+      "discharge": 0.0000035
+    },
+    "Water tank": {
+      "description": "Water reservoir",
+      "commodity": "Water",
+      "instcapc": 0,
+      "caploc": 0,
+      "capupc": -1,
+      "instcapp": 0,
+      "caplop": 0,
+      "capupp": -1,
+
+      "effin": 1,
+      "effout": 1,
+
+      "invcostc": 100,
+      "fixcostc": 0,
+      "varcostc": 0,
+      "invcostp": 0,
       "fixcostp": 0,
       "varcostp": 0,
 

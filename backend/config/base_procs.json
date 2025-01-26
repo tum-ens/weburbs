@@ -3,16 +3,16 @@
     "Photovoltaics": {
       "description": "Generates electricity from sun",
       "instcap": 0,
-      "caplo": 15000,
-      "capup": 160000,
+      "caplo": 0,
+      "capup": -1,
       "maxgrad": -1,
       "minfraction": 0,
-      "invcost": 600000,
-      "fixcost": 12000,
+      "invcost": 1000,
+      "fixcost": 0,
       "varcost": 0,
       "wacc": 0.07,
       "depreciation": 25,
-      "areapercap": 14000,
+      "areapercap": 5,
       "commodities": {
         "Solar": {
           "direction": "In",
@@ -71,6 +71,57 @@
         }
       },
       "autoadd": true
+    },
+    "Slack power plant": {
+      "description": "Dummy process to ensure feasibility\nOnly used if no other process is capable to produce energy at this time",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 999999,
+      "fixcost": 999999,
+      "varcost": 999999,
+      "wacc": 0,
+      "depreciation": 1,
+      "commodities": {
+        "Elec": {
+          "direction": "Out",
+          "ratio": 1,
+          "ratiomin": 1
+        }
+      },
+      "autoadd": true
+    },
+    "Diesel generator": {
+      "description": "Generates electricity from Diesel",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 1000,
+      "fixcost": 100,
+      "varcost": 10,
+      "wacc": 0.07,
+      "depreciation": 5,
+      "commodities": {
+        "Diesel": {
+          "direction": "In",
+          "ratio": 1,
+          "ratiomin": 1
+        },
+        "Elec": {
+          "direction": "Out",
+          "ratio": 0.3,
+          "ratiomin": -1
+        },
+        "CO2": {
+          "direction": "Out",
+          "ratio": 2.68,
+          "ratiomin": -1
+        }
+      }
     }
   }
 }
