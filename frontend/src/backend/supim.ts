@@ -26,7 +26,7 @@ export function useGetSupIm(
   })
 }
 
-export function useGenerateSupIm(
+export function useQuerySupIm(
   route: RouteLocationNormalized,
   site: Site,
   commodity: Commodity,
@@ -38,6 +38,32 @@ export function useGenerateSupIm(
       axios.post(
         `/api/project/${route.params.proj}/site/${site.name}/supim/${commodity.name}/query/${data.type}/`,
         {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    async onSuccess() {
+      await client.invalidateQueries({
+        queryKey: ['SupIm', route.params.proj, site.name, commodity.name],
+      })
+    },
+  })
+}
+
+export function useUploadSupIm(
+  route: RouteLocationNormalized,
+  site: Site,
+  commodity: Commodity,
+) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: steps =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${site.name}/supim/${commodity.name}/upload/`,
+        steps,
         {
           headers: {
             'X-CSRFToken': csrf.value,

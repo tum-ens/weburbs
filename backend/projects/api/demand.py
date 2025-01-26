@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project, get_site, get_commodity
+from projects.helper.validator import checkProfile
 from projects.models import Demand, DefDemand
 
 
@@ -46,6 +47,10 @@ def updateDemands(request, project_name, site_name, com_name):
         elif "steps" in ndemand and ndemand["steps"]:
             if demand is not None:
                 demand.delete()
+            if not checkProfile(ndemand["steps"]):
+                return HttpResponse(
+                    "Profile needs to be an array with exactly 8760 numbers", status=400
+                )
             demand = Demand(
                 name=ndemand["name"],
                 description=ndemand["description"],

@@ -1,3 +1,4 @@
+import json
 import os
 
 import requests
@@ -6,6 +7,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project, get_site, get_commodity
+from projects.helper.validator import checkProfile
 from projects.models import SupIm
 
 
@@ -45,6 +47,33 @@ def deleteSupIm(request, project_name, site_name, com_name):
 
 
 api_key = os.getenv("RN_KEY")
+
+
+@login_required
+@require_POST
+def uploadSupImProfile(request, project_name, site_name, com_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+    commodity = get_commodity(site, com_name)
+
+    if SupIm.objects.filter(commodity=commodity).exists():
+        return HttpResponse("SupIm already exists for this commodity", status=409)
+
+    profile = json.loads(request.body)
+    if not checkProfile(profile):
+        return HttpResponse(
+            "Profile needs to be an array with exactly 8760 numbers", status=400
+        )
+
+    supim = SupIm(
+        name="Uploaded profile",
+        description="Profile uploaded by user",
+        commodity=commodity,
+        steps=profile,
+    )
+    supim.save()
+
+    return JsonResponse({"detail": "SupIm uploaded"})
 
 
 @login_required
@@ -91,8 +120,8 @@ def querySolar(site, commodity):
         return HttpResponse("Data query failed", status="400")
 
     supim = SupIm(
-        name="Solar_Example",
-        description="Simple example",
+        name="Solar",
+        description="Solar data queried from renewable ninja",
         commodity=commodity,
         steps=[entry["electricity"] for entry in response.json()["data"].values()],
     )
@@ -118,8 +147,8 @@ def queryWind(site, commodity):
     if response.status_code != 200:
         return HttpResponse("Data query failed", status="400")
     supim = SupIm(
-        name="Wind_Example",
-        description="Wind example",
+        name="Wind",
+        description="Wind data queried from renewable ninja",
         commodity=commodity,
         steps=[entry["electricity"] for entry in response.json()["data"].values()],
     )

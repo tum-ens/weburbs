@@ -99,6 +99,7 @@ import type { Commodity, DemandConfig, Site } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { useToast } from 'primevue/usetoast'
+import { checkUploadFile } from '@/helper/upload'
 
 const advanced = inject('advanced')
 
@@ -207,7 +208,7 @@ function onFileSelect(event: FileUploadSelectEvent) {
 
   reader.onload = async e => {
     if (e.target) {
-      if (checkUploadFile(e.target.result)) {
+      if (checkUploadFile(toast, e.target.result)) {
         uploadSteps.value = JSON.parse(<string>e.target.result)
         uploadName.value = file.name.split('.').slice(0, -1).join('.')
       } else {
@@ -227,35 +228,6 @@ function onFileSelect(event: FileUploadSelectEvent) {
     checkingUpload.value = false
   }
   reader.readAsText(file)
-}
-
-function checkUploadFile(file: string | ArrayBuffer | null) {
-  try {
-    const parsed = JSON.parse(<string>file)
-    if (
-      !Array.isArray(parsed) ||
-      parsed.length !== 8760 ||
-      !parsed.every(item => typeof item === 'number')
-    ) {
-      toast.add({
-        summary: 'Upload error',
-        detail: `JSON needs to contain an error with exactly 8760 numbers`,
-        severity: 'error',
-        life: 2000,
-      })
-      return false
-    }
-  } catch (error) {
-    toast.add({
-      summary: 'Upload error',
-      detail: `File needs to be a JSON`,
-      severity: 'error',
-      life: 2000,
-    })
-    console.log(error)
-    return false
-  }
-  return true
 }
 </script>
 

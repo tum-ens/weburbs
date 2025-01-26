@@ -80,6 +80,10 @@ urlpatterns = [
         "project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/query/<str:type>/",
         supim.querySupIm,
     ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/supim/<str:com_name>/upload/",
+        supim.uploadSupImProfile,
+    ),
     # Demand: Get/Delete, Query - Defaults: Lists
     path(
         "project/<str:project_name>/site/<str:site_name>/demand/<str:com_name>/update/",

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import type { Commodity, Site } from '@/backend/interfaces'
-import { useGenerateSupIm } from '@/backend/supim'
+import { useQuerySupIm } from '@/backend/supim'
 import { useToast } from 'primevue/usetoast'
 import { useRoute } from 'vue-router'
 import { ref } from 'vue'
@@ -36,7 +36,7 @@ const props = defineProps<{
 const options = ['Solar', 'Wind']
 const option = ref()
 
-const { mutate: generateSupIm, isPending } = useGenerateSupIm(
+const { mutate: generateSupIm, isPending } = useQuerySupIm(
   route,
   props.site,
   props.commodity,
