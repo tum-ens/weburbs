@@ -48,7 +48,7 @@ def add_def_to_project(def_storage: DefStorage, site: Site):
     if len(coms) == 1:
         com = coms[0]
     else:
-        com = commodity.add_def_commodity(def_storage.def_commodity, site)
+        com = commodity.add_def_to_project(def_storage.def_commodity, site)
 
     storage = Storage(
         site=site,
@@ -120,7 +120,7 @@ def update_storage(request, project_name, site_name, storage_name):
         com = Commodity.objects.get(site=site, name=data["commodity"])
     except Commodity.DoesNotExist:
         def_com = DefCommodity.objects.get(name=data["commodity"])
-        com = commodity.add_def_commodity(def_com, site)
+        com = commodity.add_def_to_project(def_com, site)
 
     storage.name = data["name"]
     storage.description = data["description"]

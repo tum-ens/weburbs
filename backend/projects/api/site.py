@@ -67,9 +67,8 @@ def edit_site(request, project_name, site_name):
             site.save()
 
             for def_com in DefCommodity.objects.filter(autoadd=True).all():
-                commodity.add_def_commodity(def_com, site)
+                commodity.add_def_to_project(def_com, site)
             for def_proc in DefProcess.objects.filter(autoadd=True).all():
-                print("found one")
                 process.add_def_to_project(def_proc, site)
             for def_stor in DefStorage.objects.filter(autoadd=True).all():
                 storage.add_def_to_project(def_stor, site)
