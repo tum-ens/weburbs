@@ -29,7 +29,7 @@
                 <span>{{ option.timestamp.toLocaleString() }}</span>
                 <ResultIcon
                   :completed="option.completed"
-                  :status="option.status"
+                  :status="option.status || SimulationResultStatus.Optimal"
                 />
               </div>
             </template>
@@ -41,7 +41,7 @@
                 <span>{{ value.timestamp.toLocaleString() }}</span>
                 <ResultIcon
                   :completed="value.completed"
-                  :status="value.status"
+                  :status="value.status || SimulationResultStatus.Optimal"
                 />
               </div>
               <span v-else>{{ placeholder }}</span>
@@ -57,67 +57,20 @@
       </div>
     </template>
     <template #content>
-      <template
-        v-if="
-          resultsExist &&
-          simulation &&
-          simulation.status === SimulationResultStatus.Optimal
-        "
-      >
-        <div class="flex flex-col gap-3">
-          <div class="grid grid-cols-4 gap-3">
-            <Fieldset legend="Overview">
-              <ul>
-                <li>Environmental: {{ overview.Environmental }}</li>
-                <li>Fixed: {{ overview.Invest }}</li>
-                <li>Fuel: {{ overview.Fuel }}</li>
-                <li>Invest: {{ overview.Invest }}</li>
-                <li>Variable: {{ overview.Variable }}</li>
-              </ul>
-            </Fieldset>
-            <DataTable :value="procs" class="col-span-3">
-              <Column field="site" header="Site"></Column>
-              <Column field="proc" header="Commodity"></Column>
-              <Column field="new" header="New"></Column>
-              <Column field="total" header="Total"></Column>
-            </DataTable>
-          </div>
-
-          <Accordion lazy>
-            <AccordionPanel
-              v-for="site in sites"
-              :key="site.name"
-              :value="site.name"
-            >
-              <AccordionHeader>{{ site.name }}</AccordionHeader>
-              <AccordionContent>
-                <SiteResults
-                  v-if="site.name in demand && site.name in created"
-                  :site="site"
-                  :demand="demand[site.name]"
-                  :created="created[site.name]"
-                  :storageLevel="
-                    site.name in storageLevel
-                      ? storageLevel[site.name]
-                      : undefined
-                  "
-                />
-              </AccordionContent>
-            </AccordionPanel>
-          </Accordion>
-        </div>
-      </template>
-      <div v-else-if="!selSimulation">Select a simulation</div>
-      <div
-        v-else-if="simulation"
-        class="flex flex-col gap-3 items-center justify-start"
-      >
-        <template v-if="simulation.status === SimulationResultStatus.Optimal">
+      <template v-if="selSimulation">
+        <div
+          v-if="!simulation"
+          class="flex flex-col gap-3 items-center justify-start"
+        >
           <ProgressSpinner />
           <span>Waiting for results...</span>
-        </template>
-        <template v-else> The simulation run into an error.</template>
-      </div>
+        </div>
+        <div v-else-if="simulation.status !== SimulationResultStatus.Optimal">
+          The simulation ran into an error.
+        </div>
+        <SimulationContent v-if="simulation" :simulation="simulation" />
+      </template>
+      <div v-else-if="!selSimulation">Select a simulation</div>
     </template>
   </Card>
 
@@ -143,10 +96,6 @@ import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
 import { inject, ref, watch } from 'vue'
-import { useSites } from '@/backend/sites'
-import Plotly from 'plotly.js-dist'
-import SiteResults from '@/pages/simulation/SiteResults.vue'
-import { chunkAdd, chunkAvg, groupOptions } from '@/helper/diagrams'
 import ResultIcon from '@/pages/simulation/ResultIcon.vue'
 import {
   type SimulationResult,
@@ -154,36 +103,43 @@ import {
 } from '@/backend/interfaces'
 import SimulationLogsDialog from '@/pages/simulation/SimulationLogsDialog.vue'
 import SimulationConfigDialog from '@/pages/simulation/SimulationConfigDialog.vue'
+import SimulationContent from '@/pages/simulation/SimulationContent.vue'
 
 const route = useRoute()
 const toast = useToast()
 
 const selSimulation = ref<SimulationResult>()
-const resultsExist = ref(false)
 
 const advanced = inject('advanced')
 const logsVisible = ref(false)
 const configVisible = ref(false)
 
-const { data: sites } = useSites(route)
 const { mutate: triggerSimulation, isPending: simulating } =
   useTriggerSimulation(route)
 const { data: simulations } = useListSimulations(route)
 const { data: simulation } = useGetSimulation(route, selSimulation)
 
-const overview = ref()
-const procs = ref<{ site: string; proc: string; total: number; new: number }[]>(
-  [],
+watch(simulation, () => {
+  if (!simulation.value) return
+
+  if (selSimulation.value) {
+    selSimulation.value = {
+      ...selSimulation.value,
+      completed: true,
+      status: simulation.value.status,
+    }
+  }
+})
+
+watch(
+  simulations,
+  () => {
+    if (selSimulation.value || !simulations.value) return
+
+    selSimulation.value = simulations.value[0]
+  },
+  { immediate: true },
 )
-const demand = ref<{
-  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
-}>({})
-const created = ref<{
-  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
-}>({})
-const storageLevel = ref<{
-  [key: string]: { [key: string]: Partial<Plotly.Data>[] }
-}>({})
 
 function trigger() {
   triggerSimulation(undefined, {
@@ -207,94 +163,6 @@ function trigger() {
     },
   })
 }
-
-watch(
-  simulations,
-  () => {
-    if (selSimulation.value || !simulations.value) return
-
-    selSimulation.value = simulations.value[0]
-  },
-  { immediate: true },
-)
-
-watch(simulation, () => {
-  if (!simulation.value) {
-    resultsExist.value = false
-    return
-  }
-  if (selSimulation.value) {
-    selSimulation.value = {
-      ...selSimulation.value,
-      completed: true,
-      status: simulation.value.status,
-    }
-  }
-  resultsExist.value = true
-
-  procs.value = []
-  overview.value = simulation.value.result.costs
-  for (const site in simulation.value.result.process) {
-    for (const proc in simulation.value.result.process[site]) {
-      procs.value.push({
-        site,
-        proc,
-        total: simulation.value.result.process[site][proc].Total,
-        new: simulation.value.result.process[site][proc].New,
-      })
-    }
-  }
-
-  demand.value = {}
-  created.value = {}
-  storageLevel.value = {}
-  for (const site in simulation.value.result.results) {
-    demand.value[site] = {}
-    created.value[site] = {}
-    storageLevel.value[site] = {}
-    for (const com in simulation.value.result.results[site]) {
-      demand.value[site][com] = [
-        {
-          name: com,
-          y: chunkAdd(
-            simulation.value.result.results[site][com].demand,
-            groupOptions[0].groupSize,
-          ),
-          x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
-          type: 'bar',
-        },
-      ]
-      created.value[site][com] = []
-      for (const proc in simulation.value.result.results[site][com].created) {
-        created.value[site][com].push({
-          name: proc,
-          y: chunkAdd(
-            simulation.value.result.results[site][com].created[proc],
-            groupOptions[0].groupSize,
-          ),
-          x: Array.from({ length: groupOptions[0].groupSize }, (_, i) => i + 1),
-          type: 'bar',
-        })
-      }
-      if (simulation.value.result.results[site][com].storage) {
-        storageLevel.value[site][com] = [
-          {
-            name: com,
-            y: chunkAvg(
-              simulation.value.result.results[site][com].storage.Level,
-              groupOptions[0].groupSize,
-            ),
-            x: Array.from(
-              { length: groupOptions[0].groupSize },
-              (_, i) => i + 1,
-            ),
-            type: 'scatter',
-          },
-        ]
-      }
-    }
-  }
-})
 </script>
 
 <style scoped></style>

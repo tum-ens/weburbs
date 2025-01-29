@@ -1,13 +1,14 @@
 <template>
-  <div :id="plotId" />
+  <div ref="plot" :id="plotId" class="overflow-hidden" />
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import Plotly from 'plotly.js-dist'
 import { v4 as uuid } from 'uuid'
 
 const plotId = uuid()
+const plot = ref<HTMLDivElement>()
 
 const props = defineProps<{
   data: Partial<Plotly.Data>[]
@@ -44,13 +45,21 @@ function layout(): Partial<Plotly.Layout> {
   }
 }
 
-onMounted(() => {
-  Plotly.newPlot(plotId, props.data, layout())
-})
+let replotTimeout: number | null = null
+function replot() {
+  if (replotTimeout) clearTimeout(replotTimeout)
+  replotTimeout = setTimeout(
+    () => Plotly.newPlot(plotId, props.data, layout()),
+    200,
+  )
+}
 
-watch(props, () => {
-  Plotly.newPlot(plotId, props.data, layout())
+const resizeObserver = new ResizeObserver(replot)
+onMounted(() => {
+  replot()
+  if (plot.value) resizeObserver.observe(plot.value)
 })
+watch(props, replot, { immediate: true })
 </script>
 
 <style scoped></style>

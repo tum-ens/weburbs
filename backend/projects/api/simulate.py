@@ -20,6 +20,9 @@ from projects.models import (
     SimulationResultStatus,
 )
 
+def negInf(n):
+    return n if n >= 0 else "inf"
+
 
 @login_required
 @require_POST
@@ -45,16 +48,8 @@ def trigger_simulation(request, project_name):
                     commodity.name: {
                         "Type": commodity.get_com_type_label(),
                         "price": commodity.price,
-                        "max": None
-                        if commodity.max is None
-                        else commodity.max
-                        if commodity.max >= 0
-                        else "inf",
-                        "maxperhour": None
-                        if commodity.maxperhour is None
-                        else commodity.maxperhour
-                        if commodity.maxperhour >= 0
-                        else "inf",
+                        "max": None if commodity.max is None else negInf(commodity.max),
+                        "maxperhour": None if commodity.maxperhour is None else negInf(commodity.maxperhour),
                         "supim": SupIm.objects.filter(commodity=commodity).get().steps
                         if SupIm.objects.filter(commodity=commodity).exists()
                         else None,
@@ -68,14 +63,10 @@ def trigger_simulation(request, project_name):
                             storage.name: {
                                 "inst-cap-c": storage.instcapc,
                                 "cap-lo-c": storage.caploc,
-                                "cap-up-c": storage.capupc
-                                if storage.capupc >= 0
-                                else "inf",
+                                "cap-up-c": negInf(storage.capupc),
                                 "inst-cap-p": storage.instcapp,
                                 "cap-lo-p": storage.caplop,
-                                "cap-up-p": storage.capupp
-                                if storage.capupp >= 0
-                                else "inf",
+                                "cap-up-p": negInf(storage.capupp),
                                 "eff-in": storage.effin,
                                 "eff-out": storage.effout,
                                 "inv-cost-p": storage.invcostp,
@@ -103,8 +94,8 @@ def trigger_simulation(request, project_name):
                     process.name: {
                         "inst-cap": process.instcap,
                         "cap-lo": process.caplo,
-                        "cap-up": process.capup,
-                        "max-grad": "inf" if process.maxgrad < 0 else process.maxgrad,
+                        "cap-up": negInf(process.capup),
+                        "max-grad": negInf(process.maxgrad),
                         "min-fraction": process.minfraction,
                         "inv-cost": process.invcost,
                         "fix-cost": process.fixcost,

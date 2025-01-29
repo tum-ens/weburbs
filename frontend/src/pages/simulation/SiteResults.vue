@@ -1,36 +1,43 @@
 <template>
   <div class="flex flex-col gap-3">
     <template v-for="com in coms" :key="com.name">
-      <div v-if="com.name in props.demand">
+      <template v-if="com.name in props.demand">
         <h1>{{ com.name }}</h1>
-        <div>
-          <BarDiagramm
-            title="Demand"
-            :data="props.demand[com.name]"
-            title-x="steps"
-            title-y="kwh"
-            :bargroupgap="0.1"
-          />
-        </div>
-        <div>
-          <BarDiagramm
-            title="Create"
-            :data="props.created[com.name]"
-            title-x="steps"
-            title-y="kwh"
-            :bargroupgap="0.1"
-          />
-        </div>
-        <div v-if="props.storageLevel">
-          <BarDiagramm
-            title="Storage Level"
-            :data="props.storageLevel[com.name]"
-            title-x="steps"
-            title-y="kwh"
-            :bargroupgap="0.1"
-          />
-        </div>
-      </div>
+        <BarDiagramm
+          title="Ratio of Costs"
+          :data="[
+            {
+              values: [1, 2, 3, 1],
+              labels: ['Solar', 'Wind', 'Water', 'Nuclear'],
+              type: 'pie',
+            },
+          ]"
+          title-x=""
+          title-y=""
+        />
+        <BarDiagramm
+          title="Demand"
+          :data="props.demand[com.name]"
+          title-x="steps"
+          title-y="kwh"
+          :bargroupgap="0.1"
+        />
+        <BarDiagramm
+          title="Create"
+          :data="props.created[com.name]"
+          title-x="steps"
+          title-y="kwh"
+          :bargroupgap="0.1"
+        />
+        <BarDiagramm
+          v-if="props.storageLevel"
+          title="Storage Level"
+          :data="props.storageLevel[com.name]"
+          title-x="steps"
+          title-y="kwh"
+          :bargroupgap="0.1"
+        />
+      </template>
     </template>
   </div>
 </template>
