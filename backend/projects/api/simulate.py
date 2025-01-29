@@ -20,6 +20,7 @@ from projects.models import (
     SimulationResultStatus,
 )
 
+
 def negInf(n):
     return n if n >= 0 else "inf"
 
@@ -49,7 +50,9 @@ def trigger_simulation(request, project_name):
                         "Type": commodity.get_com_type_label(),
                         "price": commodity.price,
                         "max": None if commodity.max is None else negInf(commodity.max),
-                        "maxperhour": None if commodity.maxperhour is None else negInf(commodity.maxperhour),
+                        "maxperhour": None
+                        if commodity.maxperhour is None
+                        else negInf(commodity.maxperhour),
                         "supim": SupIm.objects.filter(commodity=commodity).get().steps
                         if SupIm.objects.filter(commodity=commodity).exists()
                         else None,

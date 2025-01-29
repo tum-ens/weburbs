@@ -7,7 +7,7 @@
     class="w-11/12 md:w-10/12 lg:w-1/2"
   >
     <ProcessForm
-      :commodity="process"
+      :process="process"
       submit-label="Update"
       :loading="loading || deleting"
       @submit="update"
