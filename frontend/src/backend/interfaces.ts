@@ -110,14 +110,58 @@ export enum SimulationResultStatus {
   Error = 3,
 }
 
-export interface SimulationResult {
+export interface SimulationInfo {
   id: string
   timestamp: Date
   completed: boolean
   status: SimulationResultStatus | null
 }
 
-export interface SimulationDetails extends SimulationResult {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  result: any
+export interface SimulationsResults {
+  costs: {
+    Invest: number
+    Fixed: number
+    Fuel: number
+    Variable: number
+    Environmental: number
+  }
+  process: {
+    [site: string]: {
+      [process: string]: {
+        New: number
+        Total: number
+      }
+    }
+  }
+  storage: {
+    [site: string]: {
+      [commodity: string]: {
+        [storage: string]: {
+          CNew: number
+          CTotal: number
+          PNew: number
+          PTotal: number
+        }
+      }
+    }
+  }
+  results: {
+    [site: string]: {
+      [commodity: string]: {
+        demand: number[]
+        created: {
+          [process: string]: number[]
+        }
+        storage: {
+          Level: number[]
+          Stored: number[]
+          Retrieved: number[]
+        }
+      }
+    }
+  }
+}
+
+export interface Simulation extends SimulationInfo {
+  result: SimulationsResults
 }

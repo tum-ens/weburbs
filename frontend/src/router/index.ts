@@ -118,6 +118,13 @@ const router = createRouter({
             parents: ['advanced'],
           },
           component: () => import('@/pages/simulation/SimulationPage.vue'),
+          children: [
+            {
+              name: 'SimulationResult',
+              path: ':simId',
+              component: () => import('@/pages/simulation/SimulationPage.vue'),
+            },
+          ],
         },
       ],
     },

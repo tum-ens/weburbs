@@ -2,8 +2,8 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
-import { computed, type Ref } from 'vue'
-import type { SimulationDetails, SimulationResult } from '@/backend/interfaces'
+import { computed } from 'vue'
+import type { Simulation, SimulationInfo } from '@/backend/interfaces'
 
 export function useTriggerSimulation(route: RouteLocationNormalized) {
   const { data: csrf } = useCSRF()
@@ -41,8 +41,8 @@ export function useListSimulations(route: RouteLocationNormalized) {
     queryFn: () =>
       axios
         .get(`/api/project/${route.params.proj}/simulate/results/`, {})
-        .then<SimulationResult[]>(response => {
-          return response.data.map((res: SimulationResult) => {
+        .then<SimulationInfo[]>(response => {
+          return response.data.map((res: SimulationInfo) => {
             return {
               ...res,
               timestamp: new Date(res.timestamp),
@@ -52,24 +52,21 @@ export function useListSimulations(route: RouteLocationNormalized) {
   })
 }
 
-export function useGetSimulation(
-  route: RouteLocationNormalized,
-  result: Ref<SimulationResult | undefined>,
-) {
+export function useGetSimulation(route: RouteLocationNormalized) {
   const queryClient = useQueryClient()
   return useQuery({
     queryKey: [
       'simulation',
       computed(() => route.params.proj),
-      computed(() => result.value?.id),
+      computed(() => route.params.simId),
     ],
-    enabled: computed(() => !!result.value),
+    enabled: computed(() => !!route.params.simId),
     retry: true,
     retryDelay: 2000,
     queryFn: () =>
       axios
         .get(
-          `/api/project/${route.params.proj}/simulate/result/${result.value?.id}/`,
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/`,
           {},
         )
         .then(response => {
@@ -82,28 +79,30 @@ export function useGetSimulation(
           })
           return response
         })
-        .then<SimulationDetails>(response => response.data),
+        .then<Simulation>(response => {
+          return {
+            ...response.data,
+            timestamp: new Date(response.data.timestamp),
+          }
+        }),
   })
 }
 
-export function useGetSimulationLogs(
-  route: RouteLocationNormalized,
-  result: SimulationResult,
-) {
+export function useGetSimulationLogs(route: RouteLocationNormalized) {
   const queryClient = useQueryClient()
   return useQuery({
     queryKey: [
       'simulationLogs',
       computed(() => route.params.proj),
-      computed(() => result.id),
+      computed(() => route.params.simId),
     ],
-    enabled: computed(() => !!result),
+    enabled: computed(() => !!route.params.simId),
     retry: true,
     retryDelay: 2000,
     queryFn: () =>
       axios
         .get(
-          `/api/project/${route.params.proj}/simulate/result/${result.id}/logs`,
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/logs`,
           {},
         )
         .then(response => {
@@ -120,24 +119,21 @@ export function useGetSimulationLogs(
   })
 }
 
-export function useGetSimulationConfig(
-  route: RouteLocationNormalized,
-  result: SimulationResult,
-) {
+export function useGetSimulationConfig(route: RouteLocationNormalized) {
   const queryClient = useQueryClient()
   return useQuery({
     queryKey: [
       'simulationConfig',
       computed(() => route.params.proj),
-      computed(() => result.id),
+      computed(() => route.params.simId),
     ],
-    enabled: computed(() => !!result),
+    enabled: computed(() => !!route.params.simId),
     retry: true,
     retryDelay: 2000,
     queryFn: () =>
       axios
         .get(
-          `/api/project/${route.params.proj}/simulate/result/${result.id}/config`,
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/config`,
           {},
         )
         .then(response => {

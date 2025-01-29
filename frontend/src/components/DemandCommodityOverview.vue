@@ -27,6 +27,7 @@
         title-y="kwH"
         class="h-80"
         :bargroupgap="0.1"
+        :margin="{ t: 20 }"
       />
     </div>
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
@@ -47,7 +48,7 @@ import { useRoute } from 'vue-router'
 import { useGetDemand } from '@/backend/demand'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import ConfigureDemandDialog from '@/dialogs/ConfigureDemandDialog.vue'
-import BarDiagramm from '@/plotly/BarDiagramm.vue'
+import BarDiagramm from '@/plotly/PlotlyDiagram.vue'
 
 const route = useRoute()
 

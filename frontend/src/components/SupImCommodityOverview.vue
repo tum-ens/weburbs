@@ -39,9 +39,10 @@
       <BarDiagramm
         :data
         title-x="Steps"
-        title-y="kWh"
+        title-y=""
         class="h-80"
         :bargroupgap="0.1"
+        :margin="{ t: 20 }"
       />
     </div>
     <Skeleton v-else-if="pending" class="col-span-7" style="height: 10rem" />
@@ -57,7 +58,7 @@ import { computed, inject, ref, type Ref } from 'vue'
 import { useDeleteSupIm, useGetSupIm, useUploadSupIm } from '@/backend/supim'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import BarDiagramm from '@/plotly/BarDiagramm.vue'
+import BarDiagramm from '@/plotly/PlotlyDiagram.vue'
 import QuerySupImDialog from '@/dialogs/QuerySupImDialog.vue'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'

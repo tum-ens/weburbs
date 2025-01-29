@@ -8,17 +8,13 @@
 
 <script setup lang="ts">
 import { useGetSimulationLogs } from '@/backend/simulate'
-import type { SimulationResult } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
 const visible = defineModel<boolean>('visible', { default: false })
-const props = defineProps<{
-  result: SimulationResult
-}>()
 
-const { data: logs } = useGetSimulationLogs(route, props.result)
+const { data: logs } = useGetSimulationLogs(route)
 </script>
 
 <style scoped></style>

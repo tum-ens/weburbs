@@ -119,6 +119,7 @@ def querySolar(site, commodity):
     if response.status_code != 200:
         return HttpResponse("Data query failed", status="400")
 
+    print(response.json())
     supim = SupIm(
         name="Solar",
         description="Solar data queried from renewable ninja",

@@ -1,64 +1,267 @@
 <template>
-  <div class="flex flex-col gap-3">
-    <template v-for="com in coms" :key="com.name">
-      <template v-if="com.name in props.demand">
-        <h1>{{ com.name }}</h1>
-        <BarDiagramm
-          title="Ratio of Costs"
-          :data="[
-            {
-              values: [1, 2, 3, 1],
-              labels: ['Solar', 'Wind', 'Water', 'Nuclear'],
-              type: 'pie',
-            },
-          ]"
-          title-x=""
-          title-y=""
-        />
-        <BarDiagramm
-          title="Demand"
-          :data="props.demand[com.name]"
-          title-x="steps"
-          title-y="kwh"
-          :bargroupgap="0.1"
-        />
-        <BarDiagramm
-          title="Create"
-          :data="props.created[com.name]"
-          title-x="steps"
-          title-y="kwh"
-          :bargroupgap="0.1"
-        />
-        <BarDiagramm
-          v-if="props.storageLevel"
-          title="Storage Level"
-          :data="props.storageLevel[com.name]"
-          title-x="steps"
-          title-y="kwh"
-          :bargroupgap="0.1"
-        />
-      </template>
-    </template>
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 items-center"
+  >
+    <div>
+      <PlotlyDiagram
+        v-if="procCapacity"
+        title="Processes"
+        :data="procCapacity"
+        :bargap="0.6"
+        titleX="kW"
+        :margin="{
+          t: 150,
+          l: 100,
+        }"
+      />
+    </div>
+    <div class="grid grid-cols-2 xl:grid-cols-3 gap-3 justify-items-center">
+      <DataPoint
+        v-for="proc in newProcs"
+        :key="proc.name"
+        :name="proc.name"
+        :value="proc.value"
+        suffix="kW"
+      />
+      <DataPoint
+        v-for="stor in newStor"
+        :key="stor.name"
+        :name="stor.name"
+        :value="stor.value"
+        suffix="kWh"
+      />
+      <DataPoint name="Storage cycles per year" :value="42" suffix="" />
+    </div>
+    <div>
+      <PlotlyDiagram
+        v-if="storCapPow"
+        title="Storage"
+        :data="storCapPow"
+        :bargap="0.6"
+        titleX="kWh"
+        titleX2="kW"
+        :margin="{
+          t: 150,
+          l: 150,
+        }"
+      />
+    </div>
+    <FloatLabel variant="on" class="col-span-1">
+      <Select
+        fluid
+        id="groupoptions"
+        :options="groupOptions"
+        optionLabel="name"
+        v-model="groupOption"
+      />
+      <label for="groupoptions">Group values</label>
+    </FloatLabel>
+    <div v-if="commodityDetails" class="col-span-3">
+      <PlotlyDiagram
+        v-for="(data, comName) in commodityDetails"
+        :key="comName"
+        :title="<string>comName"
+        :data="data"
+        titleY="kW"
+        titleY2="kWh"
+        :bargroupgap="0.2"
+        :margin="{
+          t: 150,
+          l: 150,
+        }"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Site } from '@/backend/interfaces'
-import { useProjectSiteCommodities } from '@/backend/commodities'
 import { useRoute } from 'vue-router'
-import BarDiagramm from '@/plotly/BarDiagramm.vue'
-import Plotly from 'plotly.js-dist'
+import { inject, type Ref, ref, watch } from 'vue'
+import { useGetSimulation, useGetSimulationConfig } from '@/backend/simulate'
+import PlotlyDiagram from '@/plotly/PlotlyDiagram.vue'
+import DataPoint from '@/pages/simulation/DataPoint.vue'
+import { chunkAdd, groupOptions } from '@/helper/diagrams'
 
 const route = useRoute()
 
 const props = defineProps<{
   site: Site
-  demand: { [key: string]: Partial<Plotly.Data>[] }
-  created: { [key: string]: Partial<Plotly.Data>[] }
-  storageLevel?: { [key: string]: Partial<Plotly.Data>[] }
 }>()
 
-const { data: coms } = useProjectSiteCommodities(route, props.site.name)
+const advanced = inject<Ref<boolean>>('advanced')
+
+const { data: simulation } = useGetSimulation(route)
+const { data: config } = useGetSimulationConfig(route)
+
+const procCapacity = ref<Partial<Plotly.Data>[]>()
+const newProcs = ref<{ name: string; value: number }[]>([])
+
+const storCapPow = ref<Partial<Plotly.Data>[]>()
+const newStor = ref<{ name: string; value: number }[]>([])
+
+const commodityDetails = ref<{
+  [key: string]: Partial<Plotly.Data>[]
+}>({})
+
+const groupOption = ref(groupOptions[0])
+
+watch(
+  [simulation, advanced, groupOption],
+  () => {
+    newProcs.value = []
+    procCapacity.value = []
+    newStor.value = []
+    storCapPow.value = []
+    if (!simulation.value) return
+
+    // Init processes
+    {
+      const procsNew = []
+      const procsInstalled = []
+      const procsNames = []
+      for (const procName in simulation.value.result.process[props.site.name]) {
+        const procConf =
+          config.value['site'][props.site.name]['process'][procName]
+        let allIn = true
+        let allOut = true
+        for (const procConfName in procConf['commodity']) {
+          const dir = procConf['commodity'][procConfName].Direction
+          allIn &&= dir === 'In'
+          allOut &&= dir === 'Out'
+        }
+        if (!advanced?.value && (allIn || allOut)) continue
+
+        const proc = simulation.value.result.process[props.site.name][procName]
+        procsNew.push(proc.New)
+        procsInstalled.push(proc.Total - proc.New)
+        procsNames.push(procName)
+
+        newProcs.value.push({ name: procName, value: proc.New })
+      }
+      procCapacity.value = [
+        {
+          name: 'Installed Capacity',
+          x: procsInstalled,
+          y: procsNames,
+          type: 'bar',
+          orientation: 'h',
+        },
+        {
+          name: 'New Capacity',
+          x: procsNew,
+          y: procsNames,
+          type: 'bar',
+          orientation: 'h',
+        },
+      ]
+    }
+
+    // Init storage
+    {
+      const storCNew = []
+      const storCInstalled = []
+      const storPNew = []
+      const storPInstalled = []
+      const storNames = []
+      for (const comName in simulation.value.result.storage[props.site.name]) {
+        const storCom =
+          simulation.value.result.storage[props.site.name][comName]
+        for (const storName in storCom) {
+          const stor = storCom[storName]
+
+          storCNew.push(stor.CNew)
+          storCInstalled.push(stor.CTotal - stor.CNew)
+          storPNew.push(stor.PNew)
+          storPInstalled.push(stor.PTotal - stor.PNew)
+          storNames.push(storName)
+
+          newStor.value.push({ name: storName, value: stor.CNew })
+        }
+      }
+      storCapPow.value = [
+        {
+          name: 'Installed Capacity',
+          x: storCInstalled,
+          y: storNames,
+          type: 'bar',
+          xaxis: 'x1',
+          orientation: 'h',
+        },
+        {
+          name: 'New Capacity',
+          x: storCNew,
+          y: storNames,
+          type: 'bar',
+          xaxis: 'x1',
+          orientation: 'h',
+        },
+        {
+          name: 'Installed Power',
+          x: storPInstalled,
+          y: storNames,
+          type: 'scatter',
+          xaxis: 'x2',
+          orientation: 'h',
+        },
+        {
+          name: 'New Power',
+          x: storPNew,
+          y: storNames,
+          type: 'scatter',
+          xaxis: 'x2',
+          orientation: 'h',
+        },
+      ]
+    }
+
+    const results = simulation.value.result.results[props.site.name]
+    const timeline = Array.from(
+      { length: groupOption.value.groups },
+      (_, i) => i + 1,
+    )
+    for (const comName in results) {
+      const comResults = results[comName]
+      commodityDetails.value[comName] = [
+        {
+          name: 'Demand',
+          x: timeline,
+          y: chunkAdd(comResults.demand, groupOption.value.groupSize, 8760),
+          type: 'scatter',
+          yaxis: 'y1',
+        },
+      ]
+      if (groupOption.value.groupSize === 1)
+        commodityDetails.value[comName].push({
+          name: 'Storage',
+          x: timeline,
+          y: chunkAdd(
+            comResults.storage.Level,
+            groupOption.value.groupSize,
+            8760,
+          ),
+          type: 'scatter',
+          yaxis: 'y2',
+        })
+      for (const procName in comResults.created) {
+        commodityDetails.value[comName].push({
+          name: procName,
+          x: timeline,
+          y: chunkAdd(
+            comResults.created[procName],
+            groupOption.value.groupSize,
+            8760,
+          ),
+          type: 'bar',
+          yaxis: 'y1',
+        })
+      }
+    }
+  },
+  {
+    immediate: true,
+  },
+)
 </script>
 
 <style scoped></style>

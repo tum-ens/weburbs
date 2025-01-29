@@ -13,10 +13,13 @@ const plot = ref<HTMLDivElement>()
 const props = defineProps<{
   data: Partial<Plotly.Data>[]
   title?: string
-  titleX: string
-  titleY: string
+  titleX?: string
+  titleX2?: string
+  titleY?: string
+  titleY2?: string
   bargap?: number
   bargroupgap?: number
+  margin?: { t?: number; b?: number; l?: number; r?: number }
 }>()
 
 function layout(): Partial<Plotly.Layout> {
@@ -29,18 +32,36 @@ function layout(): Partial<Plotly.Layout> {
           text: props.title,
         }
       : undefined,
-    margin: {
-      t: props.title ? 50 : 10, // Adjust top margin dynamically
-    },
     xaxis: {
       title: {
         text: props.titleX,
       },
+      side: 'bottom',
+      rangemode: 'nonnegative',
     },
+    xaxis2: {
+      title: {
+        text: props.titleX2,
+      },
+      side: 'top',
+      overlaying: 'x',
+      rangemode: 'nonnegative',
+    },
+    margin: props.margin,
     yaxis: {
       title: {
         text: props.titleY,
       },
+      side: 'left',
+      rangemode: 'nonnegative',
+    },
+    yaxis2: {
+      title: {
+        text: props.titleY2,
+      },
+      side: 'right',
+      rangemode: 'nonnegative',
+      overlaying: 'y',
     },
   }
 }
@@ -59,7 +80,7 @@ onMounted(() => {
   replot()
   if (plot.value) resizeObserver.observe(plot.value)
 })
-watch(props, replot, { immediate: true })
+watch(props, replot)
 </script>
 
 <style scoped></style>

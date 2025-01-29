@@ -21,6 +21,7 @@
             :options="simulations"
             placeholder="Select a simulation"
             empty-message="No simulation found yet"
+            @change="changeSimulation"
           >
             <template #option="{ option }">
               <div
@@ -57,7 +58,7 @@
       </div>
     </template>
     <template #content>
-      <template v-if="selSimulation">
+      <template v-if="route.params.simId">
         <div
           v-if="!simulation"
           class="flex flex-col gap-3 items-center justify-start"
@@ -77,12 +78,10 @@
   <SimulationLogsDialog
     v-if="logsVisible && selSimulation"
     v-model:visible="logsVisible"
-    :result="selSimulation"
   />
   <SimulationConfigDialog
     v-if="configVisible && selSimulation"
     v-model:visible="configVisible"
-    :result="selSimulation"
   />
 </template>
 
@@ -92,23 +91,25 @@ import {
   useListSimulations,
   useTriggerSimulation,
 } from '@/backend/simulate'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
 import { inject, ref, watch } from 'vue'
 import ResultIcon from '@/pages/simulation/ResultIcon.vue'
 import {
-  type SimulationResult,
+  type SimulationInfo,
   SimulationResultStatus,
 } from '@/backend/interfaces'
 import SimulationLogsDialog from '@/pages/simulation/SimulationLogsDialog.vue'
 import SimulationConfigDialog from '@/pages/simulation/SimulationConfigDialog.vue'
 import SimulationContent from '@/pages/simulation/SimulationContent.vue'
+import type { SelectChangeEvent } from 'primevue'
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
-const selSimulation = ref<SimulationResult>()
+const selSimulation = ref<SimulationInfo>()
 
 const advanced = inject('advanced')
 const logsVisible = ref(false)
@@ -117,26 +118,44 @@ const configVisible = ref(false)
 const { mutate: triggerSimulation, isPending: simulating } =
   useTriggerSimulation(route)
 const { data: simulations } = useListSimulations(route)
-const { data: simulation } = useGetSimulation(route, selSimulation)
+const { data: simulation } = useGetSimulation(route)
 
-watch(simulation, () => {
-  if (!simulation.value) return
+function changeSimulation(event: SelectChangeEvent) {
+  router.push({
+    name: 'SimulationResult',
+    params: {
+      simId: event.value.id,
+    },
+  })
+}
 
-  if (selSimulation.value) {
+watch(
+  simulation,
+  () => {
+    if (!simulation.value) return
+
     selSimulation.value = {
-      ...selSimulation.value,
+      id: simulation.value.id,
+      timestamp: simulation.value.timestamp,
       completed: true,
       status: simulation.value.status,
     }
-  }
-})
+  },
+  { immediate: true },
+)
 
 watch(
   simulations,
   () => {
-    if (selSimulation.value || !simulations.value) return
+    if (selSimulation.value || !simulations.value || !!route.params.simId)
+      return
 
-    selSimulation.value = simulations.value[0]
+    router.push({
+      name: 'SimulationResult',
+      params: {
+        simId: simulations.value[0].id,
+      },
+    })
   },
   { immediate: true },
 )
@@ -145,6 +164,12 @@ function trigger() {
   triggerSimulation(undefined, {
     onSuccess(data) {
       selSimulation.value = data
+      router.push({
+        name: 'SimulationResult',
+        params: {
+          simId: data.id,
+        },
+      })
       toast.add({
         summary: 'Success',
         detail: 'Simulation started',
