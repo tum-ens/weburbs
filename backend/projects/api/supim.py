@@ -98,14 +98,17 @@ def querySupIm(request, project_name, site_name, com_name, type):
 
     return JsonResponse({"detail": "SupIm added"})
 
+
 year = 2022
+
+
 def querySolar(site, commodity):
     response1 = requests.get(
         "https://www.renewables.ninja/api/data/pv",
         {
             "lat": site.lat,
             "lon": site.lon,
-            "date_from": str(year-1) + "-12-31",
+            "date_from": str(year - 1) + "-12-31",
             "date_to": str(year) + "-06-30",
             "local_time": True,
             "dataset": "merra2",
@@ -114,7 +117,7 @@ def querySolar(site, commodity):
             "azim": 180,
             "format": "json",
             "capacity": 1,
-            "tilt": 35
+            "tilt": 35,
         },
         headers={"Authorization": f"Token {api_key}"},
     )
@@ -126,7 +129,7 @@ def querySolar(site, commodity):
             "lat": site.lat,
             "lon": site.lon,
             "date_from": str(year) + "-07-01",
-            "date_to": str(year+1) + "-01-01",
+            "date_to": str(year + 1) + "-01-01",
             "local_time": True,
             "dataset": "merra2",
             "system_loss": 0.1,
@@ -134,19 +137,23 @@ def querySolar(site, commodity):
             "azim": 180,
             "format": "json",
             "capacity": 1,
-            "tilt": 35
+            "tilt": 35,
         },
         headers={"Authorization": f"Token {api_key}"},
     )
     if response2.status_code != 200:
         return HttpResponse("Data query 2 failed", status="400")
 
-    data = itertools.chain(response1.json()["data"].values(), response2.json()["data"].values())
+    data = itertools.chain(
+        response1.json()["data"].values(), response2.json()["data"].values()
+    )
     supim = SupIm(
         name="Solar",
         description="Solar data queried from renewable ninja",
         commodity=commodity,
-        steps=[entry["electricity"] for entry in data if str(year) in entry["local_time"]],
+        steps=[
+            entry["electricity"] for entry in data if str(year) in entry["local_time"]
+        ],
     )
     supim.save()
 
@@ -157,7 +164,7 @@ def queryWind(site, commodity):
         {
             "lat": site.lat,
             "lon": site.lon,
-            "date_from": str(year-1) + "-12-31",
+            "date_from": str(year - 1) + "-12-31",
             "date_to": str(year) + "-06-30",
             "local_time": True,
             "dataset": "merra2",
@@ -176,7 +183,7 @@ def queryWind(site, commodity):
             "lat": site.lat,
             "lon": site.lon,
             "date_from": str(year) + "-07-01",
-            "date_to": str(year+1) + "-01-01",
+            "date_to": str(year + 1) + "-01-01",
             "local_time": True,
             "dataset": "merra2",
             "height": 100,
@@ -189,11 +196,15 @@ def queryWind(site, commodity):
     if response2.status_code != 200:
         return HttpResponse("Data query 2 failed", status="400")
 
-    data = itertools.chain(response1.json()["data"].values(), response2.json()["data"].values())
+    data = itertools.chain(
+        response1.json()["data"].values(), response2.json()["data"].values()
+    )
     supim = SupIm(
         name="Wind",
         description="Wind data queried from renewable ninja",
         commodity=commodity,
-        steps=[entry["electricity"] for entry in data if str(year) in entry["local_time"]],
+        steps=[
+            entry["electricity"] for entry in data if str(year) in entry["local_time"]
+        ],
     )
     supim.save()

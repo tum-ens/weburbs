@@ -70,9 +70,8 @@ let replotTimeout: number | null = null
 function replot() {
   if (replotTimeout) clearTimeout(replotTimeout)
   replotTimeout = setTimeout(
-    () =>
-      Plotly.newPlot(plotId, props.data, layout())
-    , 200
+    () => Plotly.newPlot(plotId, props.data, layout()),
+    200,
   )
 }
 
@@ -84,11 +83,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (replotTimeout)
-    clearTimeout(replotTimeout)
-    resizeObserver.disconnect()
+  if (replotTimeout) clearTimeout(replotTimeout)
+  resizeObserver.disconnect()
 })
-
 </script>
 
 <style scoped></style>

@@ -59,7 +59,7 @@
         />
       </div>
       <PlotlyDiagram
-        title="Renewable Share"
+        title="Share of Renewables"
         class="min-h-96"
         :data="[
           {
@@ -93,13 +93,12 @@ import { useRoute } from 'vue-router'
 import { ref, watch } from 'vue'
 import PlotlyDiagram from '@/plotly/PlotlyDiagram.vue'
 import DataPoint from '@/pages/simulation/DataPoint.vue'
-import { useGetSimulation, useGetSimulationConfig } from '@/backend/simulate'
+import { useGetSimulation } from '@/backend/simulate'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
 
 const route = useRoute()
 const { data: sites } = useSites(route)
 const { data: simulation } = useGetSimulation(route)
-const { data: config } = useGetSimulationConfig(route)
 
 const overview = ref()
 
@@ -109,61 +108,6 @@ watch(
     if (!simulation.value) return
 
     overview.value = simulation.value.result.costs
-    // demand.value = {}
-    // created.value = {}
-    // storageLevel.value = {}
-    // for (const site in props.simulation.result.results) {
-    //   demand.value[site] = {}
-    //   created.value[site] = {}
-    //   storageLevel.value[site] = {}
-    //   for (const com in props.simulation.result.results[site]) {
-    //     demand.value[site][com] = [
-    //       {
-    //         name: com,
-    //         y: chunkAdd(
-    //           props.simulation.result.results[site][com].demand,
-    //           groupOptions[0].groupSize
-    //         ),
-    //         x: Array.from(
-    //           { length: groupOptions[0].groupSize },
-    //           (_, i) => i + 1
-    //         ),
-    //         type: 'bar'
-    //       }
-    //     ]
-    //     created.value[site][com] = []
-    //     for (const proc in props.simulation.result.results[site][com].created) {
-    //       created.value[site][com].push({
-    //         name: proc,
-    //         y: chunkAdd(
-    //           props.simulation.result.results[site][com].created[proc],
-    //           groupOptions[0].groupSize
-    //         ),
-    //         x: Array.from(
-    //           { length: groupOptions[0].groupSize },
-    //           (_, i) => i + 1
-    //         ),
-    //         type: 'bar'
-    //       })
-    //     }
-    //     if (props.simulation.result.results[site][com].storage) {
-    //       storageLevel.value[site][com] = [
-    //         {
-    //           name: com,
-    //           y: chunkAvg(
-    //             props.simulation.result.results[site][com].storage.Level,
-    //             groupOptions[0].groupSize
-    //           ),
-    //           x: Array.from(
-    //             { length: groupOptions[0].groupSize },
-    //             (_, i) => i + 1
-    //           ),
-    //           type: 'scatter'
-    //         }
-    //       ]
-    //     }
-    //   }
-    // }
   },
   { immediate: true },
 )

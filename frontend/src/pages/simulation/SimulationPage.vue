@@ -145,7 +145,7 @@ watch(
 )
 
 watch(
-  simulations,
+  [simulations, route],
   () => {
     if (selSimulation.value || !simulations.value || !!route.params.simId)
       return

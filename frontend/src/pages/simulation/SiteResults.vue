@@ -30,7 +30,13 @@
         :value="stor.value"
         suffix="kWh"
       />
-      <DataPoint name="Storage cycles per year" :value="42" suffix="" />
+      <DataPoint
+        name="Storage cycles per year"
+        :value="
+          storRetrieved / newStor.map(s => s.value).reduce((a, b) => a + b, 0)
+        "
+        suffix=""
+      />
     </div>
     <div>
       <PlotlyDiagram
@@ -99,6 +105,7 @@ const newProcs = ref<{ name: string; value: number }[]>([])
 
 const storCapPow = ref<Partial<Plotly.Data>[]>()
 const newStor = ref<{ name: string; value: number }[]>([])
+const storRetrieved = ref(0)
 
 const commodityDetails = ref<{
   [key: string]: Partial<Plotly.Data>[]
@@ -113,7 +120,7 @@ watch(
     procCapacity.value = []
     newStor.value = []
     storCapPow.value = []
-    if (!simulation.value) return
+    if (!simulation.value || !config.value) return
 
     // Init processes
     {
@@ -243,6 +250,10 @@ watch(
           type: 'scatter',
           yaxis: 'y2',
         })
+      storRetrieved.value = comResults.storage.Retrieved.reduce(
+        (acc, num) => acc + num,
+        0,
+      )
       for (const procName in comResults.created) {
         commodityDetails.value[comName].push({
           name: procName,
