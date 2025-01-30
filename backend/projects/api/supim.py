@@ -1,3 +1,4 @@
+import itertools
 import json
 import os
 
@@ -97,46 +98,68 @@ def querySupIm(request, project_name, site_name, com_name, type):
 
     return JsonResponse({"detail": "SupIm added"})
 
-
+year = 2022
 def querySolar(site, commodity):
-    response = requests.get(
+    response1 = requests.get(
         "https://www.renewables.ninja/api/data/pv",
         {
             "lat": site.lat,
             "lon": site.lon,
-            "date_from": "2023-01-01",
-            "date_to": "2023-12-31",
+            "date_from": str(year-1) + "-12-31",
+            "date_to": str(year) + "-06-30",
+            "local_time": True,
             "dataset": "merra2",
             "system_loss": 0.1,
             "tracking": 0,
             "azim": 180,
             "format": "json",
             "capacity": 1,
-            "tilt": 35,
+            "tilt": 35
         },
         headers={"Authorization": f"Token {api_key}"},
     )
-    if response.status_code != 200:
-        return HttpResponse("Data query failed", status="400")
+    if response1.status_code != 200:
+        return HttpResponse("Data query 1 failed", status="400")
+    response2 = requests.get(
+        "https://www.renewables.ninja/api/data/pv",
+        {
+            "lat": site.lat,
+            "lon": site.lon,
+            "date_from": str(year) + "-07-01",
+            "date_to": str(year+1) + "-01-01",
+            "local_time": True,
+            "dataset": "merra2",
+            "system_loss": 0.1,
+            "tracking": 0,
+            "azim": 180,
+            "format": "json",
+            "capacity": 1,
+            "tilt": 35
+        },
+        headers={"Authorization": f"Token {api_key}"},
+    )
+    if response2.status_code != 200:
+        return HttpResponse("Data query 2 failed", status="400")
 
-    print(response.json())
+    data = itertools.chain(response1.json()["data"].values(), response2.json()["data"].values())
     supim = SupIm(
         name="Solar",
         description="Solar data queried from renewable ninja",
         commodity=commodity,
-        steps=[entry["electricity"] for entry in response.json()["data"].values()],
+        steps=[entry["electricity"] for entry in data if str(year) in entry["local_time"]],
     )
     supim.save()
 
 
 def queryWind(site, commodity):
-    response = requests.get(
+    response1 = requests.get(
         "https://www.renewables.ninja/api/data/wind",
         {
             "lat": site.lat,
             "lon": site.lon,
-            "date_from": "2023-01-01",
-            "date_to": "2023-12-31",
+            "date_from": str(year-1) + "-12-31",
+            "date_to": str(year) + "-06-30",
+            "local_time": True,
             "dataset": "merra2",
             "height": 100,
             "capacity": 1,
@@ -145,12 +168,32 @@ def queryWind(site, commodity):
         },
         headers={"Authorization": f"Token {api_key}"},
     )
-    if response.status_code != 200:
-        return HttpResponse("Data query failed", status="400")
+    if response1.status_code != 200:
+        return HttpResponse("Data query 1 failed", status="400")
+    response2 = requests.get(
+        "https://www.renewables.ninja/api/data/wind",
+        {
+            "lat": site.lat,
+            "lon": site.lon,
+            "date_from": str(year) + "-07-01",
+            "date_to": str(year+1) + "-01-01",
+            "local_time": True,
+            "dataset": "merra2",
+            "height": 100,
+            "capacity": 1,
+            "turbine": "Vestas V80 2000",
+            "format": "json",
+        },
+        headers={"Authorization": f"Token {api_key}"},
+    )
+    if response2.status_code != 200:
+        return HttpResponse("Data query 2 failed", status="400")
+
+    data = itertools.chain(response1.json()["data"].values(), response2.json()["data"].values())
     supim = SupIm(
         name="Wind",
         description="Wind data queried from renewable ninja",
         commodity=commodity,
-        steps=[entry["electricity"] for entry in response.json()["data"].values()],
+        steps=[entry["electricity"] for entry in data if str(year) in entry["local_time"]],
     )
     supim.save()
