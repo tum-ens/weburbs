@@ -1,9 +1,9 @@
 <template>
-  <div ref="plot" :id="plotId" class="overflow-hidden" />
+  <div v-if="true" ref="plot" :id="plotId" class="overflow-hidden"></div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import Plotly from 'plotly.js-dist'
 import { v4 as uuid } from 'uuid'
 
@@ -70,8 +70,9 @@ let replotTimeout: number | null = null
 function replot() {
   if (replotTimeout) clearTimeout(replotTimeout)
   replotTimeout = setTimeout(
-    () => Plotly.newPlot(plotId, props.data, layout()),
-    200,
+    () =>
+      Plotly.newPlot(plotId, props.data, layout())
+    , 200
   )
 }
 
@@ -79,8 +80,15 @@ const resizeObserver = new ResizeObserver(replot)
 onMounted(() => {
   replot()
   if (plot.value) resizeObserver.observe(plot.value)
+  watch(props, replot)
 })
-watch(props, replot)
+
+onUnmounted(() => {
+  if (replotTimeout)
+    clearTimeout(replotTimeout)
+    resizeObserver.disconnect()
+})
+
 </script>
 
 <style scoped></style>
