@@ -23,13 +23,20 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 justify-items-center">
         <DataPoint
           name="LCOE"
-          :value="42"
-          suffix="ct/kwh"
+          :value="
+            ((overview.Invest +
+              overview.Fixed +
+              overview.Fuel +
+              overview.Variable) /
+              elecConsumed) *
+            100
+          "
+          suffix="ct/kWh"
           classes="bg-yellow-200"
         />
         <DataPoint
           name="Share of Renewables"
-          :value="45"
+          :value="(1 - fossilProduced / elecConsumed) * 100"
           suffix="%"
           classes="bg-green-300"
         />
@@ -37,25 +44,49 @@
           name="Invest"
           :value="overview.Invest"
           classes="bg-yellow-100"
+          suffix="$"
         />
-        <DataPoint name="Fixed" :value="overview.Fixed" classes="bg-blue-300" />
-        <DataPoint name="Fuel" :value="overview.Fuel" classes="bg-stone-300" />
+        <DataPoint
+          name="Fixed"
+          :value="overview.Fixed"
+          classes="bg-blue-300"
+          suffix="$"
+        />
+        <DataPoint
+          name="Fuel"
+          :value="overview.Fuel"
+          classes="bg-stone-300"
+          suffix="$"
+        />
         <DataPoint
           name="Variable"
           :value="overview.Variable"
           classes="bg-orange-300"
+          suffix="$"
         />
-        <DataPoint name="Energy produced" :value="1" classes="bg-green-300" />
-        <DataPoint name="Energy consumed" :value="2" classes="bg-red-300" />
+        <DataPoint
+          name="Energy produced"
+          :value="elecProduced"
+          classes="bg-green-300"
+          suffix="kWh"
+        />
+        <DataPoint
+          name="Energy consumed"
+          :value="elecConsumed"
+          classes="bg-red-300"
+          suffix="kWh"
+        />
         <DataPoint
           name="Slack production"
-          :value="1"
+          :value="slackProduction"
           classes="bg-green-800 text-white"
+          suffix="kWh"
         />
         <DataPoint
-          name="Curtailpower consumption"
-          :value="2"
+          name="Energy lost"
+          :value="elecProduced - elecConsumed"
           classes="bg-red-800 text-white"
+          suffix="kWh"
         />
       </div>
       <PlotlyDiagram
@@ -63,7 +94,7 @@
         class="min-h-96"
         :data="[
           {
-            values: [9, 100],
+            values: [elecConsumed - fossilProduced, fossilProduced],
             labels: ['Renewables', 'Fossils'],
             marker: {
               colors: ['rgb(44, 160, 44)', 'rgb(214, 39, 40)'],
@@ -93,21 +124,58 @@ import { useRoute } from 'vue-router'
 import { ref, watch } from 'vue'
 import PlotlyDiagram from '@/plotly/PlotlyDiagram.vue'
 import DataPoint from '@/pages/simulation/DataPoint.vue'
-import { useGetSimulation } from '@/backend/simulate'
+import { useGetSimulation, useGetSimulationConfig } from '@/backend/simulate'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
 
 const route = useRoute()
 const { data: sites } = useSites(route)
 const { data: simulation } = useGetSimulation(route)
+const { data: config } = useGetSimulationConfig(route)
 
 const overview = ref()
 
+const elecProduced = ref(0)
+const fossilProduced = ref(0)
+const elecConsumed = ref(0)
+const slackProduction = ref(0)
 watch(
-  simulation,
+  [simulation, config],
   () => {
-    if (!simulation.value) return
+    if (!simulation.value || !config.value) return
 
     overview.value = simulation.value.result.costs
+
+    elecConsumed.value = 0
+    elecProduced.value = 0
+    fossilProduced.value = 0
+    slackProduction.value = 0
+    for (const siteName in simulation.value.result.results) {
+      const siteResults = simulation.value.result.results[siteName]
+      const siteConfig = config.value['site'][siteName]
+      for (const comName in siteResults) {
+        if (comName !== 'Elec') continue
+        const comResults = siteResults[comName]
+        for (const procName in comResults.created) {
+          const procCreated = comResults.created[procName].reduce(
+            (a, b) => a + b,
+            0,
+          )
+          const procConfig = siteConfig['process'][procName] || {
+            commodity: {},
+          }
+          elecProduced.value += procCreated
+          if (
+            Object.keys(procConfig['commodity']).some(comName =>
+              comName.toUpperCase().includes('CO2'),
+            )
+          )
+            fossilProduced.value += procCreated
+          if (procName.toLowerCase().includes('Slack production'))
+            slackProduction.value += procCreated
+        }
+        elecConsumed.value += comResults.demand.reduce((a, b) => a + b, 0)
+      }
+    }
   },
   { immediate: true },
 )
