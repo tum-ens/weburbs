@@ -56,17 +56,11 @@ const router = createRouter({
         {
           name: 'ProjectCommodity',
           path: 'commodity',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () => import('@/pages/projectConfigs/CommodityConfig.vue'),
         },
         {
           name: 'ProjectTransmission',
           path: 'transmission',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () =>
             import('@/pages/projectConfigs/TransmissionConfig.vue'),
         },
@@ -78,9 +72,6 @@ const router = createRouter({
         {
           name: 'ProjectDSM',
           path: 'dsm',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () => import('@/pages/projectConfigs/DSMConfig.vue'),
         },
         {
@@ -96,32 +87,26 @@ const router = createRouter({
         {
           name: 'ProjectBuySell',
           path: 'buysell',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () =>
             import('@/pages/projectConfigs/BuySellPriceConfig.vue'),
         },
         {
           name: 'ProjectTimeVarEff',
           path: 'timevareff',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () =>
             import('@/pages/projectConfigs/TimeVarEffConfig.vue'),
         },
         {
           name: 'ProjectSimulation',
           path: 'simulation',
-          meta: {
-            parents: ['advanced'],
-          },
           component: () => import('@/pages/simulation/SimulationPage.vue'),
           children: [
             {
               name: 'SimulationResult',
               path: ':simId',
+              meta: {
+                parents: ['ProjectSimulation'],
+              },
               component: () => import('@/pages/simulation/SimulationPage.vue'),
             },
           ],

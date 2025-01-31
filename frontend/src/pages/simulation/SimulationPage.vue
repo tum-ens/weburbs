@@ -129,27 +129,27 @@ function changeSimulation(event: SelectChangeEvent) {
   })
 }
 
+// update select if simulation in route
 watch(
   simulation,
   () => {
-    if (!simulation.value) return
-
-    selSimulation.value = {
-      id: simulation.value.id,
-      timestamp: simulation.value.timestamp,
-      completed: true,
-      status: simulation.value.status,
-    }
+    selSimulation.value = !simulation.value
+      ? undefined
+      : {
+          id: simulation.value.id,
+          timestamp: simulation.value.timestamp,
+          completed: true,
+          status: simulation.value.status,
+        }
   },
   { immediate: true },
 )
 
+// set route if none exists
 watch(
   [simulations, route],
   () => {
-    if (selSimulation.value || !simulations.value || !!route.params.simId)
-      return
-
+    if (!simulations.value || !!route.params.simId) return
     router.push({
       name: 'SimulationResult',
       params: {
