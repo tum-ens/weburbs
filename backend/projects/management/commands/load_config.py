@@ -145,7 +145,7 @@ class Command(BaseCommand):
                     comproc["direction"]
                 ]
                 def_proccom.ratio = comproc["ratio"]
-                def_proccom.ratiomin = comproc["ratiomin"]
+                def_proccom.ratiomin = getDefault(comproc, "ratiomin", None)
                 def_proccom.save()
             print("\033[92mOK\033[0m")
 

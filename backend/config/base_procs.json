@@ -113,13 +113,11 @@
         },
         "Elec": {
           "direction": "Out",
-          "ratio": 0.3,
-          "ratiomin": -1
+          "ratio": 0.3
         },
         "CO2": {
           "direction": "Out",
-          "ratio": 2.68,
-          "ratiomin": -1
+          "ratio": 2.68
         }
       }
     }

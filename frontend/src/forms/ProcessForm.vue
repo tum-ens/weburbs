@@ -1,5 +1,6 @@
 <template>
   <div class="mt-2 flex flex-col gap-3">
+    {{ invalids }}
     <FloatLabel variant="on">
       <InputText
         :invalid="invalids.includes('name')"
@@ -203,6 +204,9 @@
                     id="ratio"
                     :max-fraction-digits="2"
                     fluid
+                    v-tooltip="
+                      'Input/output quantities, relative to process throughput. Leave empty to not set it.'
+                    "
                     v-model="inCom.ratio"
                     :invalid="inCom.ratio === undefined || inCom.ratio < 0"
                   />
@@ -213,6 +217,9 @@
                     id="ratiomin"
                     :max-fraction-digits="2"
                     fluid
+                    v-tooltip="
+                      'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
+                    "
                     v-model="inCom.ratiomin"
                     :invalid="
                       inCom.ratiomin === undefined || inCom.ratiomin < 0
@@ -251,6 +258,9 @@
                     id="ratio"
                     :max-fraction-digits="2"
                     fluid
+                    v-tooltip="
+                      'Input/output quantities, relative to process throughput. Leave empty to not set it.'
+                    "
                     v-model="outCom.ratio"
                     :invalid="outCom.ratio === undefined || outCom.ratio < 0"
                   />
@@ -261,6 +271,9 @@
                     id="ratiomin"
                     :max-fraction-digits="2"
                     fluid
+                    v-tooltip="
+                      'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
+                    "
                     v-model="outCom.ratiomin"
                     :invalid="
                       outCom.ratiomin === undefined || outCom.ratiomin < 0
@@ -450,15 +463,15 @@ function check() {
     invalids.value.push('areapercap')
 
   for (const inCom of inComs.value) {
-    if (inCom.ratio === undefined || inCom.ratio < 0)
+    if (inCom.ratio !== undefined && inCom.ratio < 0)
       invalids.value.push('inComRatio')
-    if (inCom.ratiomin === undefined || inCom.ratiomin < 0)
+    if (inCom.ratiomin !== undefined && inCom.ratiomin < 0)
       invalids.value.push('inComRatioMin')
   }
   for (const outCom of outComs.value) {
-    if (outCom.ratio === undefined || outCom.ratio < 0)
+    if (outCom.ratio !== undefined && outCom.ratio < 0)
       invalids.value.push('outComRatio')
-    if (outCom.ratiomin === undefined || outCom.ratiomin < 0)
+    if (outCom.ratiomin !== undefined && outCom.ratiomin < 0)
       invalids.value.push('outComRatioMin')
   }
 
