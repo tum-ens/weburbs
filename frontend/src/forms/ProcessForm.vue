@@ -1,6 +1,5 @@
 <template>
   <div class="mt-2 flex flex-col gap-3">
-    {{ invalids }}
     <FloatLabel variant="on">
       <InputText
         :invalid="invalids.includes('name')"
