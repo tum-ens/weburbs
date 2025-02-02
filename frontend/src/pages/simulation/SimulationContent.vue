@@ -170,7 +170,7 @@ watch(
             )
           )
             fossilProduced.value += procCreated
-          if (procName.toLowerCase().includes('Slack production'))
+          if (procName.toLowerCase().includes('slack power plant'))
             slackProduction.value += procCreated
         }
         elecConsumed.value += comResults.demand.reduce((a, b) => a + b, 0)
