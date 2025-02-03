@@ -46,7 +46,8 @@
       "type": "Stock",
       "price": 0.8,
       "max": -1,
-      "maxperhour": -1
+      "maxperhour": -1,
+      "unit": "liter"
     },
     "Water": {
       "type": "Demand",
