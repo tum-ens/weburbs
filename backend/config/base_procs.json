@@ -33,13 +33,38 @@
       "capup": 13000,
       "maxgrad": -1,
       "minfraction": 0,
-      "invcost": 1500000,
-      "fixcost": 30000,
+      "invcost": 1000,
+      "fixcost": 1,
       "varcost": 0,
       "wacc": 0.07,
       "depreciation": 25,
       "commodities": {
         "Wind": {
+          "direction": "In",
+          "ratio": 1,
+          "ratiomin": 1
+        },
+        "Elec": {
+          "direction": "Out",
+          "ratio": 1,
+          "ratiomin": 1
+        }
+      }
+    },
+    "Grid Buy": {
+      "description": "Buy electricity from the utility grid",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 100,
+      "fixcost": 0,
+      "varcost": 0,
+      "wacc": 0.00,
+      "depreciation": 50,
+      "commodities": {
+        "Grid Electricity": {
           "direction": "In",
           "ratio": 1,
           "ratiomin": 1
