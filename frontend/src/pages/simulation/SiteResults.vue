@@ -76,6 +76,7 @@
           l: 150,
         }"
       />
+      {{commodityDetails['Elec'][1]}}
     </div>
   </div>
 </template>
@@ -233,7 +234,7 @@ watch(
         {
           name: 'Demand',
           x: timeline,
-          y: chunkAdd(comResults.demand, groupOption.value.groupSize, 8760),
+          y: chunkAdd(comResults.demand, groupOption.value.groupSize),
           type: 'scatter',
           yaxis: 'y1',
         },
@@ -245,7 +246,6 @@ watch(
           y: chunkAdd(
             comResults.storage.Level,
             groupOption.value.groupSize,
-            8760,
           ),
           type: 'scatter',
           yaxis: 'y2',
@@ -261,7 +261,6 @@ watch(
           y: chunkAdd(
             comResults.created[procName],
             groupOption.value.groupSize,
-            8760,
           ),
           type: 'bar',
           yaxis: 'y1',
