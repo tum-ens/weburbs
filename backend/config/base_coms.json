@@ -2,38 +2,45 @@
   "commodity": {
     "Solar": {
       "type": "SupIm",
-      "autoquery": "Solar"
+      "autoquery": "Solar",
+      "unit": "kW"
     },
     "Wind": {
       "type": "SupIm",
-      "autoquery": "Wind"
+      "autoquery": "Wind",
+      "unit": "kW"
     },
     "Elec": {
-      "type": "Demand"
+      "type": "Demand",
+      "unit": "kWh"
     },
     "CO2": {
       "type": "Env",
       "price": 0,
       "max": -1,
-      "maxperhour": -1
+      "maxperhour": -1,
+      "unit": "kg"
     },
     "Grid Electricity": {
       "type": "Buy",
       "price": 0.1,
       "max": -1,
-      "maxperhour": -1
+      "maxperhour": -1,
+      "unit": "kWh"
     },
     "Grid Sell": {
       "type": "Sell",
       "price": 0.0,
-      "max": -1,
-      "maxperhour": -1
+      "max": 10000,
+      "maxperhour": -1,
+      "unit": "kWh"
     },
     "Diesel": {
       "type": "Stock",
       "price": 1,
       "max": -1,
-      "maxperhour": -1
+      "maxperhour": -1,
+      "unit": "liter"
     },
     "LNG": {
       "type": "Stock",
@@ -42,7 +49,8 @@
       "maxperhour": -1
     },
     "Water": {
-      "type": "Demand"
+      "type": "Demand",
+      "unit": "m³"
     }
   }
 }
