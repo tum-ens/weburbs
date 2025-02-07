@@ -31,8 +31,7 @@ const props = defineProps<{
   site_name: string
 }>()
 
-const { mutate: updateProcess, isPending: loading } =
-  useUpdateProcess(route)
+const { mutate: updateProcess, isPending: loading } = useUpdateProcess(route)
 
 function update(process: Process): void {
   updateProcess(

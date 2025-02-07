@@ -76,7 +76,6 @@
           l: 150,
         }"
       />
-      {{commodityDetails['Elec'][1]}}
     </div>
   </div>
 </template>
@@ -243,10 +242,7 @@ watch(
         commodityDetails.value[comName].push({
           name: 'Storage',
           x: timeline,
-          y: chunkAdd(
-            comResults.storage.Level,
-            groupOption.value.groupSize,
-          ),
+          y: chunkAdd(comResults.storage.Level, groupOption.value.groupSize),
           type: 'scatter',
           yaxis: 'y2',
         })

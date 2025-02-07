@@ -48,9 +48,9 @@ class AutoQuery(IntEnum):
 class CommodityTypes(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     type = models.IntegerField(choices=ComType.choices(), null=False)
-    price = models.IntegerField(null=True)
-    max = models.IntegerField(null=True)
-    maxperhour = models.IntegerField(null=True)
+    price = models.FloatField(null=True)
+    max = models.FloatField(null=True)
+    maxperhour = models.FloatField(null=True)
 
     def get_com_type_label(self):
         return ComType(self.type).name
