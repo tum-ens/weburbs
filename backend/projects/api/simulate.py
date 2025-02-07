@@ -126,10 +126,13 @@ def trigger_simulation(request, project_name):
     simres.config = config
     simres.save()
     config["callback"] = (
-        os.getenv("URBS_CALLBACK") + f"/callback/simulation/{simres.id}/"
+        os.getenv("URBS_CALLBACK", "http://localhost:8000")
+        + f"/callback/simulation/{simres.id}/"
     )
 
-    response = requests.post(os.getenv("URBS"), json=remove_none(config))
+    response = requests.post(
+        os.getenv("URBS", "http://localhost:5000/simulate"), json=remove_none(config)
+    )
     if response.status_code != 200:
         print(response.text)
         return HttpResponse("Simulation failed", status="400")

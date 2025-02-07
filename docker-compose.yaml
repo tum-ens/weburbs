@@ -1,14 +1,19 @@
 
 services:
   backend:
-    build: backend
+    image: ghcr.io/tum-ens/weburbs-backend:latest
+    # Use this to build the image locally
+    # build: backend
     container_name: weburbs-backend
     environment:
       - SECRET_KEY=change_me
-      - URBS_CALLBACK=http://backend:8000
       - URBS=http://optimizer:5000/simulate
+      - URBS_CALLBACK=http://backend:8000
+      # Replace localhost by your domain
       - DJANGO_ALLOWED_HOSTS=localhost,backend
+      # Replace localhost by your domain
       - ORIGINS=http://localhost:9000
+      # Insert API key for Renewable Ninjas
       - RN_KEY=$RN_KEY
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=urbs
@@ -18,6 +23,20 @@ services:
       - SQL_PORT=5432
     depends_on:
       - db
+    networks:
+      - urbs
+    # Use this to override the config
+    # volumes:
+    #  - ./yourfolder:/app/config
+
+  frontend:
+    image: ghcr.io/tum-ens/weburbs-frontend:latest
+    # Use this to build the image locally
+    # build: frontend
+    container_name: weburbs-frontend
+    environment:
+      # Replace localhost by your domain
+      - VUE_APP_API_URL=http://localhost:9000
     networks:
       - urbs
 
@@ -33,15 +52,6 @@ services:
     networks:
       - urbs
 
-  frontend:
-    build: frontend
-    container_name: weburbs-frontend
-    environment:
-      - POSTGRES_USER=urbs
-      - VUE_APP_API_URL=http://localhost:9000
-    networks:
-      - urbs
-
   reverse-proxy:
     image: nginx:alpine
     container_name: weburbs-proxy
@@ -53,7 +63,7 @@ services:
       - urbs
 
   optimizer:
-    image: ghcr.io/jonastahl/idp-urbs:0.0.4
+    image: ghcr.io/tum-ens/urbs-weburbs:latest
     container_name: optimizer
     networks:
       - urbs
