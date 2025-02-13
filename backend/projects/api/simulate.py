@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 
 import requests
 from django.contrib.auth.decorators import login_required
@@ -34,8 +35,8 @@ def trigger_simulation(request, project_name):
     supims = SupIm.objects.filter(commodity__in=commodities)
     demands = Demand.objects.filter(commodity__in=commodities)
     timesteps = min(
-        min(map(lambda supim: len(supim.steps), supims)),
-        min(map(lambda demand: len(demand.steps), demands)),
+        min(map(lambda supim: len(supim.steps), supims), default=999999),
+        min(map(lambda demand: len(demand.steps), demands), default=999999),
     )
 
     simres = SimulationResult(project=project)
