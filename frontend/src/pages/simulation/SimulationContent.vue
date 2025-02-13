@@ -9,12 +9,17 @@
         :data="[
           {
             values: [
-              overview.Invest,
-              overview.Fixed,
-              overview.Fuel,
-              overview.Variable,
+              overview.Invest > 0 ? overview.Invest : undefined,
+              overview.Fixed > 0 ? overview.Fixed : undefined,
+              overview.Fuel > 0 ? overview.Fuel : undefined,
+              overview.Variable > 0 ? overview.Variable : undefined,
             ],
-            labels: ['Invest', 'Fixed', 'Fuel', 'Variable'],
+            labels: [
+              overview.Invest ? 'Invest' : null,
+              overview.Fixed > 0 ? 'Fixed' : null,
+              overview.Fuel ? 'Fuel' : null,
+              overview.Variable ? 'Variable' : null,
+            ],
             type: 'pie',
           },
         ]"
@@ -40,30 +45,10 @@
           suffix="%"
           classes="bg-green-300"
         />
-        <DataPoint
-          name="Invest"
-          :value="overview.Invest"
-          classes="bg-yellow-100"
-          suffix="$"
-        />
-        <DataPoint
-          name="Fixed"
-          :value="overview.Fixed"
-          classes="bg-blue-300"
-          suffix="$"
-        />
-        <DataPoint
-          name="Fuel"
-          :value="overview.Fuel"
-          classes="bg-stone-300"
-          suffix="$"
-        />
-        <DataPoint
-          name="Variable"
-          :value="overview.Variable"
-          classes="bg-orange-300"
-          suffix="$"
-        />
+        <DataPoint name="Invest" :value="overview.Invest" suffix="$" />
+        <DataPoint name="Fixed" :value="overview.Fixed" suffix="$" />
+        <DataPoint name="Fuel" :value="overview.Fuel" suffix="$" />
+        <DataPoint name="Variable" :value="overview.Variable" suffix="$" />
         <DataPoint
           name="Energy produced"
           :value="elecProduced"
@@ -77,15 +62,15 @@
           suffix="kWh"
         />
         <DataPoint
-          name="Slack production"
-          :value="slackProduction"
-          classes="bg-green-800 text-white"
-          suffix="kWh"
+          name="CO2 saved"
+          :value="(560 * elecConsumed) / 1000 - co2Produced"
+          classes="bg-green-300"
+          suffix="kg"
         />
         <DataPoint
           name="Energy lost"
           :value="elecProduced - elecConsumed"
-          classes="bg-red-800 text-white"
+          classes="bg-red-300"
           suffix="kWh"
         />
       </div>
@@ -96,7 +81,7 @@
           {
             values: [
               Math.max(elecConsumed - fossilProduced, 0),
-              fossilProduced,
+              fossilProduced > 0.1 ? fossilProduced : 0,
             ],
             labels: ['Renewables', 'Fossils'],
             marker: {
@@ -141,6 +126,8 @@ const elecProduced = ref(0)
 const fossilProduced = ref(0)
 const elecConsumed = ref(0)
 const slackProduction = ref(0)
+
+const co2Produced = ref(0)
 watch(
   [simulation, config],
   () => {
@@ -152,31 +139,42 @@ watch(
     elecProduced.value = 0
     fossilProduced.value = 0
     slackProduction.value = 0
+    co2Produced.value = 0
     for (const siteName in simulation.value.result.results) {
       const siteResults = simulation.value.result.results[siteName]
       const siteConfig = config.value['site'][siteName]
       for (const comName in siteResults) {
-        if (comName !== 'Elec') continue
-        const comResults = siteResults[comName]
-        for (const procName in comResults.created) {
-          const procCreated = comResults.created[procName].reduce(
-            (a, b) => a + b,
-            0,
-          )
-          const procConfig = siteConfig['process'][procName] || {
-            commodity: {},
-          }
-          elecProduced.value += procCreated
-          if (
-            Object.keys(procConfig['commodity']).some(comName =>
-              comName.toUpperCase().includes('CO2'),
+        if (comName.toUpperCase().includes('CO2')) {
+          const comResults = siteResults[comName]
+          for (const procName in comResults.created) {
+            co2Produced.value += comResults.created[procName].reduce(
+              (a, b) => a + b,
+              0,
             )
-          )
-            fossilProduced.value += procCreated
-          if (procName.toLowerCase().includes('slack power plant'))
-            slackProduction.value += procCreated
+          }
         }
-        elecConsumed.value += comResults.demand.reduce((a, b) => a + b, 0)
+        if (comName.toUpperCase().includes('ELEC')) {
+          const comResults = siteResults[comName]
+          for (const procName in comResults.created) {
+            const procCreated = comResults.created[procName].reduce(
+              (a, b) => a + b,
+              0,
+            )
+            const procConfig = siteConfig['process'][procName] || {
+              commodity: {},
+            }
+            elecProduced.value += procCreated
+            if (
+              Object.keys(procConfig['commodity']).some(comName =>
+                comName.toUpperCase().includes('CO2'),
+              )
+            )
+              fossilProduced.value += procCreated
+            if (procName.toLowerCase().includes('slack power plant'))
+              slackProduction.value += procCreated
+          }
+          elecConsumed.value += comResults.demand.reduce((a, b) => a + b, 0)
+        }
       }
     }
   },

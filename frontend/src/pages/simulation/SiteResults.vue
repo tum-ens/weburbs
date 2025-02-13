@@ -238,6 +238,12 @@ watch(
       (_, i) => i + 1,
     )
     for (const comName in results) {
+      if (
+        config.value['site'][props.site.name]['commodity'][comName]['Type'] !==
+        'Demand'
+      )
+        continue
+
       const comResults = results[comName]
       commodityDetails.value[comName] = [
         {
