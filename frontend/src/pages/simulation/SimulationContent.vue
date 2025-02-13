@@ -36,7 +36,7 @@
         />
         <DataPoint
           name="Share of Renewables"
-          :value="(1 - fossilProduced / elecConsumed) * 100"
+          :value="Math.max(1 - fossilProduced / elecConsumed, 0) * 100"
           suffix="%"
           classes="bg-green-300"
         />
@@ -94,7 +94,10 @@
         class="min-h-96"
         :data="[
           {
-            values: [elecConsumed - fossilProduced, fossilProduced],
+            values: [
+              Math.max(elecConsumed - fossilProduced, 0),
+              fossilProduced,
+            ],
             labels: ['Renewables', 'Fossils'],
             marker: {
               colors: ['rgb(44, 160, 44)', 'rgb(214, 39, 40)'],

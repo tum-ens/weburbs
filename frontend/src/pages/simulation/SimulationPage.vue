@@ -150,6 +150,7 @@ watch(
   [simulations, route],
   () => {
     if (!simulations.value || !!route.params.simId) return
+    if (simulations.value.length === 0) return
     router.push({
       name: 'SimulationResult',
       params: {
