@@ -208,6 +208,11 @@ watch(
           x: storPInstalled,
           y: storNames,
           type: 'scatter',
+          mode: 'markers',
+          marker: {
+            symbol: 25,
+            size: 15,
+          },
           xaxis: 'x2',
           orientation: 'h',
         },
@@ -216,6 +221,11 @@ watch(
           x: storPNew,
           y: storNames,
           type: 'scatter',
+          mode: 'markers',
+          marker: {
+            symbol: 25,
+            size: 15,
+          },
           xaxis: 'x2',
           orientation: 'h',
         },
