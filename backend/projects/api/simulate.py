@@ -90,6 +90,8 @@ def trigger_simulation(request, project_name):
                         }
                         if Storage.objects.filter(commodity=commodity).exists()
                         else None,
+                        "unitR": commodity.unitR,
+                        "unitC": commodity.unitC,
                     }
                     for commodity in Commodity.objects.filter(site=site)
                 },
@@ -243,8 +245,8 @@ def get_simulation_config(request, project_name, simid):
 
     simres = SimulationResult.objects.get(id=simid, project=project)
 
-    if not simres.completed:
-        return HttpResponse("No result has been reported...", status="204")
+    if simres is None:
+        return HttpResponse("Simulation not found", status="204")
 
     return JsonResponse(simres.config)
 

@@ -29,7 +29,7 @@
           fluid
           v-model="instcapc"
         />
-        <label for="instcapc">Installed capacity (kW)</label>
+        <label for="instcapc">Installed capacity ({{ unitC }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -42,7 +42,7 @@
           fluid
           v-model="caploc"
         />
-        <label for="caploc">Minimum capacity (kW)</label>
+        <label for="caploc">Minimum capacity ({{ unitC }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -55,7 +55,7 @@
           fluid
           v-model="capupc"
         />
-        <label for="capupc">Maximum capacity (kW)</label>
+        <label for="capupc">Maximum capacity ({{ unitC }})</label>
       </FloatLabel>
     </div>
     <div class="grid grid-cols-3 gap-3">
@@ -70,33 +70,33 @@
           fluid
           v-model="invcostc"
         />
-        <label for="invcostc">Investment cost cap. (€/kWh)</label>
+        <label for="invcostc">Investment cost cap. (€/{{ unitC }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.fixcostc)"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'Operation independent costs for existing and new storage capacities per kWh.'
+            `Operation independent costs for existing and new storage capacities per ${unitC}.`
           "
           id="fixcostc"
           fluid
           v-model="fixcostc"
         />
-        <label for="fixcostc">Fix cost capacity (€/kWh/a)</label>
+        <label for="fixcostc">Fix cost capacity (€/{{ unitC }}/a)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.varcostc)"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'Operation dependent costs per kWh stored. This value is usually zero, but can be exploited for modelling short-term storage technologies or ones that have increased wear and tear proportional to amount of stored energy.'
+            `Operation dependent costs per ${unitC} stored. This value is usually zero, but can be exploited for modelling short-term storage technologies or ones that have increased wear and tear proportional to amount of stored energy.`
           "
           id="varcostc"
           fluid
           v-model="varcostc"
         />
-        <label for="varcostc">Variable cost cap. (€/kWh))</label>
+        <label for="varcostc">Variable cost cap. (€/{{ unitC }}))</label>
       </FloatLabel>
     </div>
 
@@ -115,7 +115,9 @@
                   fluid
                   v-model="instcapp"
                 />
-                <label for="instcapp">Installed storage power (kW)</label>
+                <label for="instcapp"
+                  >Installed storage power ({{ unitR }})</label
+                >
               </FloatLabel>
               <FloatLabel variant="on">
                 <InputNumber
@@ -128,7 +130,7 @@
                   fluid
                   v-model="caplop"
                 />
-                <label for="caplo">Minimum power (kW)</label>
+                <label for="caplo">Minimum power ({{ unitR }})</label>
               </FloatLabel>
               <FloatLabel variant="on">
                 <InputNumber
@@ -141,7 +143,7 @@
                   fluid
                   v-model="capupp"
                 />
-                <label for="capupp">Maximum power (kW)</label>
+                <label for="capupp">Maximum power ({{ unitR }})</label>
               </FloatLabel>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -181,33 +183,37 @@
                   fluid
                   v-model="invcostp"
                 />
-                <label for="invcostp">Investment cost power (€/kW)</label>
+                <label for="invcostp"
+                  >Investment cost power (€/{{ unitR }})</label
+                >
               </FloatLabel>
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.fixcostp)"
                   :max-fraction-digits="2"
                   v-tooltip.bottom="
-                    'Operation independent costs for existing and new capacities per kW input/output power.'
+                    `Operation independent costs for existing and new capacities per ${unitR} input/output power.`
                   "
                   id="fixcostp"
                   fluid
                   v-model="fixcostp"
                 />
-                <label for="fixcostp">Annual fix cost (€/kW/a)</label>
+                <label for="fixcostp">Annual fix cost (€/{{ unitR }}/a)</label>
               </FloatLabel>
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.varcostp)"
                   :max-fraction-digits="2"
                   v-tooltip.bottom="
-                    'Operation dependent costs for input or output of energy per kWh_out stored or retrieved.'
+                    `Operation dependent costs for input or output of energy per ${unitC}_out stored or retrieved.`
                   "
                   id="varcostc"
                   fluid
                   v-model="varcostp"
                 />
-                <label for="varcostp">Variable cost in/out (€/kWh)</label>
+                <label for="varcostp"
+                  >Variable cost in/out (€/{{ unitC }})</label
+                >
               </FloatLabel>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -316,7 +322,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useRoute } from 'vue-router'
 import type { Storage } from '@/backend/interfaces'
@@ -355,6 +361,8 @@ const coms = computed(() => {
         name: com.name,
         disp_name: com.name,
         default: false,
+        unitR: com.unitR,
+        unitC: com.unitC,
       }
     }),
     ...def_commodities.value
@@ -366,6 +374,8 @@ const coms = computed(() => {
           name: def_com.name,
           disp_name: def_com.name + ' (Default)',
           default: true,
+          unitR: def_com.unitR,
+          unitC: def_com.unitC,
         }
       }),
   ]
@@ -409,6 +419,8 @@ interface ComTag {
   name: string
   disp_name: string
   default: boolean
+  unitR: string
+  unitC: string
 }
 
 const commodity = ref<ComTag | undefined>(
@@ -417,8 +429,27 @@ const commodity = ref<ComTag | undefined>(
         name: props.storage.commodity,
         disp_name: props.storage.commodity,
         default: false,
+        unitR: 'kW',
+        unitC: 'kWh',
       }
     : undefined,
+)
+
+const unitR = computed(() => commodity.value?.unitR || 'kW')
+const unitC = computed(() => commodity.value?.unitC || 'kWh')
+watch(
+  commodities,
+  () => {
+    if (!commodities.value || !commodity.value) return
+
+    commodities.value.forEach(com => {
+      if (com.name !== commodity.value?.name) return
+
+      commodity.value.unitR = com.unitR
+      commodity.value.unitC = com.unitC
+    })
+  },
+  { immediate: true },
 )
 
 enum Errors {

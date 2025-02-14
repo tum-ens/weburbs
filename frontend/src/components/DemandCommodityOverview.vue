@@ -24,7 +24,7 @@
       <BarDiagramm
         :data="data"
         title-x="Steps"
-        title-y="kwH"
+        :title-y="commodity.unitC"
         class="h-80"
         :bargroupgap="0.1"
         :margin="{ t: 20 }"

@@ -28,7 +28,7 @@
         :key="stor.name"
         :name="stor.name"
         :value="stor.value"
-        suffix="kWh"
+        :suffix="stor.suffix"
       />
       <DataPoint
         name="Storage cycles per year"
@@ -44,8 +44,8 @@
         title="Storage"
         :data="storCapPow"
         :bargap="0.6"
-        titleX="kWh"
-        titleX2="kW"
+        :titleX="storUnitC?.join(' / ') || 'kWh'"
+        :titleX2="storUnitR?.join(' / ') || 'kW'"
         :margin="{
           t: 150,
           l: 150,
@@ -67,9 +67,8 @@
         v-for="(data, comName) in commodityDetails"
         :key="comName"
         :title="<string>comName"
-        :data="data"
-        titleY="kW"
-        titleY2="kWh"
+        :data="data.data"
+        :titleY="data.unitC"
         :bargroupgap="0.2"
         :margin="{
           t: 150,
@@ -104,11 +103,13 @@ const procCapacity = ref<Partial<Plotly.Data>[]>()
 const newProcs = ref<{ name: string; value: number }[]>([])
 
 const storCapPow = ref<Partial<Plotly.Data>[]>()
-const newStor = ref<{ name: string; value: number }[]>([])
+const storUnitR = ref<string[]>()
+const storUnitC = ref<string[]>()
+const newStor = ref<{ name: string; value: number; suffix: string }[]>([])
 const storRetrieved = ref(0)
 
 const commodityDetails = ref<{
-  [key: string]: Partial<Plotly.Data>[]
+  [key: string]: { unitR: string; unitC: string; data: Partial<Plotly.Data>[] }
 }>({})
 
 const groupOption = ref(groupOptions[0])
@@ -120,6 +121,8 @@ watch(
     procCapacity.value = []
     newStor.value = []
     storCapPow.value = []
+    storUnitR.value = []
+    storUnitC.value = []
     if (!simulation.value || !config.value) return
 
     // Init processes
@@ -183,7 +186,14 @@ watch(
           storPInstalled.push(stor.PTotal - stor.PNew)
           storNames.push(storName)
 
-          newStor.value.push({ name: storName, value: stor.CNew })
+          const com = config.value.site[props.site.name].commodity[comName]
+          newStor.value.push({
+            name: storName,
+            value: stor.CNew,
+            suffix: com.unitR,
+          })
+          storUnitR.value.push(com.unitR)
+          storUnitC.value.push(com.unitC)
         }
       }
       storCapPow.value = [
@@ -238,24 +248,25 @@ watch(
       (_, i) => i + 1,
     )
     for (const comName in results) {
-      if (
-        config.value['site'][props.site.name]['commodity'][comName]['Type'] !==
-        'Demand'
-      )
-        continue
+      const com = config.value.site[props.site.name].commodity[comName]
+      if (com.Type !== 'Demand') continue
 
       const comResults = results[comName]
-      commodityDetails.value[comName] = [
-        {
-          name: 'Demand',
-          x: timeline,
-          y: chunkAdd(comResults.demand, groupOption.value.groupSize),
-          type: 'scatter',
-          yaxis: 'y1',
-        },
-      ]
+      commodityDetails.value[comName] = {
+        unitR: com.unitR,
+        unitC: com.unitC,
+        data: [
+          {
+            name: 'Demand',
+            x: timeline,
+            y: chunkAdd(comResults.demand, groupOption.value.groupSize),
+            type: 'scatter',
+            yaxis: 'y1',
+          },
+        ],
+      }
       if (groupOption.value.groupSize === 1)
-        commodityDetails.value[comName].push({
+        commodityDetails.value[comName].data.push({
           name: 'Storage',
           x: timeline,
           y: chunkAdd(comResults.storage.Level, groupOption.value.groupSize),
@@ -267,7 +278,7 @@ watch(
         0,
       )
       for (const procName in comResults.created) {
-        commodityDetails.value[comName].push({
+        commodityDetails.value[comName].data.push({
           name: procName,
           x: timeline,
           y: chunkAdd(

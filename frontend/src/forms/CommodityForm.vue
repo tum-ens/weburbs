@@ -27,14 +27,14 @@
           :invalid="invalids.includes('price')"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'Cost for purchasing one unit (MWh) of a stock or buy commodity. Revenue for selling one unit (MWh) of a sell commodity. Cost for creating one unit of environmental commodity.\n' +
-            'Multiplier for sheet \'Buy-Sell-Price\' for commodity types \'Buy\' and \'Sell\'.'
+            `Cost for purchasing one unit (${unitC}) of a stock or buy commodity. Revenue for selling one unit (${unitC}) of a sell commodity. Cost for creating one unit of environmental commodity.\n` +
+            `Multiplier for sheet \'Buy-Sell-Price\' for commodity types \'Buy\' and \'Sell\'.`
           "
           id="price"
           fluid
           v-model="price"
         />
-        <label for="price">Price (€/kWh)</label>
+        <label for="price">Price (€/{{ unitC }})</label>
       </FloatLabel>
     </div>
     <div class="grid grid-cols-2 gap-3">
@@ -43,7 +43,7 @@
           :invalid="invalids.includes('max')"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'For stock commodities, this value limits annual use (kWh) of this commodity. For CO2, this value limits the amount of emissions (t_CO2). If simulation timespan does not cover a full year, the sums are multiplied accordingly before (cf. \'weight\' in urbs). ' +
+            `For stock commodities, this value limits annual use (${unitC}) of this commodity. For CO2, this value limits the amount of emissions (t_CO2). If simulation timespan does not cover a full year, the sums are multiplied accordingly before (cf. \'weight\' in urbs). ` +
             'Set negative for infinity.'
           "
           id="max"
@@ -57,7 +57,7 @@
           :invalid="invalids.includes('maxperhour')"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'For stock commodities, this value limits the energy use per hour (kW). ' +
+            `For stock commodities, this value limits the energy use per hour (${unitR}). ` +
             'Set negative for infinity.'
           "
           id="maxperhour"
@@ -148,8 +148,8 @@ const price = ref(defaultValue(props.commodity?.price, undefined))
 const max = ref(defaultValue(props.commodity?.max, undefined))
 const maxperhour = ref(defaultValue(props.commodity?.maxperhour, undefined))
 
-const unitR = ref(defaultValue(props.commodity?.unitR, ''))
-const unitC = ref(defaultValue(props.commodity?.unitC, ''))
+const unitR = ref(defaultValue(props.commodity?.unitR, 'kW'))
+const unitC = ref(defaultValue(props.commodity?.unitC, 'kWh'))
 
 const invalids = ref<string[]>([])
 

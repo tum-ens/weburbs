@@ -29,7 +29,7 @@
           fluid
           v-model="instcap"
         />
-        <label for="instcap">Installed capacity (kW)</label>
+        <label for="instcap">Installed capacity ({{ unitR }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -42,7 +42,7 @@
           fluid
           v-model="caplo"
         />
-        <label for="caplo">Minimum capacity (kW)</label>
+        <label for="caplo">Minimum capacity ({{ unitR }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
@@ -55,7 +55,7 @@
           fluid
           v-model="capup"
         />
-        <label for="capup">Maximum capacity (kW)</label>
+        <label for="capup">Maximum capacity ({{ unitR }})</label>
       </FloatLabel>
     </div>
     <div class="grid grid-cols-3 gap-3">
@@ -70,33 +70,33 @@
           fluid
           v-model="invcost"
         />
-        <label for="invcost">Investment cost (€/kW)</label>
+        <label for="invcost">Investment cost (€/{{ unitRboxed }})</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('fixcost')"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'Operation independent costs for existing and new capacities per kW throughput power.'
+            `Operation independent costs for existing and new capacities per ${unitR} throughput power.`
           "
           id="fixcost"
           fluid
           v-model="fixcost"
         />
-        <label for="fixcost">Annual fix cost (€/kW/a)</label>
+        <label for="fixcost">Annual fix cost (€/{{ unitRboxed }}/a)</label>
       </FloatLabel>
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('varcost')"
           :max-fraction-digits="2"
           v-tooltip.bottom="
-            'Variable costs per throughput energy unit (kWh) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.'
+            `Variable costs per throughput energy unit (${unitC}) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.`
           "
           id="varcost"
           fluid
           v-model="varcost"
         />
-        <label for="varcost">Variable costs (€/kWh)</label>
+        <label for="varcost">Variable costs (€/{{ unitCboxed }})</label>
       </FloatLabel>
     </div>
 
@@ -172,7 +172,9 @@
                   fluid
                   v-model="areapercap"
                 />
-                <label for="areapercap">Area use per capacity (m^2/kW)</label>
+                <label for="areapercap"
+                  >Area use per capacity (m²/{{ unitRboxed }})</label
+                >
               </FloatLabel>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -312,7 +314,11 @@
 <script setup lang="ts">
 import { computed, inject, ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import type { Process, ProcessCommodity } from '@/backend/interfaces'
+import {
+  CommodityType,
+  type Process,
+  type ProcessCommodity,
+} from '@/backend/interfaces'
 import {
   useDefCommodities,
   useProjectSiteCommodities,
@@ -351,6 +357,9 @@ const coms = computed(() => {
         default: false,
         ratio: 1,
         ratiomin: 1,
+        unit: com.type === CommodityType.Demand,
+        unitR: com.unitR,
+        unitC: com.unitC,
       }
     }),
     ...def_commodities.value
@@ -364,6 +373,9 @@ const coms = computed(() => {
           default: true,
           ratio: 1,
           ratiomin: 1,
+          unit: def_com.type === CommodityType.Demand,
+          unitR: def_com.unitR,
+          unitC: def_com.unitC,
         }
       }),
   ]
@@ -395,6 +407,9 @@ const areapercap = ref(defaultValue(props.process?.areapercap, undefined))
 interface ProcComTag extends ProcessCommodity {
   disp_name: string
   default: boolean
+  unit: boolean
+  unitR?: string
+  unitC?: string
 }
 
 const inComs = ref<ProcComTag[]>([])
@@ -413,6 +428,7 @@ watch(
         ...proccom,
         disp_name: proccom.name,
         default: false,
+        unit: false,
       }
     })
     outComs.value = props.process.out.map(proccom => {
@@ -420,6 +436,38 @@ watch(
         ...proccom,
         disp_name: proccom.name,
         default: false,
+        unit: false,
+      }
+    })
+  },
+  { immediate: true },
+)
+
+const unitR = computed(
+  () => outComs.value?.find(com => com.unit)?.unitR || 'kW',
+)
+const unitRboxed = computed(() =>
+  unitR.value.includes('/') ? `(${unitR.value})` : unitR.value,
+)
+const unitC = computed(
+  () => outComs.value?.find(com => com.unit)?.unitC || 'kWh',
+)
+const unitCboxed = computed(() =>
+  unitR.value.includes('/') ? `(${unitC.value})` : unitC.value,
+)
+watch(
+  commodities,
+  () => {
+    if (!commodities.value || outComs.value.length === 0) return
+
+    outComs.value = outComs.value.map(outCom => {
+      const com = commodities.value.find(com => com.name === outCom.name)
+      if (!com) return outCom
+      return {
+        ...outCom,
+        unit: com.type === CommodityType.Demand,
+        unitR: com.unitR,
+        unitC: com.unitC,
       }
     })
   },

@@ -39,7 +39,7 @@
       <BarDiagramm
         :data
         title-x="Steps"
-        title-y=""
+        :title-y="commodity.unitC"
         class="h-80"
         :bargroupgap="0.1"
         :margin="{ t: 20 }"
