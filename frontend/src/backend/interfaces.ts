@@ -34,6 +34,8 @@ export interface Commodity {
   price: number | undefined
   max: number | undefined
   maxperhour: number | undefined
+  unitR: string
+  unitC: string
 }
 
 export interface ProcessCommodity {

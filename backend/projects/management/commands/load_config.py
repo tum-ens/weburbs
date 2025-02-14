@@ -106,6 +106,8 @@ class Command(BaseCommand):
             def_com.max = getDefault(com, "max", None)
             def_com.maxperhour = getDefault(com, "maxperhour", None)
             def_com.autoadd = getDefault(com, "autoadd", False)
+            def_com.unitR = getDefault(com, "unitR", "kW")
+            def_com.unitC = getDefault(com, "unitC", "kWh")
             def_com.save()
             print("\033[92mOK\033[0m")
 

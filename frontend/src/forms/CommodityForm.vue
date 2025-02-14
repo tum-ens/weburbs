@@ -67,6 +67,33 @@
         <label for="maxperhour">Maximum commodity use per hour</label>
       </FloatLabel>
     </div>
+    <div class="grid grid-cols-2 gap-3">
+      <FloatLabel variant="on">
+        <InputText
+          :invalid="invalids.includes('unitR')"
+          v-tooltip.bottom="
+            'This defines the rate unit used everywhere for this commodity'
+          "
+          id="unitR"
+          fluid
+          v-model="unitR"
+        />
+        <label for="max">Rate unit</label>
+      </FloatLabel>
+      <FloatLabel variant="on">
+        <InputText
+          :invalid="invalids.includes('unitC')"
+          :max-fraction-digits="2"
+          v-tooltip.bottom="
+            'This defines the capacity unit used everywhere for this commodity'
+          "
+          id="unitC"
+          fluid
+          v-model="unitC"
+        />
+        <label for="unitC">Unit capacity</label>
+      </FloatLabel>
+    </div>
 
     <div class="flex flex-row gap-3">
       <Button
@@ -121,6 +148,9 @@ const price = ref(defaultValue(props.commodity?.price, undefined))
 const max = ref(defaultValue(props.commodity?.max, undefined))
 const maxperhour = ref(defaultValue(props.commodity?.maxperhour, undefined))
 
+const unitR = ref(defaultValue(props.commodity?.unitR, ''))
+const unitC = ref(defaultValue(props.commodity?.unitC, ''))
+
 const invalids = ref<string[]>([])
 
 function check() {
@@ -129,6 +159,9 @@ function check() {
 
   if (type.value === undefined) invalids.value.push('type')
   if (price.value !== undefined && price.value < 0) invalids.value.push('price')
+
+  if (!unitR.value || unitR.value.length === 0) invalids.value.push('unitR')
+  if (!unitC.value || unitC.value.length === 0) invalids.value.push('unitC')
 
   return invalids.value.length === 0
 }
@@ -151,6 +184,8 @@ function submit() {
     price: price.value,
     max: max.value,
     maxperhour: maxperhour.value,
+    unitR: unitR.value,
+    unitC: unitC.value,
   })
 }
 

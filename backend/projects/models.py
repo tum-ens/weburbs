@@ -51,6 +51,8 @@ class CommodityTypes(models.Model):
     price = models.FloatField(null=True)
     max = models.FloatField(null=True)
     maxperhour = models.FloatField(null=True)
+    unitR = models.TextField(null=False)
+    unitC = models.TextField(null=False)
 
     def get_com_type_label(self):
         return ComType(self.type).name

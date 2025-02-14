@@ -16,7 +16,7 @@ def list_def_commodities(request):
     commodities = (
         DefCommodity.objects.all()
         .order_by("name")
-        .values("name", "type", "price", "max", "maxperhour")
+        .values("name", "type", "price", "max", "maxperhour", "unitR", "unitC")
     )
 
     return JsonResponse(list(commodities), safe=False)
@@ -31,7 +31,7 @@ def list_commodities(request, project_name, site_name):
     commodities = (
         Commodity.objects.filter(site=site)
         .order_by("name")
-        .values("name", "type", "price", "max", "maxperhour")
+        .values("name", "type", "price", "max", "maxperhour", "unitR", "unitC")
     )
 
     return JsonResponse(list(commodities), safe=False)
@@ -46,6 +46,8 @@ def add_def_to_project(def_commodity: DefCommodity, site: Site):
         price=def_commodity.price,
         max=def_commodity.max,
         maxperhour=def_commodity.maxperhour,
+        unitR=def_commodity.unitR,
+        unitC=def_commodity.unitC,
     )
     commodity.save()
 
@@ -100,6 +102,8 @@ def update_commodity(request, project_name, site_name, commodity_name):
     commodity.price = data["price"] if "price" in data else None
     commodity.max = data["max"] if "max" in data else None
     commodity.maxperhour = data["maxperhour"] if "maxperhour" in data else None
+    commodity.unitR = data["unitR"]
+    commodity.unitC = data["unitC"]
     commodity.save()
 
     return JsonResponse({"detail": "Commodity updated"})
