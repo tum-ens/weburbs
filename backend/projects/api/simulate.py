@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 
 import requests
 from django.contrib.auth.decorators import login_required

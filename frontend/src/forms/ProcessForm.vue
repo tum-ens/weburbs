@@ -58,34 +58,6 @@
         <label for="capup">Maximum capacity (kW)</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes('maxgrad')"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Maximum allowed power gradient relative to power throughput capacity. Set value to negative or greater than 1/dt to disable it. '
-          "
-          id="maxgrad"
-          fluid
-          v-model="maxgrad"
-        />
-        <label for="maxgrad">Maximal power gradient (1/h)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes('minfraction')"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'This value sets the minimum possible fraction of the process capacity which the process can run at. Must be greater equal 0.'
-          "
-          id="minfraction"
-          fluid
-          v-model="minfraction"
-        />
-        <label for="minfraction">Minimum load fraction</label>
-      </FloatLabel>
-    </div>
     <div class="grid grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
@@ -127,159 +99,190 @@
         <label for="varcost">Variable costs (€/kWh)</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-3 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes('wacc')"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Percentage of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
-          "
-          id="wacc"
-          fluid
-          v-model="wacc"
-        />
-        <label for="wacc">Weighted average cost of capital</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes('depreciation')"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Economic lifetime (more conservative than technical lifetime) of a process investment in years (a). Used to calculate annuity factor for investment costs.'
-          "
-          id="depreciation"
-          fluid
-          v-model="depreciation"
-        />
-        <label for="depreciation">Depreciation period (a)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes('areapercap')"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'If a process requires area set value here. If no area use is to be considered leave empty.'
-          "
-          id="areapercap"
-          fluid
-          v-model="areapercap"
-        />
-        <label for="areapercap">Area use per capacity (m^2/kW)</label>
-      </FloatLabel>
-    </div>
 
     <Accordion value="1" v-if="advanced">
       <AccordionPanel pt:root:class="border-0" value="0">
         <AccordionHeader>Advanced</AccordionHeader>
         <AccordionContent pt:root:class="pt-1">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-3">
+          <div class="mt-2 flex flex-col gap-3">
+            <div class="grid grid-cols-2 gap-3">
               <FloatLabel variant="on">
-                <MultiSelect
-                  optionLabel="disp_name"
-                  dataKey="name"
-                  v-model="inComs"
-                  display="chip"
-                  :options="coms"
-                  filter
+                <InputNumber
+                  :invalid="invalids.includes('maxgrad')"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Maximum allowed power gradient relative to power throughput capacity. Set value to negative or greater than 1/dt to disable it. '
+                  "
+                  id="maxgrad"
                   fluid
-                  id="inComs"
-                >
-                  <template #emptyfilter
-                    >Create commodities before using them</template
-                  >
-                </MultiSelect>
-                <label for="inComs">Incoming commodities</label>
+                  v-model="maxgrad"
+                />
+                <label for="maxgrad">Maximal power gradient (1/h)</label>
               </FloatLabel>
-              <div
-                v-for="inCom in inComs"
-                :key="inCom.name"
-                class="grid grid-cols-3 gap-3 items-center"
-              >
-                <span>{{ inCom.disp_name }}</span>
-                <FloatLabel variant="on">
-                  <InputNumber
-                    id="ratio"
-                    :max-fraction-digits="2"
-                    fluid
-                    v-tooltip="
-                      'Input/output quantities, relative to process throughput. Leave empty to not set it.'
-                    "
-                    v-model="inCom.ratio"
-                    :invalid="inCom.ratio === undefined || inCom.ratio < 0"
-                  />
-                  <label for="ratio">Ratio</label>
-                </FloatLabel>
-                <FloatLabel variant="on">
-                  <InputNumber
-                    id="ratiomin"
-                    :max-fraction-digits="2"
-                    fluid
-                    v-tooltip="
-                      'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
-                    "
-                    v-model="inCom.ratiomin"
-                    :invalid="
-                      inCom.ratiomin === undefined || inCom.ratiomin < 0
-                    "
-                  />
-                  <label for="ratiomin">Minimum ratio</label>
-                </FloatLabel>
-              </div>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes('minfraction')"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'This value sets the minimum possible fraction of the process capacity which the process can run at. Must be greater equal 0.'
+                  "
+                  id="minfraction"
+                  fluid
+                  v-model="minfraction"
+                />
+                <label for="minfraction">Minimum load fraction</label>
+              </FloatLabel>
             </div>
-            <div class="flex flex-col gap-3">
+
+            <div class="grid grid-cols-3 gap-3">
               <FloatLabel variant="on">
-                <MultiSelect
-                  optionLabel="disp_name"
-                  dataKey="name"
-                  v-model="outComs"
-                  display="chip"
-                  :options="coms"
-                  filter
+                <InputNumber
+                  :invalid="invalids.includes('wacc')"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Percentage of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
+                  "
+                  id="wacc"
                   fluid
-                  id="outComs"
-                >
-                  <template #emptyfilter
-                    >Create commodities before using them</template
-                  >
-                </MultiSelect>
-                <label for="outComs">Outgoing commodities</label>
+                  v-model="wacc"
+                />
+                <label for="wacc">Weighted average cost of capital</label>
               </FloatLabel>
-              <div
-                v-for="outCom in outComs"
-                :key="outCom.name"
-                class="grid grid-cols-3 gap-3 items-center"
-              >
-                <span>{{ outCom.disp_name }}</span>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes('depreciation')"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Economic lifetime (more conservative than technical lifetime) of a process investment in years (a). Used to calculate annuity factor for investment costs.'
+                  "
+                  id="depreciation"
+                  fluid
+                  v-model="depreciation"
+                />
+                <label for="depreciation">Depreciation period (a)</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes('areapercap')"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'If a process requires area set value here. If no area use is to be considered leave empty.'
+                  "
+                  id="areapercap"
+                  fluid
+                  v-model="areapercap"
+                />
+                <label for="areapercap">Area use per capacity (m^2/kW)</label>
+              </FloatLabel>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-3">
                 <FloatLabel variant="on">
-                  <InputNumber
-                    id="ratio"
-                    :max-fraction-digits="2"
+                  <MultiSelect
+                    optionLabel="disp_name"
+                    dataKey="name"
+                    v-model="inComs"
+                    display="chip"
+                    :options="coms"
+                    filter
                     fluid
-                    v-tooltip="
-                      'Input/output quantities, relative to process throughput. Leave empty to not set it.'
-                    "
-                    v-model="outCom.ratio"
-                    :invalid="outCom.ratio === undefined || outCom.ratio < 0"
-                  />
-                  <label for="ratio">Ratio</label>
+                    id="inComs"
+                  >
+                    <template #emptyfilter
+                      >Create commodities before using them
+                    </template>
+                  </MultiSelect>
+                  <label for="inComs">Incoming commodities</label>
                 </FloatLabel>
+                <div
+                  v-for="inCom in inComs"
+                  :key="inCom.name"
+                  class="grid grid-cols-3 gap-3 items-center"
+                >
+                  <span>{{ inCom.disp_name }}</span>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      id="ratio"
+                      :max-fraction-digits="2"
+                      fluid
+                      v-tooltip="
+                        'Input/output quantities, relative to process throughput. Leave empty to not set it.'
+                      "
+                      v-model="inCom.ratio"
+                      :invalid="inCom.ratio === undefined || inCom.ratio < 0"
+                    />
+                    <label for="ratio">Ratio</label>
+                  </FloatLabel>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      id="ratiomin"
+                      :max-fraction-digits="2"
+                      fluid
+                      v-tooltip="
+                        'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
+                      "
+                      v-model="inCom.ratiomin"
+                      :invalid="
+                        inCom.ratiomin === undefined || inCom.ratiomin < 0
+                      "
+                    />
+                    <label for="ratiomin">Minimum ratio</label>
+                  </FloatLabel>
+                </div>
+              </div>
+              <div class="flex flex-col gap-3">
                 <FloatLabel variant="on">
-                  <InputNumber
-                    id="ratiomin"
-                    :max-fraction-digits="2"
+                  <MultiSelect
+                    optionLabel="disp_name"
+                    dataKey="name"
+                    v-model="outComs"
+                    display="chip"
+                    :options="coms"
+                    filter
                     fluid
-                    v-tooltip="
-                      'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
-                    "
-                    v-model="outCom.ratiomin"
-                    :invalid="
-                      outCom.ratiomin === undefined || outCom.ratiomin < 0
-                    "
-                  />
-                  <label for="ratiomin">Minimum ratio</label>
+                    id="outComs"
+                  >
+                    <template #emptyfilter
+                      >Create commodities before using them
+                    </template>
+                  </MultiSelect>
+                  <label for="outComs">Outgoing commodities</label>
                 </FloatLabel>
+                <div
+                  v-for="outCom in outComs"
+                  :key="outCom.name"
+                  class="grid grid-cols-3 gap-3 items-center"
+                >
+                  <span>{{ outCom.disp_name }}</span>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      id="ratio"
+                      :max-fraction-digits="2"
+                      fluid
+                      v-tooltip="
+                        'Input/output quantities, relative to process throughput. Leave empty to not set it.'
+                      "
+                      v-model="outCom.ratio"
+                      :invalid="outCom.ratio === undefined || outCom.ratio < 0"
+                    />
+                    <label for="ratio">Ratio</label>
+                  </FloatLabel>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      id="ratiomin"
+                      :max-fraction-digits="2"
+                      fluid
+                      v-tooltip="
+                        'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
+                      "
+                      v-model="outCom.ratiomin"
+                      :invalid="
+                        outCom.ratiomin === undefined || outCom.ratiomin < 0
+                      "
+                    />
+                    <label for="ratiomin">Minimum ratio</label>
+                  </FloatLabel>
+                </div>
               </div>
             </div>
           </div>

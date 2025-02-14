@@ -61,69 +61,6 @@
     <div class="grid grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
-          :invalid="invalids.includes(Errors.instcapp)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="'Existing storage power per storage type'"
-          id="instcapp"
-          fluid
-          v-model="instcapp"
-        />
-        <label for="instcapp">Installed storage power (kW)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.caplop)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Minimum required input/output power. Must be smaller or equal to \'inst-cap-p\'.'
-          "
-          id="caplop"
-          fluid
-          v-model="caplop"
-        />
-        <label for="caplo">Minimum power (kW)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.capupp)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Maximum allowed input/output power. Must be bigger or equal to \'inst-cap-p\'. Set negative for infinity.'
-          "
-          id="capupp"
-          fluid
-          v-model="capupp"
-        />
-        <label for="capupp">Maximum power (kW)</label>
-      </FloatLabel>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.effin)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="'Energy efficiency of storing process.'"
-          id="effin"
-          fluid
-          v-model="effin"
-        />
-        <label for="effin">Efficiency input</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.effout)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="'Energy efficiency of power output.'"
-          id="effout"
-          fluid
-          v-model="effout"
-        />
-        <label for="effout">Efficiency output</label>
-      </FloatLabel>
-    </div>
-    <div class="grid grid-cols-3 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
           :invalid="invalids.includes(Errors.invcostc)"
           :max-fraction-digits="2"
           v-tooltip.bottom="
@@ -162,135 +99,201 @@
         <label for="varcostc">Variable cost cap. (€/kWh))</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-3 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.invcostp)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Total investement cost for adding power input/output capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
-          "
-          id="invcostp"
-          fluid
-          v-model="invcostp"
-        />
-        <label for="invcostp">Investment cost power (€/kW)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.fixcostp)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Operation independent costs for existing and new capacities per kW input/output power.'
-          "
-          id="fixcostp"
-          fluid
-          v-model="fixcostp"
-        />
-        <label for="fixcostp">Annual fix cost (€/kW/a)</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.varcostp)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Operation dependent costs for input or output of energy per kWh_out stored or retrieved.'
-          "
-          id="varcostc"
-          fluid
-          v-model="varcostp"
-        />
-        <label for="varcostp">Variable cost in/out (€/kWh)</label>
-      </FloatLabel>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.wacc)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Percentage (%) of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
-          "
-          id="wacc"
-          fluid
-          v-model="wacc"
-        />
-        <label for="wacc">Weighted average cost of capital</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.depreciation)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Economic lifetime (more conservative than technical lifetime) of a storage investment in years (a). Used to calculate annuity factor for investment costs.'
-          "
-          id="depreciation"
-          fluid
-          v-model="depreciation"
-        />
-        <label for="depreciation">Depreciation period (a)</label>
-      </FloatLabel>
-    </div>
-    <div class="grid grid-cols-3 gap-3">
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.init)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Fraction of storage capacity that is full at the simulation start (t0). This level also has to be reached in the final timestep (tN).'
-          "
-          id="init"
-          fluid
-          v-model="init"
-        />
-        <label for="init">Initial storage content</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.discharge)"
-          :max-fraction-digits="20"
-          v-tooltip.bottom="
-            'Energy losses due to self-discharge per hour as a fraction (1=100%/h).'
-          "
-          id="discharge"
-          fluid
-          v-model="discharge"
-        />
-        <label for="discharge">Discharge</label>
-      </FloatLabel>
-      <FloatLabel variant="on">
-        <InputNumber
-          :invalid="invalids.includes(Errors.epratio)"
-          :max-fraction-digits="2"
-          v-tooltip.bottom="
-            'Fixed ratio of the storage energy capacity to its power capacity. For the types of storages whose energy and power capacity may be sized independently from each other, this cell should be left empty.'
-          "
-          id="epratio"
-          fluid
-          v-model="epratio"
-        />
-        <label for="epratio">Energy to power ratio (hours)</label>
-      </FloatLabel>
-    </div>
 
     <Accordion value="1" v-if="advanced">
       <AccordionPanel pt:root:class="border-0" value="0">
         <AccordionHeader>Advanced</AccordionHeader>
         <AccordionContent pt:root:class="pt-1">
-          <div class="grid grid-cols-2 gap-3">
-            <FloatLabel variant="on">
-              <Select
-                optionLabel="disp_name"
-                dataKey="name"
-                v-model="commodity"
-                display="chip"
-                :options="coms"
-                filter
-                fluid
-                id="coms"
-              />
-              <label for="coms">Commodities</label>
-            </FloatLabel>
+          <div class="mt-2 flex flex-col gap-3">
+            <div class="grid grid-cols-3 gap-3">
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.instcapp)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="'Existing storage power per storage type'"
+                  id="instcapp"
+                  fluid
+                  v-model="instcapp"
+                />
+                <label for="instcapp">Installed storage power (kW)</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.caplop)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Minimum required input/output power. Must be smaller or equal to \'inst-cap-p\'.'
+                  "
+                  id="caplop"
+                  fluid
+                  v-model="caplop"
+                />
+                <label for="caplo">Minimum power (kW)</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.capupp)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Maximum allowed input/output power. Must be bigger or equal to \'inst-cap-p\'. Set negative for infinity.'
+                  "
+                  id="capupp"
+                  fluid
+                  v-model="capupp"
+                />
+                <label for="capupp">Maximum power (kW)</label>
+              </FloatLabel>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.effin)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="'Energy efficiency of storing process.'"
+                  id="effin"
+                  fluid
+                  v-model="effin"
+                />
+                <label for="effin">Efficiency input</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.effout)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="'Energy efficiency of power output.'"
+                  id="effout"
+                  fluid
+                  v-model="effout"
+                />
+                <label for="effout">Efficiency output</label>
+              </FloatLabel>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.invcostp)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Total investement cost for adding power input/output capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
+                  "
+                  id="invcostp"
+                  fluid
+                  v-model="invcostp"
+                />
+                <label for="invcostp">Investment cost power (€/kW)</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.fixcostp)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Operation independent costs for existing and new capacities per kW input/output power.'
+                  "
+                  id="fixcostp"
+                  fluid
+                  v-model="fixcostp"
+                />
+                <label for="fixcostp">Annual fix cost (€/kW/a)</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.varcostp)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Operation dependent costs for input or output of energy per kWh_out stored or retrieved.'
+                  "
+                  id="varcostc"
+                  fluid
+                  v-model="varcostp"
+                />
+                <label for="varcostp">Variable cost in/out (€/kWh)</label>
+              </FloatLabel>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.wacc)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Percentage (%) of costs for capital after taxes. Used to calculate annuity factor for investment costs.'
+                  "
+                  id="wacc"
+                  fluid
+                  v-model="wacc"
+                />
+                <label for="wacc">Weighted average cost of capital</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.depreciation)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Economic lifetime (more conservative than technical lifetime) of a storage investment in years (a). Used to calculate annuity factor for investment costs.'
+                  "
+                  id="depreciation"
+                  fluid
+                  v-model="depreciation"
+                />
+                <label for="depreciation">Depreciation period (a)</label>
+              </FloatLabel>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.init)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Fraction of storage capacity that is full at the simulation start (t0). This level also has to be reached in the final timestep (tN).'
+                  "
+                  id="init"
+                  fluid
+                  v-model="init"
+                />
+                <label for="init">Initial storage content</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.discharge)"
+                  :max-fraction-digits="20"
+                  v-tooltip.bottom="
+                    'Energy losses due to self-discharge per hour as a fraction (1=100%/h).'
+                  "
+                  id="discharge"
+                  fluid
+                  v-model="discharge"
+                />
+                <label for="discharge">Discharge</label>
+              </FloatLabel>
+              <FloatLabel variant="on">
+                <InputNumber
+                  :invalid="invalids.includes(Errors.epratio)"
+                  :max-fraction-digits="2"
+                  v-tooltip.bottom="
+                    'Fixed ratio of the storage energy capacity to its power capacity. For the types of storages whose energy and power capacity may be sized independently from each other, this cell should be left empty.'
+                  "
+                  id="epratio"
+                  fluid
+                  v-model="epratio"
+                />
+                <label for="epratio">Energy to power ratio (hours)</label>
+              </FloatLabel>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <FloatLabel variant="on">
+                <Select
+                  optionLabel="disp_name"
+                  dataKey="name"
+                  v-model="commodity"
+                  display="chip"
+                  :options="coms"
+                  filter
+                  fluid
+                  id="coms"
+                />
+                <label for="coms">Commodity</label>
+              </FloatLabel>
+            </div>
           </div>
         </AccordionContent>
       </AccordionPanel>
