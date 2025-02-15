@@ -25,7 +25,7 @@
         ]"
         :margin="{ l: 0, b: 0, r: 0 }"
       />
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 justify-items-center">
+      <div class="grid grid-cols-2 gap-3 justify-items-center">
         <DataPoint
           name="LCOE"
           :value="

@@ -19,7 +19,7 @@
       />
       <label for="description">Description</label>
     </FloatLabel>
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.instcapc)"
@@ -58,7 +58,7 @@
         <label for="capupc">Maximum capacity ({{ unitC }})</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.invcostc)"
@@ -105,7 +105,7 @@
         <AccordionHeader>Advanced</AccordionHeader>
         <AccordionContent pt:root:class="pt-1">
           <div class="mt-2 flex flex-col gap-3">
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.instcapp)"
@@ -171,7 +171,7 @@
               </FloatLabel>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.invcostp)"
@@ -244,7 +244,7 @@
                 <label for="depreciation">Depreciation period (a)</label>
               </FloatLabel>
             </div>
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.init)"

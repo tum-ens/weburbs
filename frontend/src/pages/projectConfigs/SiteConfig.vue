@@ -2,7 +2,7 @@
   <Card v-if="sites">
     <template #title>Sites</template>
     <template #content>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Accordion v-model:value="curSite" lazy>
           <AccordionPanel
             v-for="site in sites"
@@ -46,7 +46,7 @@
             </AccordionContent>
           </AccordionPanel>
         </Accordion>
-        <div>
+        <div class="min-h-60">
           <l-map
             @click="mapClick"
             :zoom="2"

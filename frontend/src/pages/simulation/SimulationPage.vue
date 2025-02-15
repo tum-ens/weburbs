@@ -1,9 +1,9 @@
 <template>
   <Card>
     <template #title>
-      <div class="flex flex-row justify-between">
+      <div class="flex flex-col xl:flex-row justify-between gap-3">
         <span>Simulations</span>
-        <div class="flex flex-row gap-3">
+        <div class="grid grid-cols-2 md:flex md:flex-row gap-3">
           <Button
             v-if="advanced && selSimulation"
             severity="info"
@@ -17,6 +17,7 @@
             @click="logsVisible = true"
           />
           <Select
+            class="col-span-2"
             v-model="selSimulation"
             :options="simulations"
             placeholder="Select a simulation"
@@ -49,6 +50,7 @@
             </template>
           </Select>
           <Button
+            class="col-span-2"
             icon="pi pi-caret-right"
             label="Simulate"
             :loading="simulating"

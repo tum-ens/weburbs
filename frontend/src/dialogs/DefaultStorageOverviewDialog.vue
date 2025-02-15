@@ -4,7 +4,7 @@
     :draggable="false"
     modal
     header="Default Processes"
-    class="w-1/2 min-h-96"
+    class="w-11/12 md:w-10/12 xl:w-1/2 min-h-96"
   >
     <div
       v-if="def_storage?.length"

@@ -4,13 +4,14 @@
     :draggable="false"
     header="Configure Demand"
     modal
+    class="w-11/12 md:w-10/12 xl:w-1/2"
   >
-    <div class="flex flex-col min-w-96">
+    <div class="flex flex-col">
       <span v-if="demands.length === 0"> Add some consumer... </span>
       <div class="flex flex-col gap-3">
         <template v-for="demand in demands" :key="demand.name">
           <div class="grid grid-cols-12 gap-3 items-center">
-            <span class="col-span-6">{{ demand.name }}</span>
+            <span class="col-span-12 sm:col-span-6">{{ demand.name }}</span>
             <InputNumber
               v-model="demand.quantity"
               inputId="horizontal-buttons"
@@ -20,7 +21,7 @@
               input-class="text-center"
               :max-fraction-digits="0"
               fluid
-              class="col-span-5"
+              class="col-span-10 sm:col-span-5"
               :allow-empty="false"
               :min="1"
             >
@@ -32,7 +33,7 @@
               </template>
             </InputNumber>
             <Button
-              class="col-span-1 w-full"
+              class="col-span-2 sm:col-span-1 w-full"
               icon="pi pi-trash"
               severity="danger"
               @click="() => remove(demand)"
@@ -42,30 +43,40 @@
         </template>
       </div>
       <divider />
-      <div class="grid grid-cols-2 gap-3 items-center">
-        <Select
-          v-model="newDefault"
-          :options="availDefDemands"
-          filter
-          option-label="name"
-        />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+        <FloatLabel variant="on">
+          <Select
+            fluid
+            v-model="newDefault"
+            :options="availDefDemands"
+            filter
+            option-label="name"
+            id="selDefault"
+          />
+          <label for="selDefault">Select a default</label>
+        </FloatLabel>
         <Button label="Add" @click="addDefault" :disabled="!newDefault" />
       </div>
       <template v-if="advanced">
         <divider />
-        <div class="grid grid-cols-3 gap-3 items-center">
-          <FileUpload
-            :disabled="checkingUpload"
-            ref="profileUpload"
-            mode="basic"
-            custom-upload
-            choose-icon="pi pi-upload"
-            choose-label="Upload"
-            @select="onFileSelect"
-            pt:root:class="justify-start"
-          />
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-center"
+        >
+          <div class="sm:col-span-2 md:col-span-1">
+            <FileUpload
+              :disabled="checkingUpload"
+              ref="profileUpload"
+              mode="basic"
+              custom-upload
+              choose-icon="pi pi-upload"
+              choose-label="Upload"
+              @select="onFileSelect"
+              pt:root:class="justify-start"
+            />
+          </div>
           <FloatLabel variant="on">
             <InputText
+              fluid
               id="uploadName"
               :disabled="!uploadSteps"
               v-model="uploadName"

@@ -15,14 +15,14 @@
     "format-check": "prettier . --check"
   },
   "dependencies": {
-    "@primevue/themes": "^4.1.1",
+    "@primevue/themes": "^4.2.5",
     "@tanstack/vue-query": "^5.59.16",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "axios": "^1.7.7",
     "leaflet": "^1.9.4",
     "plotly.js-dist": "^2.35.2",
     "primeicons": "^7.0.0",
-    "primevue": "^4.1.1",
+    "primevue": "^4.2.5",
     "tailwindcss-primeui": "^0.3.4",
     "uuid": "^11.0.3",
     "vue": "^3.5.12",

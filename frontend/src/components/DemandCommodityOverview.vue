@@ -1,6 +1,6 @@
 <template>
   <divider />
-  <div class="grid grid-cols-8 gap-3">
+  <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-8 gap-3">
     <div class="flex flex-col gap-3">
       <h1>{{ commodity.name }}</h1>
       <Button
@@ -20,7 +20,10 @@
       </FloatLabel>
     </div>
 
-    <div v-if="demands && demands?.length > 0" class="col-span-7">
+    <div
+      v-if="demands && demands?.length > 0"
+      class="md:col-span-5 lg:col-span-7"
+    >
       <BarDiagramm
         :data="data"
         title-x="Steps"

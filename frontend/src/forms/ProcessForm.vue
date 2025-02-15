@@ -19,7 +19,7 @@
       />
       <label for="description">Description</label>
     </FloatLabel>
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('instcap')"
@@ -58,7 +58,7 @@
         <label for="capup">Maximum capacity ({{ unitR }})</label>
       </FloatLabel>
     </div>
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('invcost')"
@@ -134,7 +134,7 @@
               </FloatLabel>
             </div>
 
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes('wacc')"
@@ -177,7 +177,7 @@
                 >
               </FloatLabel>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div class="flex flex-col gap-3">
                 <FloatLabel variant="on">
                   <MultiSelect

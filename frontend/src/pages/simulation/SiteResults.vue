@@ -62,7 +62,7 @@
       />
       <label for="groupoptions">Group values</label>
     </FloatLabel>
-    <div v-if="commodityDetails" class="col-span-3">
+    <div v-if="commodityDetails" class="md:col-span-2 xl:col-span-3">
       <PlotlyDiagram
         v-for="(data, comName) in commodityDetails"
         :key="comName"
@@ -72,7 +72,6 @@
         :bargroupgap="0.2"
         :margin="{
           t: 150,
-          l: 150,
         }"
       />
     </div>
