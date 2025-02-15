@@ -15,7 +15,8 @@ However, you can find some more [special option](#special-options).
       "price": 0, // can be left out
       "max": -1, // can be left out
       "maxperhour": -1, // can be left out
-      "unit": "kg"
+      "unitR": "kW", // unit for the rate (should be unitC/h)
+      "unitC": "kWh" // unit for the capacity of this commodity
     },
     ...
   },
