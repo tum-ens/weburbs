@@ -67,12 +67,15 @@ function layout(): Partial<Plotly.Layout> {
 }
 
 let replotTimeout: number | null = null
+
 function replot() {
   if (replotTimeout) clearTimeout(replotTimeout)
-  replotTimeout = setTimeout(
-    () => Plotly.newPlot(plotId, props.data, layout()),
-    200,
-  )
+  replotTimeout = setTimeout(() => {
+    Plotly.newPlot(plotId, props.data, layout())
+    for (const el of document.getElementsByClassName('main-svg')) {
+      ;(<HTMLElement>el).style.cssText = 'background: rgba(0, 0, 0, 0);'
+    }
+  }, 200)
 }
 
 const resizeObserver = new ResizeObserver(replot)
@@ -88,4 +91,10 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style>
+@media (prefers-color-scheme: dark) {
+  .plot-container {
+    filter: invert(75%) hue-rotate(180deg);
+  }
+}
+</style>

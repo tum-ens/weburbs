@@ -37,13 +37,13 @@
             100
           "
           suffix="ct/kWh"
-          classes="bg-yellow-200"
+          classes="bg-yellow-200 text-black"
         />
         <DataPoint
           name="Share of Renewables"
           :value="Math.max(1 - fossilProduced / elecConsumed, 0) * 100"
           suffix="%"
-          classes="bg-green-300"
+          classes="bg-green-300  text-black"
         />
         <DataPoint name="Invest" :value="overview.Invest" suffix="$" />
         <DataPoint name="Fixed" :value="overview.Fixed" suffix="$" />
@@ -52,25 +52,25 @@
         <DataPoint
           name="Energy produced"
           :value="elecProduced"
-          classes="bg-green-300"
+          classes="bg-green-300 text-black"
           suffix="kWh"
         />
         <DataPoint
           name="Energy consumed"
           :value="elecConsumed"
-          classes="bg-red-300"
+          classes="bg-red-300 text-black"
           suffix="kWh"
         />
         <DataPoint
           name="CO2 saved"
           :value="(560 * elecConsumed) / 1000 - co2Produced"
-          classes="bg-green-300"
+          classes="bg-green-300 text-black"
           suffix="kg"
         />
         <DataPoint
           name="Energy lost"
           :value="elecProduced - elecConsumed"
-          classes="bg-red-300"
+          classes="bg-red-300 text-black"
           suffix="kWh"
         />
       </div>
