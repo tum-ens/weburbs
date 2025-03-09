@@ -8,7 +8,7 @@ from projects.api import (
     storage,
     supim,
     demand,
-    simulate,
+    simulate, excelupload,
 )
 
 urlpatterns = [
@@ -112,4 +112,8 @@ urlpatterns = [
         "project/<str:project_name>/simulate/result/<uuid:simid>/config",
         simulate.get_simulation_config,
     ),
+    path(
+        "project/<str:project_name>/excelupload",
+        excelupload.upload,
+    )
 ]

@@ -4,14 +4,15 @@
       <template #title>
         <div class="flex flex-row justify-between">
           <span>Homepage</span>
-          <Button
-            label="CreateProject"
+          <SplitButton
+            label="Create Project"
             @click="
               () =>
                 router.push({
                   name: 'CreateProject',
                 })
             "
+            :model="items"
           />
         </div>
       </template>
@@ -41,15 +42,18 @@
       </template>
     </Card>
   </DefaultLayout>
+
+  <CreateFromExcel v-model:visible="createFExcelVisible" />
 </template>
 
 <script setup lang="ts">
 import { useAuthenticated } from '@/backend/security'
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Transformer from '@/components/TransformerComponent.vue'
 import { useProjectList } from '@/backend/projects'
 import DefaultLayout from '@/layout/DefaultLayout.vue'
+import CreateFromExcel from '@/dialogs/CreateFromExcel.vue'
 
 const { data: authenticated } = useAuthenticated()
 const router = useRouter()
@@ -70,6 +74,17 @@ watch(
 )
 
 const { data: projects } = useProjectList()
+
+const items = [
+  {
+    label: 'Create from Excel',
+    command: () => {
+      createFExcelVisible.value = true
+    },
+  },
+]
+
+const createFExcelVisible = ref(false)
 </script>
 
 <style scoped></style>
