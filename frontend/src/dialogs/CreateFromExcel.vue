@@ -14,6 +14,7 @@
         choose-icon="pi pi-upload"
         choose-label="Select"
         @select="onFileSelect"
+        accept=".xls,.xlsx"
         pt:root:class="justify-start"
       />
       <FloatLabel variant="on">

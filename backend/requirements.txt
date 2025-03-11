@@ -3,3 +3,4 @@ gunicorn==23.0.0
 django-cors-headers==4.6.0
 psycopg2-binary==2.9.10
 requests==2.32.3
+pandas==2.2.3

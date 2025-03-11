@@ -8,7 +8,8 @@ from projects.api import (
     storage,
     supim,
     demand,
-    simulate, excelupload,
+    simulate,
+    excelupload,
 )
 
 urlpatterns = [
@@ -115,5 +116,5 @@ urlpatterns = [
     path(
         "project/<str:project_name>/excelupload",
         excelupload.upload,
-    )
+    ),
 ]
