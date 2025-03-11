@@ -13,15 +13,16 @@
         custom-upload
         choose-icon="pi pi-upload"
         choose-label="Select"
+        :disabled="uploading"
         @select="onFileSelect"
         accept=".xls,.xlsx"
         pt:root:class="justify-start"
       />
       <FloatLabel variant="on">
-        <InputText fluid id="title" v-model="title" />
+        <InputText fluid id="title" v-model="title" :disabled="uploading" />
         <label for="name">Title</label>
       </FloatLabel>
-      <Button label="Upload" @click="upload" />
+      <Button label="Upload" @click="upload" :loading="uploading" />
     </div>
   </Dialog>
 </template>
@@ -31,9 +32,13 @@ import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useUploadExcel } from '@/backend/excelupload'
+import { useRouter } from 'vue-router'
 
 const toast = useToast()
+const router = useRouter()
 const { mutate: uploadExcel } = useUploadExcel()
+
+const uploading = ref(false)
 
 const excelUpload = ref<InstanceType<typeof FileUpload>>()
 const visible = defineModel<boolean>('visible', { default: false })
@@ -67,14 +72,39 @@ function upload() {
     return
   }
 
-  uploadExcel({ project_name: title.value, file })
-  visible.value = false
+  uploading.value = true
+  uploadExcel(
+    { project_name: title.value, file },
+    {
+      onSuccess() {
+        router.push({
+          name: 'ProjectSimulation',
+          params: {
+            proj: title.value,
+          },
+        })
+        uploading.value = false
+        visible.value = false
+      },
+      onError(error) {
+        toast.add({
+          summary: 'Upload failed',
+          // @ts-expect-error Axios error is the only error possible
+          detail: error.response.data,
+          severity: 'error',
+          life: 2000,
+        })
+        uploading.value = false
+      },
+    },
+  )
 }
 
 watch(visible, () => {
   // @ts-expect-error Wrong type description
   if (excelUpload.value) excelUpload.value.clear()
   title.value = ''
+  uploading.value = false
 })
 </script>
 
