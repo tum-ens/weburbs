@@ -596,7 +596,7 @@ function submit() {
     depreciation: depreciation.value || 0,
     init: init.value || 0,
     discharge: discharge.value || 0,
-    epratio: epratio.value || 0,
+    epratio: epratio.value === undefined ? null : epratio.value,
     commodity: commodity.value?.name || '',
   })
 }

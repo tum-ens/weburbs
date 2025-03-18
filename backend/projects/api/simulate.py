@@ -125,6 +125,7 @@ def trigger_simulation(request, project_name):
             for site in sites
         },
     }
+    config = remove_none(config)
     simres.config = config
     simres.save()
     config["callback"] = (
@@ -133,7 +134,7 @@ def trigger_simulation(request, project_name):
     )
 
     response = requests.post(
-        os.getenv("URBS", "http://localhost:5000/simulate"), json=remove_none(config)
+        os.getenv("URBS", "http://localhost:5000/simulate"), json=config
     )
     if response.status_code != 200:
         print(response.text)
