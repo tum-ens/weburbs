@@ -189,7 +189,7 @@ watch(
           newStor.value.push({
             name: storName,
             value: stor.CNew,
-            suffix: com.unitR,
+            suffix: com.unitC,
           })
           storUnitR.value.push(com.unitR)
           storUnitC.value.push(com.unitC)
