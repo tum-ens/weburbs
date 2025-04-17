@@ -3,14 +3,14 @@ services:
   backend:
     image: ghcr.io/tum-ens/weburbs-backend:latest
     # Use this to build the image locally
-    build: backend
+    # build: backend
     container_name: weburbs-backend
     environment:
       - SECRET_KEY=change_me
       - URBS=http://optimizer:5000/simulate
       - URBS_CALLBACK=http://backend:8000
       # Replace localhost by your domain, or add more domains, separated by comma
-      - ORIGINS=http://localhost:9000
+      - ORIGINS=http://localhost
       # Change this for production
       - HTTPS_ONLY=False
       # Insert API key for Renewable Ninjas
@@ -30,9 +30,9 @@ services:
     #  - ./yourfolder:/app/config
 
   frontend:
-    image: ghcr.io/jonastahl/manage-urbs-backend:0.0.13-open
+    image: ghcr.io/tum-ens/weburbs-frontend:latest
     # Use this to build the image locally
-    build: frontend
+    # build: frontend
     container_name: weburbs-frontend
     # environment:
       # Replace localhost by your domain if it differs from the backend url
@@ -56,7 +56,7 @@ services:
     image: nginx:alpine
     container_name: weburbs-proxy
     ports:
-      - "9000:9000"
+      - "80:9000"
     volumes:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
