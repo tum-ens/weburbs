@@ -60,7 +60,7 @@ export function useUploadSupIm(
   const { data: csrf } = useCSRF()
   const client = useQueryClient()
   return useMutation({
-    mutationFn: steps =>
+    mutationFn: (steps: number[]) =>
       axios.post(
         `/api/project/${route.params.proj}/site/${site.name}/supim/${commodity.name}/upload/`,
         steps,

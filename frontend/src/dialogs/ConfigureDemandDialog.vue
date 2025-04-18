@@ -67,6 +67,7 @@
               :disabled="checkingUpload"
               ref="profileUpload"
               mode="basic"
+              accept=".json, .xlsx"
               custom-upload
               choose-icon="pi pi-upload"
               choose-label="Upload"
@@ -90,6 +91,15 @@
             @click="uploadProfile"
           />
         </div>
+        <span class="mt-2"
+          >You can create a custom demand profile
+          <a
+            class="link"
+            target="_blank"
+            href="https://nessi.iwi.uni-hannover.de/en/ramp/start/"
+            >here</a
+          >.</span
+        >
       </template>
       <divider />
       <div class="grid grid-cols-2 gap-3 items-center">
@@ -215,31 +225,26 @@ const checkingUpload = ref(false)
 function onFileSelect(event: FileUploadSelectEvent) {
   checkingUpload.value = true
   const file = event.files[0]
-  const reader = new FileReader()
-
-  reader.onload = async e => {
-    if (e.target) {
-      if (checkUploadFile(toast, e.target.result)) {
-        uploadSteps.value = JSON.parse(<string>e.target.result)
-        uploadName.value = file.name.split('.').slice(0, -1).join('.')
-      } else {
-        uploadSteps.value = null
-        uploadName.value = ''
-        // @ts-expect-error Wrong type description
-        if (profileUpload.value) profileUpload.value.clear()
-      }
-    } else {
-      toast.add({
-        summary: 'Upload error',
-        detail: `Something went wrong when reading file ${file.name}`,
-        severity: 'error',
-        life: 2000,
-      })
-    }
-    checkingUpload.value = false
-  }
-  reader.readAsText(file)
+  checkUploadFile(toast, file)
+    .then(res => {
+      uploadSteps.value = res
+      uploadName.value = file.name.split('.').slice(0, -1).join('.')
+    })
+    .catch(() => {
+      uploadSteps.value = null
+      uploadName.value = ''
+      // @ts-expect-error Wrong type description
+      if (profileUpload.value) profileUpload.value.clear()
+    })
+    .finally(() => {
+      checkingUpload.value = false
+    })
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.link {
+  color: blue;
+  text-decoration: underline;
+}
+</style>

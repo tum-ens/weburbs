@@ -132,27 +132,17 @@ const { mutate: uploadSupIm } = useUploadSupIm(
 async function upload(event: FileUploadSelectEvent) {
   checkingUpload.value = true
   const file = event.files[0]
-  const reader = new FileReader()
 
-  reader.onload = async e => {
-    if (e.target) {
-      if (checkUploadFile(toast, e.target.result)) {
-        uploadSupIm(JSON.parse(<string>e.target.result))
-      }
+  checkUploadFile(toast, file)
+    .then(res => {
+      uploadSupIm(res)
+    })
+    .catch(() => {})
+    .finally(() => {
       // @ts-expect-error Wrong type description
       if (profileUpload.value) profileUpload.value.clear()
       checkingUpload.value = false
-    } else {
-      toast.add({
-        summary: 'Upload error',
-        detail: `Something went wrong when reading file ${file.name}`,
-        severity: 'error',
-        life: 2000,
-      })
-    }
-    // setTimeout(() => checkingUpload.value = false, 4000)
-  }
-  reader.readAsText(file)
+    })
 }
 </script>
 
