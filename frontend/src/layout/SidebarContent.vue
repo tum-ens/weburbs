@@ -1,4 +1,53 @@
 <template>
+  <Accordion>
+    <AccordionPanel value="0">
+      <AccordionHeader>Versions</AccordionHeader>
+      <AccordionContent>
+        <div class="flex flex-col gap-3">
+          <Select
+            fluid
+            class="col-span-2 mb-3"
+            v-model="selSimulation"
+            :options="simulations"
+            placeholder="Select a simulation"
+            empty-message="No simulation found yet"
+            @change="changeSimulation"
+          >
+            <template #option="{ option }">
+              <div
+                class="w-full flex flex-row justify-between items-center gap-3"
+              >
+                <span>{{ option.timestamp.toLocaleString() }}</span>
+                <ResultIcon
+                  :completed="option.completed"
+                  :status="option.status || SimulationResultStatus.Optimal"
+                />
+              </div>
+            </template>
+            <template #value="{ value, placeholder }">
+              <div
+                v-if="value"
+                class="w-full flex flex-row justify-between items-center gap-3"
+              >
+                <span>{{ value.timestamp.toLocaleString() }}</span>
+                <ResultIcon
+                  :completed="value.completed"
+                  :status="value.status || SimulationResultStatus.Optimal"
+                />
+              </div>
+              <span v-else>{{ placeholder }}</span>
+            </template>
+          </Select>
+          <Button
+            label="Rename"
+          />
+          <Button
+            label="Duplicate"
+            />
+        </div>
+      </AccordionContent>
+    </AccordionPanel>
+  </Accordion>
   <PanelMenu :model="items" :expanded-keys="expandedKey">
     <template #item="{ item }">
       <a class="flex items-center px-4 py-2 cursor-pointer group">
@@ -27,11 +76,28 @@
 import { computed, inject, type Ref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectList } from '@/backend/projects'
+import { type SimulationInfo, SimulationResultStatus } from '@/backend/interfaces'
+import ResultIcon from '@/pages/simulation/ResultIcon.vue'
+import { useGetSimulation, useListSimulations } from '@/backend/simulate'
+import type { SelectChangeEvent } from 'primevue'
 
 const route = useRoute()
 const router = useRouter()
 
 const advanced = inject<Ref<boolean>>('advanced')
+
+const selSimulation = ref<SimulationInfo>()
+const { data: simulation } = useGetSimulation(route)
+const { data: simulations } = useListSimulations(route)
+
+function changeSimulation(event: SelectChangeEvent) {
+  router.push({
+    name: 'SimulationResult',
+    params: {
+      simId: event.value.id
+    }
+  })
+}
 
 const expandedKey = ref<{ [key: string]: boolean }>({})
 const { data: projects } = useProjectList()
@@ -46,6 +112,27 @@ watch(
       }
     if (route.params.proj) expandedKey.value['project'] = true
   },
+  { immediate: true }
+)
+// update select if simulation in route
+watch(
+  [simulation, simulations],
+  () => {
+    if (simulation.value) {
+      selSimulation.value = {
+        id: simulation.value.id,
+        timestamp: simulation.value.timestamp,
+        completed: true,
+        status: simulation.value.status,
+      }
+      return
+    }
+    if (simulations.value && route.params.simId)
+      selSimulation.value = simulations.value.find(
+        sim => sim.id === route.params.simId,
+      )
+    else selSimulation.value = undefined
+  },
   { immediate: true },
 )
 
@@ -55,7 +142,7 @@ const items = computed(() => {
       key: 'Home',
       label: 'Home',
       icon: 'pi pi-home',
-      command: () => router.push({ name: 'Home' }),
+      command: () => router.push({ name: 'Home' })
     },
     {
       key: 'project',
@@ -69,8 +156,8 @@ const items = computed(() => {
           icon: 'pi pi-globe',
           command: () =>
             router.push({
-              name: 'ProjectConfig',
-            }),
+              name: 'ProjectConfig'
+            })
         },
         {
           key: 'ProjectSites',
@@ -78,8 +165,8 @@ const items = computed(() => {
           icon: 'pi pi-map-marker',
           command: () =>
             router.push({
-              name: 'ProjectSites',
-            }),
+              name: 'ProjectSites'
+            })
         },
         {
           key: 'ProjectCommodity',
@@ -88,8 +175,8 @@ const items = computed(() => {
           icon: 'pi pi-bolt',
           command: () =>
             router.push({
-              name: 'ProjectCommodity',
-            }),
+              name: 'ProjectCommodity'
+            })
         },
         {
           key: 'ProjectDemand',
@@ -97,8 +184,8 @@ const items = computed(() => {
           icon: 'pi pi-gauge',
           command: () =>
             router.push({
-              name: 'ProjectDemand',
-            }),
+              name: 'ProjectDemand'
+            })
         },
         {
           key: 'ProjectSupIm',
@@ -107,8 +194,8 @@ const items = computed(() => {
           advanced: true,
           command: () =>
             router.push({
-              name: 'ProjectSupIm',
-            }),
+              name: 'ProjectSupIm'
+            })
         },
         {
           key: 'ProjectProcess',
@@ -116,8 +203,8 @@ const items = computed(() => {
           icon: 'pi pi-hammer',
           command: () =>
             router.push({
-              name: 'ProjectProcess',
-            }),
+              name: 'ProjectProcess'
+            })
         },
         {
           key: 'ProjectStorage',
@@ -125,8 +212,8 @@ const items = computed(() => {
           icon: 'pi pi-warehouse',
           command: () =>
             router.push({
-              name: 'ProjectStorage',
-            }),
+              name: 'ProjectStorage'
+            })
         },
         {
           key: 'ProjectSimulation',
@@ -134,9 +221,9 @@ const items = computed(() => {
           icon: 'pi pi-play-circle',
           command: () =>
             router.push({
-              name: 'ProjectSimulation',
-            }),
-        },
+              name: 'ProjectSimulation'
+            })
+        }
         /*{
           key: 'advanced',
           label: 'Advanced',
@@ -191,9 +278,9 @@ const items = computed(() => {
           ],
         },*/
       ].filter(
-        item => (!item.advanced || advanced?.value) && route.params.proj,
-      ),
-    },
+        item => (!item.advanced || advanced?.value) && route.params.proj
+      )
+    }
   ]
 })
 </script>
