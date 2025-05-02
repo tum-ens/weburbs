@@ -33,11 +33,6 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='timevareff',
-            name='steps',
-            field=models.JSONField(),
-        ),
-        migrations.AlterField(
             model_name='transmission',
             name='basevoltage',
             field=models.FloatField(null=True),

@@ -6,6 +6,7 @@ from projects.api import (
     commodity,
     process,
     storage,
+    transmission,
     supim,
     demand,
     simulate,
@@ -71,6 +72,16 @@ urlpatterns = [
     path(
         "project/<str:project_name>/site/<str:site_name>/def_storage/<str:def_storage_name>/add/",
         storage.add_def_storage,
+    ),
+    # Transmission: List, Update, Delete
+    path("project/<str:project_name>/transmission/", transmission.list_transmission),
+    path(
+        "project/<str:project_name>/transmission/<str:site_in>/<str:site_out>/<str:com_name>/update",
+        transmission.list_transmission,
+    ),
+    path(
+        "project/<str:project_name>/transmission/<str:site_in>/<str:site_out>/<str:com_name>/delete",
+        transmission.list_transmission,
     ),
     # SupIm: Get/Delete, Query
     path(

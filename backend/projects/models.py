@@ -230,20 +230,19 @@ class TransType(IntEnum):
 
 class Transmission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    sitein = models.ForeignKey(
-        Site,
+    commodityin = models.ForeignKey(
+        Commodity,
         on_delete=models.CASCADE,
         null=False,
         related_name="incoming_transmissions",
     )
-    siteout = models.ForeignKey(
+    commodityout = models.ForeignKey(
         Site,
         on_delete=models.CASCADE,
         null=False,
         related_name="outgoing_transmissions",
     )
-    transmission = models.IntegerField(choices=TransType.choices(), null=False)
-    commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    type = models.IntegerField(choices=TransType.choices(), null=False)
     eff = models.FloatField(null=False)
     invcost = models.FloatField(null=False)
     fixcost = models.FloatField(null=False)

@@ -129,6 +129,46 @@ const items = computed(() => {
             }),
         },
         {
+          key: 'ProjectTransmission',
+          label: 'Transmission',
+          icon: 'pi pi-wifi',
+          advanced: true,
+          command: () =>
+            router.push({
+              name: 'ProjectTransmission',
+            }),
+        },
+        {
+          key: 'ProjectDSM',
+          label: 'DSM',
+          icon: 'pi pi-sliders-v',
+          advanced: true,
+          command: () =>
+            router.push({
+              name: 'ProjectDSM',
+            }),
+        },
+        {
+          key: 'ProjectBuySell',
+          label: 'BuySellPrice',
+          icon: 'pi pi-dollar',
+          advanced: true,
+          command: () =>
+            router.push({
+              name: 'ProjectBuySell',
+            }),
+        },
+        {
+          key: 'ProjectTimeVarEff',
+          label: 'TimeVarEff',
+          icon: 'pi pi-hourglass',
+          advanced: true,
+          command: () =>
+            router.push({
+              name: 'ProjectTimeVarEff',
+            }),
+        },
+        {
           key: 'ProjectSimulation',
           label: 'Simulation',
           icon: 'pi pi-play-circle',
@@ -137,59 +177,6 @@ const items = computed(() => {
               name: 'ProjectSimulation',
             }),
         },
-        /*{
-          key: 'advanced',
-          label: 'Advanced',
-          advanced: true,
-          icon: 'pi pi-sparkles',
-          command: () => {
-            const newKeys = { ...expandedKey.value }
-            if (newKeys['advanced']) {
-              delete newKeys['advanced']
-            } else {
-              newKeys['advanced'] = true
-            }
-            expandedKey.value = newKeys
-          },
-          items: [
-            {
-              key: 'ProjectTransmission',
-              label: 'Transmission',
-              icon: 'pi pi-wifi',
-              command: () =>
-                router.push({
-                  name: 'ProjectTransmission',
-                }),
-            },
-            {
-              key: 'ProjectDSM',
-              label: 'DSM',
-              icon: 'pi pi-sliders-v',
-              command: () =>
-                router.push({
-                  name: 'ProjectDSM',
-                }),
-            },
-            {
-              key: 'ProjectBuySell',
-              label: 'BuySellPrice',
-              icon: 'pi pi-dollar',
-              command: () =>
-                router.push({
-                  name: 'ProjectBuySell',
-                }),
-            },
-            {
-              key: 'ProjectTimeVarEff',
-              label: 'TimeVarEff',
-              icon: 'pi pi-hourglass',
-              command: () =>
-                router.push({
-                  name: 'ProjectTimeVarEff',
-                }),
-            },
-          ],
-        },*/
       ].filter(
         item => (!item.advanced || advanced?.value) && route.params.proj,
       ),

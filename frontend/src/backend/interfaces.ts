@@ -106,6 +106,56 @@ export interface DemandProfile extends DemandConfig {
   steps: number[]
 }
 
+export enum TransmissionType {
+  hvac = 1,
+}
+
+export interface Transmission {
+  sitein: string
+  siteout: string
+  commodity: string
+  type: TransmissionType
+  eff: number
+  invcost: number
+  fixcost: number
+  varcost: number
+  instcap: number
+  caplo: number
+  capup: number
+  wacc: number
+  depreciation: number
+  reactance: number | null
+  difflimit: number | null
+  basevoltage: number | null
+}
+
+export interface DSM {
+  site: string
+  commodity: string
+  delay: number
+  eff: number
+  recov: number
+  capmaxdo: number
+  capmaxup: number
+}
+
+export enum BuySellPriceType {
+  buy = 1,
+  sell = 2,
+}
+
+export interface BuySellPrice {
+  commodity: string
+  type: BuySellPriceType
+  steps: number[]
+}
+
+export interface TimeVarEff {
+  site: string
+  process: string
+  steps: number[]
+}
+
 export enum SimulationResultStatus {
   Optimal = 1,
   Infeasible = 2,

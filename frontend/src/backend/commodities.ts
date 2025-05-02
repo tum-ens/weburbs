@@ -21,16 +21,18 @@ export function useCommodities(route: RouteLocationNormalized, site: Site) {
 
 export function useProjectSiteCommodities(
   route: RouteLocationNormalized,
-  site: string,
+  site: string | undefined,
 ) {
   return useQuery({
     queryKey: ['commodities', computed(() => route.params.proj), site],
-    queryFn: () =>
-      axios
+    queryFn: () => {
+      if (!site) return []
+      return axios
         .get<
           Commodity[]
         >(`/api/project/${route.params.proj}/site/${site}/commodities/`)
-        .then(res => res.data),
+        .then(res => res.data)
+    },
   })
 }
 
