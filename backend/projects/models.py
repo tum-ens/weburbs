@@ -253,26 +253,46 @@ class Transmission(models.Model):
     capup = models.FloatField(null=False)
     wacc = models.FloatField(null=False)
     depreciation = models.FloatField(null=False)
-    reactance = models.FloatField(null=False)
-    difflimit = models.FloatField(null=False)
-    basevoltage = models.FloatField(null=False)
+    reactance = models.FloatField(null=True)
+    difflimit = models.FloatField(null=True)
+    basevoltage = models.FloatField(null=True)
 
     def get_trans_type_label(self):
         return ComType(self.transmission).name
 
 
+class DSM(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
+    commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    delay = models.IntegerField(null=False)
+    eff = models.FloatField(null=False)
+    recov = models.IntegerField(null=False)
+    capmaxdo = models.FloatField(null=False)
+    capmaxup = models.FloatField(null=False)
+
+
+class BuySellPriceType(IntEnum):
+    buy = 1
+    sell = 2
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
+
+
 class BuySellPrice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
-    buy = models.JSONField(null=False)
-    sell = models.JSONField(null=False)
+    type = models.IntegerField(choices=BuySellPriceType.choices(), null=False)
+    steps = models.JSONField(null=False)
 
 
 class TimeVarEff(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
-    steps = models.FloatField(null=False)
+    steps = models.JSONField(null=False)
 
 
 class SimulationResultStatus(IntEnum):
