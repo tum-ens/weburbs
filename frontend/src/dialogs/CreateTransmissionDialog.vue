@@ -29,7 +29,6 @@ const visible = defineModel<boolean>('visible', { default: false })
 
 const { mutate: updateTransmission, isPending: loading } =
   useUpdateTransmission(route)
-// const { mutate: updateStorage, isPending: loading } = useUpdateStorage(route)
 
 function update(transmission: Transmission): void {
   updateTransmission(

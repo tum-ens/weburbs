@@ -220,7 +220,7 @@ class SupIm(SupImType):
     )
 
 
-class TransType(IntEnum):
+class TransmissionType(IntEnum):
     hvac = 1
 
     @classmethod
@@ -237,12 +237,12 @@ class Transmission(models.Model):
         related_name="incoming_transmissions",
     )
     commodityout = models.ForeignKey(
-        Site,
+        Commodity,
         on_delete=models.CASCADE,
         null=False,
         related_name="outgoing_transmissions",
     )
-    type = models.IntegerField(choices=TransType.choices(), null=False)
+    type = models.IntegerField(choices=TransmissionType.choices(), null=False)
     eff = models.FloatField(null=False)
     invcost = models.FloatField(null=False)
     fixcost = models.FloatField(null=False)

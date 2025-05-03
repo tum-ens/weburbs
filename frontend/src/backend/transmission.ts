@@ -4,14 +4,13 @@ import type { Transmission } from '@/backend/interfaces'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed } from 'vue'
 import { useCSRF } from '@/backend/security'
-import type { Transition } from 'plotly.js'
 
 export function useTransmission(route: RouteLocationNormalized) {
   return useQuery({
     queryKey: ['transmissions', computed(() => route.params.proj)],
     queryFn: () =>
       axios
-        .get<Transition[]>(`/api/project/${route.params.proj}/transmission/`)
+        .get<Transmission[]>(`/api/project/${route.params.proj}/transmission/`)
         .then(response => response.data),
   })
 }
@@ -27,7 +26,7 @@ export function useUpdateTransmission(route: RouteLocationNormalized) {
       transmission: Transmission
     }) =>
       axios.post(
-        `/api/project/${route.params.proj}/transmission/${data.sitein_name}/${data.siteout_name}/${data.com_name}/update/`,
+        `/api/project/${route.params.proj}/transmission/update/${data.sitein_name}/${data.siteout_name}/${data.com_name}/`,
         data.transmission,
         {
           headers: {
@@ -53,7 +52,7 @@ export function useDeleteTransmission(route: RouteLocationNormalized) {
       com_name: string
     }) =>
       axios.post(
-        `/api/project/${route.params.proj}/transmission/${data.sitein_name}/${data.siteout_name}/${data.com_name}/delete/`,
+        `/api/project/${route.params.proj}/transmission/delete/${data.sitein_name}/${data.siteout_name}/${data.com_name}/`,
         {},
         {
           headers: {
@@ -61,9 +60,9 @@ export function useDeleteTransmission(route: RouteLocationNormalized) {
           },
         },
       ),
-    onSuccess(data, vars) {
+    onSuccess() {
       client.invalidateQueries({
-        queryKey: ['transmission', route.params.proj],
+        queryKey: ['transmissions', route.params.proj],
       })
     },
   })

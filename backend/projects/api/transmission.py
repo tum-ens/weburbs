@@ -3,16 +3,10 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_GET, require_POST
-from docutils.nodes import transition
 
 from projects.api.helper import get_project, get_site
-from projects.api import commodity
 from projects.models import (
-    Site,
-    DefStorage,
-    Storage,
     Commodity,
-    DefCommodity,
     Transmission,
 )
 from django.forms.models import model_to_dict
@@ -23,32 +17,43 @@ from django.forms.models import model_to_dict
 def list_transmission(request, project_name):
     project = get_project(request.user, project_name)
 
-    transmissions = Transmission.objects.filter(sitein__project=project).order_by(
-        "commodity_name", "sitein__name", "siteout__name"
+    transmissions = Transmission.objects.filter(
+        commodityin__site__project=project
+    ).order_by(
+        "commodityin__name", "commodityin__site__name", "commodityout__site__name"
     )
 
-    return JsonResponse(transmissions, safe=False)
+    transmissionsList = [
+        {
+            **model_to_dict(trans, exclude=["id", "commodityin", "commodityout"]),
+            "sitein": trans.commodityin.site.name,
+            "siteout": trans.commodityout.site.name,
+            "commodity": trans.commodityin.name,
+        }
+        for trans in transmissions
+    ]
+    return JsonResponse(transmissionsList, safe=False)
 
 
 @login_required
 @require_POST
-def update_transmission(
-    request, project_name, sitein_name, siteout_name, commodity_name
-):
+def update_transmission(request, project_name, sitein_name, siteout_name, com_name):
     project = get_project(request.user, project_name)
     sitein = get_site(project, sitein_name)
-    comin = Commodity.objects.filter(site=sitein, name=commodity_name)
+    comin = Commodity.objects.get(site=sitein, name=com_name)
     siteout = get_site(project, siteout_name)
-    comout = Commodity.objects.filter(site=siteout, name=commodity_name)
+    comout = Commodity.objects.get(site=siteout, name=com_name)
 
     data = json.loads(request.body)
 
-    comin_new = Commodity.objects.filter(site=data["sitein"], name=commodity_name)
-    comout_new = Commodity.objects.filter(site=data["siteout"], name=commodity_name)
+    sitein_new = get_site(project, data["sitein"])
+    comin_new = Commodity.objects.get(site=sitein_new, name=com_name)
+    siteout_new = get_site(project, data["siteout"])
+    comout_new = Commodity.objects.get(site=siteout_new, name=com_name)
     if (
         sitein_name != data["sitein"]
-        or siteout_name != data["name"]
-        or commodity_name != data["commodity"]
+        or siteout_name != data["siteout"]
+        or com_name != data["commodity"]
     ):
         if Transmission.objects.filter(
             commodityin=comin_new, commodityout=comout_new
@@ -70,7 +75,7 @@ def update_transmission(
     transmission.invcost = data["invcost"]
     transmission.fixcost = data["fixcost"]
     transmission.varcost = data["varcost"]
-    transmission.instcapc = data["instcapc"]
+    transmission.instcap = data["instcap"]
     transmission.caplo = data["caplo"]
     transmission.capup = data["capup"]
     transmission.wacc = data["wacc"]
@@ -94,14 +99,12 @@ def update_transmission(
 
 @login_required
 @require_POST
-def delete_transmission(
-    request, project_name, sitein_name, siteout_name, commodity_name
-):
+def delete_transmission(request, project_name, sitein_name, siteout_name, com_name):
     project = get_project(request.user, project_name)
     sitein = get_site(project, sitein_name)
-    comin = Commodity.objects.filter(site=sitein, name=commodity_name)
+    comin = Commodity.objects.get(site=sitein, name=com_name)
     siteout = get_site(project, siteout_name)
-    comout = Commodity.objects.filter(site=siteout, name=commodity_name)
+    comout = Commodity.objects.get(site=siteout, name=com_name)
 
     transmission = Transmission.objects.get(commodityin=comin, commodityout=comout)
     transmission.delete()

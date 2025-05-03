@@ -3,15 +3,14 @@
     v-model:visible="visible"
     :draggable="false"
     modal
-    :header="'Edit \'' + props.storage.name + '\''"
+    header="Edit transmission"
     class="w-11/12 md:w-10/12 lg:w-1/2"
   >
     <TransmissionForm
-      :storage="storage"
+      :transmission="transmission"
       submit-label="Update"
       :loading="loading || deleting"
       @submit="update"
-      :site_name="site_name"
       delete
       @onDelete="deleteProc"
     />
@@ -19,38 +18,43 @@
 </template>
 
 <script setup lang="ts">
-import type { Storage } from '@/backend/interfaces'
+import type { Transmission } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
-import { useDeleteStorage, useUpdateStorage } from '@/backend/storage'
 import TransmissionForm from '@/forms/TransmissionForm.vue'
+import {
+  useDeleteTransmission,
+  useUpdateTransmission,
+} from '@/backend/transmission'
 
 const route = useRoute()
 const toast = useToast()
 
 const visible = defineModel<boolean>('visible', { default: false })
 const props = defineProps<{
-  site_name: string
-  storage: Storage
+  transmission: Transmission
 }>()
 
-const { mutate: updateStorage, isPending: loading } = useUpdateStorage(route)
-const { mutate: deleteStorage, isPending: deleting } = useDeleteStorage(route)
+const { mutate: updateTransmission, isPending: loading } =
+  useUpdateTransmission(route)
+const { mutate: deleteTransmission, isPending: deleting } =
+  useDeleteTransmission(route)
 
-function update(storage: Storage): void {
-  updateStorage(
+function update(transmission: Transmission): void {
+  updateTransmission(
     {
-      site_name: props.site_name,
-      storage_name: props.storage.name,
-      storage: storage,
+      sitein_name: props.transmission.sitein,
+      siteout_name: props.transmission.siteout,
+      com_name: props.transmission.commodity,
+      transmission: transmission,
     },
     {
       onSuccess() {
         visible.value = false
         toast.add({
           summary: 'Added',
-          detail: `Storage ${storage.name} has been updated`,
+          detail: `Transmission has been updated`,
           severity: 'success',
           life: 2000,
         })
@@ -60,7 +64,7 @@ function update(storage: Storage): void {
           summary: 'Error adding',
           detail:
             (<AxiosError>error)?.response?.data ||
-            `An error occurred when updating ${storage.name}`,
+            `An error occurred when updating transmission between ${transmission.sitein} and ${transmission.siteout} with commodity ${transmission.commodity}`,
           severity: 'error',
           life: 2000,
         })
@@ -70,17 +74,18 @@ function update(storage: Storage): void {
 }
 
 function deleteProc(): void {
-  deleteStorage(
+  deleteTransmission(
     {
-      site_name: props.site_name,
-      storage_name: props.storage.name,
+      sitein_name: props.transmission.sitein,
+      siteout_name: props.transmission.siteout,
+      com_name: props.transmission.commodity,
     },
     {
       onSuccess() {
         visible.value = false
         toast.add({
           summary: 'Deleted',
-          detail: `Storage ${props.storage.name} has been deleted`,
+          detail: `Transmission has been deleted`,
           severity: 'success',
           life: 2000,
         })
@@ -90,7 +95,7 @@ function deleteProc(): void {
           summary: 'Error deleted',
           detail:
             (<AxiosError>error)?.response?.data ||
-            `An error occurred when deleting ${props.storage.name}`,
+            `An error occurred when deleting transmission`,
           severity: 'error',
           life: 2000,
         })

@@ -76,12 +76,12 @@ urlpatterns = [
     # Transmission: List, Update, Delete
     path("project/<str:project_name>/transmission/", transmission.list_transmission),
     path(
-        "project/<str:project_name>/transmission/<str:site_in>/<str:site_out>/<str:com_name>/update",
-        transmission.list_transmission,
+        "project/<str:project_name>/transmission/update/<str:sitein_name>/<str:siteout_name>/<str:com_name>/",
+        transmission.update_transmission,
     ),
     path(
-        "project/<str:project_name>/transmission/<str:site_in>/<str:site_out>/<str:com_name>/delete",
-        transmission.list_transmission,
+        "project/<str:project_name>/transmission/delete/<str:sitein_name>/<str:siteout_name>/<str:com_name>/",
+        transmission.delete_transmission,
     ),
     # SupIm: Get/Delete, Query
     path(

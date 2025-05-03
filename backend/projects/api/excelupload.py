@@ -17,6 +17,8 @@ from projects.models import (
     Storage,
     Demand,
     SupIm,
+    Transmission,
+    TransmissionType,
 )
 
 
@@ -169,5 +171,30 @@ def upload(request, project_name):
             site, com = key.split(".")
             supim = SupIm(commodity=coms[site][com], steps=supim_tab[key].tolist()[1::])
             supim.save()
+
+        transmission_tab = xls.parse("Transmission")
+        for index, row in transmission_tab.iterrows():
+            sitein = Site.objects.get(project=project, name=row["Site In"])
+            siteout = Site.objects.get(project=project, name=row["Site Out"])
+            comin = Commodity.objects.get(site=sitein, name=row["Commodity"])
+            comout = Commodity.objects.get(site=siteout, name=row["Commodity"])
+            transmission = Transmission(
+                commodityin=comin,
+                commodityout=comout,
+                type=TransmissionType[row["Transmission"]],
+                eff=parse_num(row["eff"]),
+                invcost=parse_num(row["inv-cost"]),
+                fixcost=parse_num(row["fix-cost"]),
+                varcost=parse_num(row["var-cost"]),
+                instcap=parse_num(row["inst-cap"]),
+                caplo=parse_num(row["cap-lo"]),
+                capup=parse_num(row["cap-up"]),
+                wacc=parse_num(row["wacc"]),
+                depreciation=parse_num(row["depreciation"]),
+                reactance=parse_num(row["reactance"]),
+                difflimit=parse_num(row["difflimit"]),
+                basevoltage=parse_num(row["base_voltage"]),
+            )
+            transmission.save()
 
     return HttpResponse("Project created")
