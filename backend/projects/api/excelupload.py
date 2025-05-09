@@ -203,9 +203,9 @@ def upload(request, project_name):
 
         dsm_tab = xls.parse("DSM")
         for index, row in dsm_tab.iterrows():
+            site = Site.objects.get(project=project, name=row["Site"])
             commodity = Commodity.objects.get(site=site, name=row["Commodity"])
             dsm = DSM(
-                site=site,
                 commodity=commodity,
                 delay=parse_num(row["delay"]),
                 eff=parse_num(row["eff"]),
@@ -215,7 +215,7 @@ def upload(request, project_name):
             )
             dsm.save()
 
-        bsp_tab = xls.parse("Buy-Sell-Price")
+        bsp_tab = xls.parse("Buy-Sell-Price").set_index(["t"])
         for key in bsp_tab:
             com, type = key.split(" ")
             commodities = Commodity.objects.filter(name=com)
@@ -228,9 +228,10 @@ def upload(request, project_name):
                 )
                 bsp.save()
 
-        tve_tab = xls.parse("TimeVarEff")
+        tve_tab = xls.parse("TimeVarEff").set_index(["t"])
         for key in tve_tab:
             site, proc = key.split(".")
+            site = Site.objects.get(project=project, name=site)
             process = Process.objects.get(site=site, name=proc)
 
             tve = TimeVarEff(process=process, steps=tve_tab[key].tolist()[1::])
