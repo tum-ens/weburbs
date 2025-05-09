@@ -33,14 +33,14 @@ def list_storage(request, project_name, site_name):
 
     storage = Storage.objects.filter(site=site).order_by("name")
 
-    proclist = [
+    sto_list = [
         {
             **model_to_dict(sto, exclude=["id", "def_commodity"]),
             "commodity": sto.commodity.name,
         }
         for sto in storage
     ]
-    return JsonResponse(proclist, safe=False)
+    return JsonResponse(sto_list, safe=False)
 
 
 def add_def_to_project(def_storage: DefStorage, site: Site):
