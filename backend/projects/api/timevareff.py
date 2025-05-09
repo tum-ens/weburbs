@@ -25,7 +25,7 @@ def getTVE(request, project_name, site_name, proc_name):
     process = Process.objects.get(site=site, name=proc_name)
 
     tve = TimeVarEff.objects.get(process=process)
-    return JsonResponse({"steps": tve.steps})
+    return JsonResponse({"data": tve.steps})
 
 
 def deleteTVE(request, project_name, site_name, proc_name):

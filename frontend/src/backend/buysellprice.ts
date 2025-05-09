@@ -7,8 +7,12 @@ import {
   BuySellPriceType,
   type Commodity,
   type Site,
-  type Steps,
 } from '@/backend/interfaces'
+
+export interface BuySellPriceSteps {
+  buy: number[]
+  sell: number[]
+}
 
 export function useGetBuySellPrice(
   route: RouteLocationNormalized,
@@ -24,7 +28,7 @@ export function useGetBuySellPrice(
     ],
     queryFn: () =>
       axios
-        .get<Steps>(
+        .get<BuySellPriceSteps>(
           `/api/project/${route.params.proj}/site/${site.name}/buysellprice/${commodity.name}/`,
         )
         .then(response => response.data),

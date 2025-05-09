@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axios from 'axios'
-import type { DSM, Site, Storage } from '@/backend/interfaces'
+import type { DSM, Site } from '@/backend/interfaces'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed } from 'vue'
 import { useCSRF } from '@/backend/security'
@@ -10,9 +10,7 @@ export function useDSM(route: RouteLocationNormalized, site: Site) {
     queryKey: ['dsm', computed(() => route.params.proj), site.name],
     queryFn: () =>
       axios
-        .get<
-          Storage[]
-        >(`/api/project/${route.params.proj}/site/${site.name}/dsm/`)
+        .get<DSM[]>(`/api/project/${route.params.proj}/site/${site.name}/dsm/`)
         .then(response => response.data),
   })
 }
