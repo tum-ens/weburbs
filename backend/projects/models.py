@@ -262,7 +262,6 @@ class Transmission(models.Model):
 
 class DSM(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
     delay = models.IntegerField(null=False)
     eff = models.FloatField(null=False)
@@ -289,7 +288,6 @@ class BuySellPrice(models.Model):
 
 class TimeVarEff(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=False)
     process = models.ForeignKey(Process, on_delete=models.CASCADE, null=False)
     steps = models.JSONField(null=False)
 
