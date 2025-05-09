@@ -12,26 +12,19 @@
       </div>
     </template>
     <template #content>
-      <Accordion v-model:value="curSite">
-        <AccordionPanel
-          v-for="site in sites"
-          :key="site.name"
-          :value="site.name"
-        >
-          <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent>
-            <CommodityOverviewComponent
-              :site="site"
-              @clickCommodity="
-                commodity => {
-                  clickedCommodity = commodity
-                  editVisible = true
-                }
-              "
-            />
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+      <SiteOverviewComponent v-model:cur-site="curSite">
+        <template #default="{ site }">
+          <CommodityOverviewComponent
+            :site="site"
+            @clickCommodity="
+              commodity => {
+                clickedCommodity = commodity
+                editVisible = true
+              }
+            "
+          />
+        </template>
+      </SiteOverviewComponent>
 
       <div class="mt-3 flex justify-end">
         <Button
@@ -76,6 +69,7 @@ import type { Commodity } from '@/backend/interfaces'
 import DefaultCommodityOverviewDialog from '@/dialogs/DefaultCommodityOverviewDialog.vue'
 import CreateCommodityDialog from '@/dialogs/CreateCommodityDialog.vue'
 import EditCommodityDialog from '@/dialogs/EditCommodityDialog.vue'
+import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
 const router = useRouter()

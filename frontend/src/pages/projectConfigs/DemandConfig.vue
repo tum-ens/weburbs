@@ -2,18 +2,11 @@
   <Card>
     <template #title>Demand</template>
     <template #content>
-      <Accordion v-model:value="curSite" lazy>
-        <AccordionPanel
-          v-for="site in sites"
-          :key="site.name"
-          :value="site.name"
-        >
-          <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent>
-            <DemandOverview :site="site" />
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+      <SiteOverviewComponent v-model:cur-site="curSite">
+        <template #default="{ site }">
+          <DemandOverview :site="site" />
+        </template>
+      </SiteOverviewComponent>
 
       <div class="mt-3 flex justify-end">
         <Button
@@ -42,8 +35,8 @@
         >
           Processes >>
         </Button>
-      </div></template
-    >
+      </div>
+    </template>
   </Card>
 </template>
 
@@ -52,6 +45,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSites } from '@/backend/sites'
 import DemandOverview from '@/components/DemandOverview.vue'
 import { inject, ref, watch } from 'vue'
+import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
 const router = useRouter()

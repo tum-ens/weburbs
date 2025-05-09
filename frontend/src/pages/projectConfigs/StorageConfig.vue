@@ -19,26 +19,19 @@
       </div>
     </template>
     <template #content>
-      <Accordion v-model:value="curSite">
-        <AccordionPanel
-          v-for="site in sites"
-          :key="site.name"
-          :value="site.name"
-        >
-          <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent>
-            <StorageOverviewComponent
-              :site="site"
-              @clickStorage="
-                sto => {
-                  clickedStorage = sto
-                  editVisible = true
-                }
-              "
-            />
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+      <SiteOverviewComponent v-model:cur-site="curSite">
+        <template #default="{ site }">
+          <StorageOverviewComponent
+            :site="site"
+            @clickStorage="
+              sto => {
+                clickedStorage = sto
+                editVisible = true
+              }
+            "
+          />
+        </template>
+      </SiteOverviewComponent>
 
       <div class="mt-3 flex justify-end gap-3">
         <Button
@@ -90,13 +83,13 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { inject, ref, watch } from 'vue'
-import { useSites } from '@/backend/sites'
+import { inject, ref } from 'vue'
 import DefaultStorageOverviewDialog from '@/dialogs/DefaultStorageOverviewDialog.vue'
 import StorageOverviewComponent from '@/components/StorageOverviewComponent.vue'
 import CreateStorageDialog from '@/dialogs/CreateStorageDialog.vue'
 import EditStorageDialog from '@/dialogs/EditStorageDialog.vue'
 import type { Storage } from '@/backend/interfaces'
+import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,17 +102,6 @@ const createVisible = ref(false)
 const editVisible = ref(false)
 
 const clickedStorage = ref<Storage | null>(null)
-
-const { data: sites } = useSites(route)
-watch(
-  sites,
-  () => {
-    if (!curSite.value && sites.value) {
-      curSite.value = sites.value[0].name
-    }
-  },
-  { immediate: true },
-)
 
 const items = [
   {

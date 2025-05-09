@@ -2,6 +2,11 @@
   <Card>
     <template #title>SupIm</template>
     <template #content>
+      <SiteOverviewComponent v-model:cur-site="curSite">
+        <template #default="{ site }">
+          <SupImOverview :site="site" />
+        </template>
+      </SiteOverviewComponent>
       <Accordion lazy v-model:value="curSite">
         <AccordionPanel
           v-for="site in sites"
@@ -9,9 +14,7 @@
           :value="site.name"
         >
           <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent>
-            <SupImOverview :site="site" />
-          </AccordionContent>
+          <AccordionContent> </AccordionContent>
         </AccordionPanel>
       </Accordion>
 
@@ -38,6 +41,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSites } from '@/backend/sites'
 import SupImOverview from '@/components/SupImOverview.vue'
 import { ref, watch } from 'vue'
+import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
 const router = useRouter()

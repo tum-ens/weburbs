@@ -19,26 +19,19 @@
       </div>
     </template>
     <template #content>
-      <Accordion v-model:value="curSite">
-        <AccordionPanel
-          v-for="site in sites"
-          :key="site.name"
-          :value="site.name"
-        >
-          <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent>
-            <ProcessOverviewComponent
-              :site="site"
-              @clickProcess="
-                proc => {
-                  clickedProcess = proc
-                  editVisible = true
-                }
-              "
-            />
-          </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
+      <SiteOverviewComponent v-model:cur-site="curSite">
+        <template #default="{ site }">
+          <ProcessOverviewComponent
+            :site="site"
+            @clickProcess="
+              proc => {
+                clickedProcess = proc
+                editVisible = true
+              }
+            "
+          />
+        </template>
+      </SiteOverviewComponent>
 
       <div class="mt-3 flex justify-end">
         <Button
@@ -83,6 +76,7 @@ import { useSites } from '@/backend/sites'
 import CreateProcessDialog from '@/dialogs/CreateProcessDialog.vue'
 import EditProcessDialog from '@/dialogs/EditProcessDialog.vue'
 import type { Process } from '@/backend/interfaces'
+import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
 const router = useRouter()
