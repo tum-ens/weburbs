@@ -11,6 +11,8 @@ from projects.api import (
     demand,
     simulate,
     excelupload,
+    dsm,
+    buysellprice,
 )
 
 urlpatterns = [
@@ -108,6 +110,34 @@ urlpatterns = [
     path(
         "def_demands/",
         demand.getDefaultDemands,
+    ),
+    # DSM: List, Update, Delete
+    path("project/<str:project_name>/site/<str:site_name>/dsm/", dsm.list_dsm),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/dsm/<str:com_name>/update/",
+        dsm.update_dsm,
+    ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/dsm/<str:com_name>/delete/",
+        dsm.delete_dsm,
+    ),
+    # BuySellPrice: Get&Delete, Update
+    path(
+        "project/<str:project_name>/site/<str:site_name>/buysellprice/<str:com_name>/",
+        buysellprice.handleBSP,
+    ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/buysellprice/<str:com_name>/upload/<str:ty>/",
+        buysellprice.uploadBSPProfile,
+    ),
+    # TimeVarEff: Get&Delete, Update
+    path(
+        "project/<str:project_name>/site/<str:site_name>/timevareff/<str:proc_name>/",
+        buysellprice.handleBSP,
+    ),
+    path(
+        "project/<str:project_name>/site/<str:site_name>/timevareff/<str:proc_name>/upload/",
+        buysellprice.uploadBSPProfile,
     ),
     # Simulation: Trigger, Get Result, Get Logs, Get Config
     path("project/<str:project_name>/simulate/trigger/", simulate.trigger_simulation),

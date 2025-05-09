@@ -1,5 +1,4 @@
 import json
-import os
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
@@ -57,25 +56,24 @@ def deleteBSP(request, project_name, site_name, com_name):
     return HttpResponse("BuySellPrice deleted", status=200)
 
 
-api_key = os.getenv("RN_KEY")
-
-
 @login_required
 @require_POST
-def uploadBSPProfile(request, project_name, site_name, com_name, type):
+def uploadBSPProfile(request, project_name, site_name, com_name, ty):
     project = get_project(request.user, project_name)
     site = get_site(project, site_name)
     commodity = get_commodity(site, com_name)
 
-    if type == "buy":
-        type = BuySellPriceType.buy
-    elif type == "sell":
-        type = BuySellPriceType.sell
+    if ty == "buy":
+        ty = BuySellPriceType.buy
+    elif ty == "sell":
+        ty = BuySellPriceType.sell
     else:
         return HttpResponse("Invalid type", status=400)
 
-    if BuySellPrice.objects.filter(commodity=commodity, type=type).exists():
-        return HttpResponse("BSP already exists for this commodity", status=409)
+    if BuySellPrice.objects.filter(commodity=commodity, type=ty).exists():
+        return HttpResponse(
+            "BuySellPrice already exists for this commodity", status=409
+        )
 
     profile = json.loads(request.body)
     if not checkProfile(profile):
@@ -83,7 +81,7 @@ def uploadBSPProfile(request, project_name, site_name, com_name, type):
             "Profile needs to be an array with exactly 8760 numbers", status=400
         )
 
-    bsp = BuySellPrice(commodity=commodity, type=type, steps=profile)
+    bsp = BuySellPrice(commodity=commodity, type=ty, steps=profile)
     bsp.save()
 
-    return JsonResponse({"detail": "BSP uploaded"})
+    return JsonResponse({"detail": "BuySellPrice uploaded"})
