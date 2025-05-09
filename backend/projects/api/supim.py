@@ -137,7 +137,7 @@ def querySolar(site, commodity):
             "azim": 180,
             "format": "json",
             "capacity": 1,
-            "tilt": 35,
+            "tilt": abs(site.lat) * 0.73,
         },
         headers={"Authorization": f"Token {api_key}"},
     )
