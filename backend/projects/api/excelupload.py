@@ -19,6 +19,10 @@ from projects.models import (
     SupIm,
     Transmission,
     TransmissionType,
+    DSM,
+    BuySellPrice,
+    BuySellPriceType,
+    TimeVarEff,
 )
 
 
@@ -196,5 +200,40 @@ def upload(request, project_name):
                 basevoltage=parse_num(row["base_voltage"]),
             )
             transmission.save()
+
+        dsm_tab = xls.parse("DSM")
+        for index, row in dsm_tab.iterrows():
+            commodity = Commodity.objects.get(site=site, name=row["Commodity"])
+            dsm = DSM(
+                site=site,
+                commodity=commodity,
+                delay=parse_num(row["delay"]),
+                eff=parse_num(row["eff"]),
+                recov=parse_num(row["recov"]),
+                capmaxdo=parse_num(row["cap-max-do"]),
+                capmaxup=parse_num(row["cap-max-up"]),
+            )
+            dsm.save()
+
+        bsp_tab = xls.parse("Buy-Sell-Price")
+        for key in bsp_tab:
+            com, type = key.split(" ")
+            commodities = Commodity.objects.filter(name=com)
+            steps = bsp_tab[key].tolist()[1::]
+            for commodity in commodities:
+                bsp = BuySellPrice(
+                    commodity=commodity,
+                    type=BuySellPriceType[type],
+                    steps=steps,
+                )
+                bsp.save()
+
+        tve_tab = xls.parse("TimeVarEff")
+        for key in tve_tab:
+            site, proc = key.split(".")
+            process = Process.objects.get(site=site, name=proc)
+
+            tve = TimeVarEff(process=process, steps=tve_tab[key].tolist()[1::])
+            tve.save()
 
     return HttpResponse("Project created")
