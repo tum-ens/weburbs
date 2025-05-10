@@ -15,7 +15,7 @@ export function useDSM(route: RouteLocationNormalized, site: Site) {
   })
 }
 
-export function useUpdateStorage(route: RouteLocationNormalized) {
+export function useUpdateDSM(route: RouteLocationNormalized) {
   const { data: csrf } = useCSRF()
   const client = useQueryClient()
   return useMutation({

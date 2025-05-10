@@ -130,7 +130,6 @@ export interface Transmission {
 }
 
 export interface DSM {
-  site: string
   commodity: string
   delay: number
   eff: number

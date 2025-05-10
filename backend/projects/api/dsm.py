@@ -7,7 +7,6 @@ from django.views.decorators.http import require_GET, require_POST
 from projects.api.helper import get_project, get_site
 from projects.models import (
     Commodity,
-    Transmission,
     DSM,
 )
 from django.forms.models import model_to_dict
@@ -41,8 +40,8 @@ def update_dsm(request, project_name, site_name, com_name):
 
     data = json.loads(request.body)
 
+    com_new = Commodity.objects.get(site=site, name=data["commodity"])
     if com_name != data["commodity"]:
-        com_new = Commodity.objects.get(site=site, name=data["commodity"])
         if DSM.objects.filter(commodity=com_new).exists():
             return HttpResponse(
                 "DSM with for this commodity already exists", status=409
@@ -50,7 +49,7 @@ def update_dsm(request, project_name, site_name, com_name):
 
     try:
         dsm = DSM.objects.get(commodity=com)
-    except Transmission.DoesNotExist:
+    except DSM.DoesNotExist:
         dsm = DSM()
 
     dsm.commodity = com_new

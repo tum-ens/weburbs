@@ -74,7 +74,7 @@
       </FloatLabel>
     </div>
 
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.invcost)"
@@ -116,7 +116,7 @@
       </FloatLabel>
     </div>
 
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.instcap)"
@@ -187,7 +187,7 @@
       </FloatLabel>
     </div>
 
-    <div class="grid grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.reactance)"
