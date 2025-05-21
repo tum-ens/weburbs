@@ -2,7 +2,7 @@
   <Card>
     <template #title>TimeVarEff</template>
     <template #content>
-      <SiteOverviewComponent v-model:cur-site="curSite">
+      <SiteOverviewComponent>
         <template #default="{ site }">
           <TimeVarEffOverview :site="site" />
         </template>
@@ -29,13 +29,10 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
-import { ref } from 'vue'
 import TimeVarEffOverview from '@/components/TimeVarEffOverview.vue'
 
 const route = useRoute()
 const router = useRouter()
-
-const curSite = ref('')
 </script>
 
 <style scoped></style>

@@ -15,7 +15,7 @@
         <template #filelabel><template /></template>
       </FileUpload>
       <Button @click="del" severity="danger" :disabled="!steps?.data">
-        Delete SupIm
+        Delete TimeVarEff
       </Button>
       <FloatLabel variant="on">
         <Select
@@ -36,6 +36,7 @@
       <BarDiagramm
         :data="data"
         title-x="Steps"
+        :title-y="unitC"
         class="h-80"
         :bargroupgap="0.1"
         :margin="{ t: 20 }"
@@ -60,6 +61,7 @@ import {
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { checkUploadFile } from '@/helper/upload'
 import { useToast } from 'primevue/usetoast'
+import { useCommodities } from '@/backend/commodities'
 
 const route = useRoute()
 const toast = useToast()
@@ -88,6 +90,21 @@ const { mutate: deleteTimeVarEff } = useDeleteTimeVarEff(
   props.site,
   props.process,
 )
+const { data: commodities } = useCommodities(route, props.site)
+const unitC = computed(() => {
+  if (!commodities.value || !props.process) return 'kWh'
+  if (props.process.out.length > 0)
+    return (
+      commodities.value.find(c => c.name === props.process.out[0].name)
+        ?.unitC || 'kWh'
+    )
+  if (props.process.in.length > 0)
+    return (
+      commodities.value.find(c => c.name === props.process.in[0].name)?.unitC ||
+      'kWh'
+    )
+  return 'kWh'
+})
 
 const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
   if (!steps.value || !steps.value.data) return []
