@@ -24,8 +24,11 @@ def getTVE(request, project_name, site_name, proc_name):
     site = get_site(project, site_name)
     process = Process.objects.get(site=site, name=proc_name)
 
-    tve = TimeVarEff.objects.get(process=process)
-    return JsonResponse({"data": tve.steps})
+    try:
+        tve = TimeVarEff.objects.get(process=process)
+        return JsonResponse({"data": tve.steps})
+    except TimeVarEff.DoesNotExist:
+        return JsonResponse({})
 
 
 def deleteTVE(request, project_name, site_name, proc_name):

@@ -13,6 +13,7 @@ from projects.api import (
     excelupload,
     dsm,
     buysellprice,
+    timevareff,
 )
 
 urlpatterns = [
@@ -133,11 +134,11 @@ urlpatterns = [
     # TimeVarEff: Get&Delete, Update
     path(
         "project/<str:project_name>/site/<str:site_name>/timevareff/<str:proc_name>/",
-        buysellprice.handleBSP,
+        timevareff.handleTVE,
     ),
     path(
         "project/<str:project_name>/site/<str:site_name>/timevareff/<str:proc_name>/upload/",
-        buysellprice.uploadBSPProfile,
+        timevareff.uploadTVEProfile,
     ),
     # Simulation: Trigger, Get Result, Get Logs, Get Config
     path("project/<str:project_name>/simulate/trigger/", simulate.trigger_simulation),

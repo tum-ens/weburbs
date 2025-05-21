@@ -42,9 +42,8 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { useSites } from '@/backend/sites'
 import DemandOverview from '@/components/DemandOverview.vue'
-import { inject, ref, watch } from 'vue'
+import { inject, ref } from 'vue'
 import SiteOverviewComponent from '@/components/SiteOverviewComponent.vue'
 
 const route = useRoute()
@@ -53,17 +52,6 @@ const router = useRouter()
 const advanced = inject('advanced')
 
 const curSite = ref('')
-
-const { data: sites } = useSites(route)
-watch(
-  sites,
-  () => {
-    if (!sites.value || sites.value.length === 0) return
-
-    curSite.value = sites.value[0].name
-  },
-  { immediate: true },
-)
 </script>
 
 <style scoped></style>
