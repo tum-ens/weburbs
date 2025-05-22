@@ -37,6 +37,21 @@ def list_commodities(request, project_name, site_name):
     return JsonResponse(list(commodities), safe=False)
 
 
+@login_required
+@require_GET
+def list_all_commodities(request, project_name):
+    project = get_project(request.user, project_name)
+
+    com_names = (
+        Commodity.objects.filter(site__project=project)
+        .order_by("name")
+        .values_list("name", flat=True)
+        .distinct()
+    )
+
+    return JsonResponse(list(com_names), safe=False)
+
+
 def add_def_to_project(def_commodity: DefCommodity, site: Site):
     commodity = Commodity(
         site=site,

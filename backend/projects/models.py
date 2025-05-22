@@ -281,7 +281,8 @@ class BuySellPriceType(IntEnum):
 
 class BuySellPrice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    commodity = models.ForeignKey(Commodity, on_delete=models.CASCADE, null=False)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
+    name = models.CharField(max_length=255, null=False, unique=False)
     type = models.IntegerField(choices=BuySellPriceType.choices(), null=False)
     steps = models.JSONField(null=False)
 

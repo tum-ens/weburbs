@@ -144,7 +144,7 @@ export enum BuySellPriceType {
 }
 
 export interface BuySellPrice {
-  commodity: string
+  name: string
   type: BuySellPriceType
   steps: number[]
 }

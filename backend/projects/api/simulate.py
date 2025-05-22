@@ -18,11 +18,27 @@ from projects.models import (
     Storage,
     SimulationResult,
     SimulationResultStatus,
+    DSM,
+    TimeVarEff,
+    BuySellPrice,
 )
 
 
 def negInf(n):
     return n if n >= 0 else "inf"
+
+
+def create_dsm_config(commodity: Commodity):
+    if not DSM.objects.filter(commodity=commodity).exists():
+        return None
+    dsm = DSM.objects.get(commodity=commodity)
+    return {
+        "delay": dsm.delay,
+        "eff": dsm.eff,
+        "recov": dsm.recov,
+        "cap-max-do": dsm.capmaxdo,
+        "cap-max-up": dsm.capmaxup,
+    }
 
 
 @login_required
@@ -90,6 +106,7 @@ def trigger_simulation(request, project_name):
                         }
                         if Storage.objects.filter(commodity=commodity).exists()
                         else None,
+                        "dsm": create_dsm_config(commodity),
                         "unitR": commodity.unitR,
                         "unitC": commodity.unitC,
                     }
@@ -118,11 +135,26 @@ def trigger_simulation(request, project_name):
                                 process=process
                             )
                         },
+                        "timevareff": TimeVarEff.objects.filter(process=process)
+                        .get()
+                        .steps
+                        if TimeVarEff.objects.filter(process=process).exists()
+                        else None,
                     }
                     for process in Process.objects.filter(site=site)
                 },
             }
             for site in sites
+        },
+        "dsm": {
+            bsp.name: {
+                "delay": bsp.delay,
+                "eff": bsp.eff,
+                "recov": bsp.recov,
+                "cap-max-do": bsp.capmaxdo,
+                "cap-max-up": bsp.capmaxup,
+            }
+            for bsp in BuySellPrice.objects.filter(project=project)
         },
     }
     config = remove_none(config)

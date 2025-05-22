@@ -218,15 +218,14 @@ def upload(request, project_name):
         bsp_tab = xls.parse("Buy-Sell-Price").set_index(["t"])
         for key in bsp_tab:
             com, type = key.split(" ")
-            commodities = Commodity.objects.filter(name=com)
             steps = bsp_tab[key].tolist()[1::]
-            for commodity in commodities:
-                bsp = BuySellPrice(
-                    commodity=commodity,
-                    type=BuySellPriceType[type],
-                    steps=steps,
-                )
-                bsp.save()
+            bsp = BuySellPrice(
+                project=project,
+                name=com,
+                type=BuySellPriceType[type],
+                steps=steps,
+            )
+            bsp.save()
 
         tve_tab = xls.parse("TimeVarEff").set_index(["t"])
         for key in tve_tab:

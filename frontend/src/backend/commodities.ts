@@ -2,7 +2,7 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, type Ref, unref } from 'vue'
 import axios from 'axios'
-import type { Commodity, Site } from '@/backend/interfaces'
+import type { BuySellPrice, Commodity, Site } from '@/backend/interfaces'
 import { useCSRF } from '@/backend/security'
 
 export function useDefCommodities() {
@@ -33,6 +33,16 @@ export function useProjectSiteCommodities(
         >(`/api/project/${route.params.proj}/site/${unref(site)}/commodities/`)
         .then(res => res.data)
     },
+  })
+}
+
+export function useProjectCommodities(route: RouteLocationNormalized) {
+  return useQuery({
+    queryKey: ['commodities', computed(() => route.params.proj)],
+    queryFn: () =>
+      axios
+        .get<string[]>(`/api/project/${route.params.proj}/commodities/`)
+        .then(response => response.data),
   })
 }
 

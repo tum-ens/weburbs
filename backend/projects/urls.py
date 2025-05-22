@@ -23,11 +23,12 @@ urlpatterns = [
     path("project/<str:project_name>/update/", project.update_project),
     path("project/<str:project_name>/sites/", site.list_sites),
     path("project/<str:project_name>/site/<str:site_name>/", site.edit_site),
-    # Commodity: List, List, Update - Default: List, Add
+    # Commodity: List, List all, Update - Default: List, Add
     path(
         "project/<str:project_name>/site/<str:site_name>/commodities/",
         commodity.list_commodities,
     ),
+    path("project/<str:project_name>/commodities/", commodity.list_all_commodities),
     path(
         "project/<str:project_name>/site/<str:site_name>/commodity/<str:commodity_name>/update/",
         commodity.update_commodity,
@@ -124,11 +125,15 @@ urlpatterns = [
     ),
     # BuySellPrice: Get&Delete, Update
     path(
-        "project/<str:project_name>/site/<str:site_name>/buysellprice/<str:com_name>/",
-        buysellprice.handleBSP,
+        "project/<str:project_name>/buysellprice/",
+        buysellprice.listBSP,
     ),
     path(
-        "project/<str:project_name>/site/<str:site_name>/buysellprice/<str:com_name>/upload/<str:ty>/",
+        "project/<str:project_name>/buysellprice/<str:com_name>/delete/<str:ty>/",
+        buysellprice.deleteBSP,
+    ),
+    path(
+        "project/<str:project_name>/buysellprice/<str:com_name>/upload/<str:ty>/",
         buysellprice.uploadBSPProfile,
     ),
     # TimeVarEff: Get&Delete, Update
