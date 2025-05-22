@@ -21,6 +21,7 @@ from projects.models import (
     DSM,
     TimeVarEff,
     BuySellPrice,
+    Transmission,
 )
 
 
@@ -39,6 +40,32 @@ def create_dsm_config(commodity: Commodity):
         "cap-max-do": dsm.capmaxdo,
         "cap-max-up": dsm.capmaxup,
     }
+
+
+def create_transmission_config(commodity: Commodity):
+    transmissions = Transmission.objects.filter(commodityout=commodity)
+    if len(transmissions) == 0:
+        return None
+    print("found someting", len(transmissions))
+    transmission_config = {}
+    for transmission in transmissions:
+        site_name = transmission.commodityin.site.name
+        transmission_config[site_name] = {
+            "type": transmission.get_trans_type_label(),
+            "eff": transmission.eff,
+            "invcost": transmission.invcost,
+            "fixcost": transmission.fixcost,
+            "varcost": transmission.varcost,
+            "instcap": transmission.instcap,
+            "caplo": transmission.caplo,
+            "capup": negInf(transmission.capup),
+            "wacc": transmission.wacc,
+            "depreciation": transmission.depreciation,
+            "reactance": transmission.reactance,
+            "difflimit": transmission.difflimit,
+            "basevoltage": transmission.basevoltage,
+        }
+    return transmission_config
 
 
 @login_required
@@ -109,6 +136,7 @@ def trigger_simulation(request, project_name):
                         "dsm": create_dsm_config(commodity),
                         "unitR": commodity.unitR,
                         "unitC": commodity.unitC,
+                        "transmission": create_transmission_config(commodity),
                     }
                     for commodity in Commodity.objects.filter(site=site)
                 },
@@ -146,14 +174,8 @@ def trigger_simulation(request, project_name):
             }
             for site in sites
         },
-        "dsm": {
-            bsp.name: {
-                "delay": bsp.delay,
-                "eff": bsp.eff,
-                "recov": bsp.recov,
-                "cap-max-do": bsp.capmaxdo,
-                "cap-max-up": bsp.capmaxup,
-            }
+        "bsp": {
+            bsp.name: {"type": BuySellPrice(bsp.type).name, "steps": bsp.steps}
             for bsp in BuySellPrice.objects.filter(project=project)
         },
     }

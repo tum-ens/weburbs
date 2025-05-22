@@ -15,7 +15,13 @@ def listBSP(request, project_name):
     project = get_project(request.user, project_name)
     BSPs = BuySellPrice.objects.filter(project=project).order_by("name", "type").all()
 
-    bsp_list = [{**model_to_dict(bsp, exclude=["id", "project"])} for bsp in BSPs]
+    bsp_list = [
+        {
+            **model_to_dict(bsp, exclude=["id", "project"]),
+            "type": BuySellPriceType(bsp.type).name,
+        }
+        for bsp in BSPs
+    ]
     return JsonResponse(bsp_list, safe=False)
 
 

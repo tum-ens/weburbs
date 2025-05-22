@@ -49,7 +49,7 @@ export function useDeleteBuySellPrice(
   return useMutation({
     mutationFn: () =>
       axios.delete(
-        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/delete/${BuySellPriceType[bsp.type]}/`,
+        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/delete/${bsp.type}/`,
         {
           headers: {
             'X-CSRFToken': csrf.value,

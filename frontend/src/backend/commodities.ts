@@ -2,7 +2,7 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, type Ref, unref } from 'vue'
 import axios from 'axios'
-import type { BuySellPrice, Commodity, Site } from '@/backend/interfaces'
+import type { Commodity, Site } from '@/backend/interfaces'
 import { useCSRF } from '@/backend/security'
 
 export function useDefCommodities() {

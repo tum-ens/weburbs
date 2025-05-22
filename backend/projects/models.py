@@ -257,7 +257,7 @@ class Transmission(models.Model):
     basevoltage = models.FloatField(null=True)
 
     def get_trans_type_label(self):
-        return ComType(self.transmission).name
+        return ComType(self.type).name
 
 
 class DSM(models.Model):
