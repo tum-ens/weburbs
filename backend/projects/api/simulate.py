@@ -22,6 +22,7 @@ from projects.models import (
     TimeVarEff,
     BuySellPrice,
     Transmission,
+    Project,
 )
 
 
@@ -46,19 +47,18 @@ def create_transmission_config(commodity: Commodity):
     transmissions = Transmission.objects.filter(commodityout=commodity)
     if len(transmissions) == 0:
         return None
-    print("found someting", len(transmissions))
     transmission_config = {}
     for transmission in transmissions:
         site_name = transmission.commodityin.site.name
         transmission_config[site_name] = {
-            "type": transmission.get_trans_type_label(),
+            "Transmission": transmission.get_trans_type_label(),
             "eff": transmission.eff,
-            "invcost": transmission.invcost,
-            "fixcost": transmission.fixcost,
-            "varcost": transmission.varcost,
-            "instcap": transmission.instcap,
-            "caplo": transmission.caplo,
-            "capup": negInf(transmission.capup),
+            "inv-cost": transmission.invcost,
+            "fix-cost": transmission.fixcost,
+            "var-cost": transmission.varcost,
+            "inst-cap": transmission.instcap,
+            "cap-lo": transmission.caplo,
+            "cap-up": negInf(transmission.capup),
             "wacc": transmission.wacc,
             "depreciation": transmission.depreciation,
             "reactance": transmission.reactance,
@@ -66,6 +66,18 @@ def create_transmission_config(commodity: Commodity):
             "basevoltage": transmission.basevoltage,
         }
     return transmission_config
+
+
+def create_buysellprice_config(project: Project):
+    buysellprices = BuySellPrice.objects.filter(project=project)
+    if len(buysellprices) == 0:
+        return None
+    buysellprice_config = {}
+    for bsp in buysellprices:
+        if bsp.name not in buysellprice_config:
+            buysellprice_config[bsp.name] = {}
+        buysellprice_config[bsp.name][bsp.get_type_label()] = bsp.steps
+    return buysellprice_config
 
 
 @login_required
@@ -87,7 +99,7 @@ def trigger_simulation(request, project_name):
         "global": {"CO2 limit": project.co2limit, "Cost limit": project.costlimit},
         "site": {
             site.name: {
-                "area": "inf" if site.area is None else site.area,
+                "area": "NaN" if site.area is None else site.area,
                 "commodity": {
                     commodity.name: {
                         "Type": commodity.get_com_type_label(),
@@ -174,10 +186,7 @@ def trigger_simulation(request, project_name):
             }
             for site in sites
         },
-        "bsp": {
-            bsp.name: {"type": BuySellPrice(bsp.type).name, "steps": bsp.steps}
-            for bsp in BuySellPrice.objects.filter(project=project)
-        },
+        "buysellprice": create_buysellprice_config(project),
     }
     config = remove_none(config)
     simres.config = config

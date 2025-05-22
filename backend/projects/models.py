@@ -257,7 +257,7 @@ class Transmission(models.Model):
     basevoltage = models.FloatField(null=True)
 
     def get_trans_type_label(self):
-        return ComType(self.type).name
+        return TransmissionType(self.type).name
 
 
 class DSM(models.Model):
@@ -285,6 +285,9 @@ class BuySellPrice(models.Model):
     name = models.CharField(max_length=255, null=False, unique=False)
     type = models.IntegerField(choices=BuySellPriceType.choices(), null=False)
     steps = models.JSONField(null=False)
+
+    def get_type_label(self):
+        return BuySellPriceType(self.type).name
 
 
 class TimeVarEff(models.Model):
