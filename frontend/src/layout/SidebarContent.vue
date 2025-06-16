@@ -17,21 +17,37 @@
       </a>
     </template>
   </PanelMenu>
+  <Button
+    v-if="!!route.params.proj"
+    class="mt-3"
+    fluid
+    severity="danger"
+    label="Delete Project"
+    @click="deleteProject()"
+  />
   <div class="flex flex-row pt-3 pl-3 gap-3">
     <label for="advanced" class="select-none">Advanced mode</label>
     <ToggleSwitch inputId="advanced" v-model="advanced" />
   </div>
+
+  <ConfirmDialog />
 </template>
 
 <script setup lang="ts">
 import { computed, inject, type Ref, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProjectList } from '@/backend/projects'
+import { useDeleteProject, useProjectList } from '@/backend/projects'
+import { useConfirm } from 'primevue'
+import { useToast } from 'primevue/usetoast'
 
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
 const advanced = inject<Ref<boolean>>('advanced')
+
+const confirm = useConfirm()
+const { mutate: deleteProjectCall } = useDeleteProject(route)
 
 const expandedKey = ref<{ [key: string]: boolean }>({})
 const { data: projects } = useProjectList()
@@ -183,6 +199,34 @@ const items = computed(() => {
     },
   ]
 })
+
+function deleteProject() {
+  confirm.require({
+    message: 'Are you sure you want to delete this project?',
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Cancel',
+    },
+    acceptProps: {
+      label: 'Delete',
+      outlined: true,
+      severity: 'danger',
+    },
+    accept: () => {
+      deleteProjectCall()
+      toast.add({
+        severity: 'error',
+        summary: 'Deleted',
+        detail: 'The project has been deleted',
+        life: 2000,
+      })
+      router.push({
+        name: 'Home',
+      })
+    },
+  })
+}
 </script>
 
 <style scoped></style>

@@ -68,3 +68,12 @@ def update_project(request, project_name):
         )
 
     return JsonResponse({"detail": "Project created"})
+
+
+@login_required
+@require_POST
+def delete_project(request, project_name):
+    project = get_project(request.user, project_name)
+    project.delete()
+
+    return JsonResponse({"detail": "Project delete"})

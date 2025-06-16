@@ -37,3 +37,23 @@ export function useProjectDetails(route: RouteLocationNormalized) {
         .then(res => res.data),
   })
 }
+
+export function useDeleteProject(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () =>
+      axios.post(
+        `/api/project/${route.params.proj}/delete/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    async onSuccess() {
+      await client.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
+}

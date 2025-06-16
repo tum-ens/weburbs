@@ -11,6 +11,7 @@ import FocusTrap from 'primevue/focustrap'
 import axios from 'axios'
 import ToastService from 'primevue/toastservice'
 import Tooltip from 'primevue/tooltip'
+import { ConfirmationService } from 'primevue'
 
 axios.defaults.withCredentials = true
 
@@ -36,6 +37,7 @@ fetch('/config.json')
           },
         },
       })
+      .use(ConfirmationService)
       .directive('focustrap', FocusTrap)
       .directive('tooltip', Tooltip)
       .mount('#app')

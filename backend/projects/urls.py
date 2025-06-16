@@ -19,6 +19,7 @@ from projects.api import (
 urlpatterns = [
     path("projects/", project.list_projects),
     path("project/<str:project_name>/", project.project_details),
+    path("project/<str:project_name>/delete/", project.delete_project),
     # Edit, list and delete Sites
     path("project/<str:project_name>/update/", project.update_project),
     path("project/<str:project_name>/sites/", site.list_sites),
