@@ -164,6 +164,7 @@ export enum SimulationResultStatus {
 export interface SimulationInfo {
   id: string
   timestamp: Date
+  name: string | null
   completed: boolean
   status: SimulationResultStatus | null
 }

@@ -249,7 +249,7 @@ def get_simulations(request, project_name):
         SimulationResult.objects.filter(project=project)
         .order_by("timestamp")
         .reverse()
-        .values("id", "timestamp", "completed", "status")
+        .values("id", "timestamp", "name", "completed", "status")
     )
     return JsonResponse(
         list(
@@ -257,6 +257,7 @@ def get_simulations(request, project_name):
                 lambda res: {
                     "id": res["id"],
                     "timestamp": res["timestamp"],
+                    "name": res["name"] if "name" in res else None,
                     "completed": res["completed"],
                     "status": res["status"],
                 },
@@ -282,6 +283,7 @@ def get_simulation_result(request, project_name, simid):
         {
             "id": simres.id,
             "timestamp": simres.timestamp,
+            "name": simres.name,
             "completed": simres.completed,
             "status": simres.status,
             "result": simres.result,
@@ -313,6 +315,21 @@ def get_simulation_config(request, project_name, simid):
         return HttpResponse("Simulation not found", status="204")
 
     return JsonResponse(simres.config)
+
+
+@login_required
+@require_POST
+def update_simulation_name(request, project_name, simid, name=None):
+    project = get_project(request.user, project_name)
+
+    simres = SimulationResult.objects.get(id=simid, project=project)
+
+    if simres is None:
+        return HttpResponse("Simulation not found", status="204")
+
+    simres.name = name
+    simres.save()
+    return HttpResponse("Name was updated")
 
 
 def remove_none(d):

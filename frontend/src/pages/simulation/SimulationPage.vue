@@ -16,6 +16,29 @@
             label="Logs"
             @click="logsVisible = true"
           />
+          <Inplace
+            v-if="selSimulation"
+            :displayProps="{ class: 'border-box-sizing flex h-full p-0' }"
+            :pt="{ content: { class: 'border-box-sizing flex h-full p-0' } }"
+          >
+            <template #display>
+              <Button label="Change name" />
+            </template>
+            <template #content="{ closeCallback }">
+              <InputGroup fluid>
+                <InputText
+                  fluid
+                  v-model="simName"
+                  @keyup.enter="updateName(closeCallback)"
+                />
+                <Button
+                  fluid
+                  label="Update"
+                  @click="updateName(closeCallback)"
+                />
+              </InputGroup>
+            </template>
+          </Inplace>
           <Select
             class="col-span-2"
             v-model="selSimulation"
@@ -28,7 +51,9 @@
               <div
                 class="w-full flex flex-row justify-between items-center gap-3"
               >
-                <span>{{ option.timestamp.toLocaleString() }}</span>
+                <span>{{
+                  option.name || option.timestamp.toLocaleString()
+                }}</span>
                 <ResultIcon
                   :completed="option.completed"
                   :status="option.status || SimulationResultStatus.Optimal"
@@ -40,7 +65,9 @@
                 v-if="value"
                 class="w-full flex flex-row justify-between items-center gap-3"
               >
-                <span>{{ value.timestamp.toLocaleString() }}</span>
+                <span>{{
+                  value.name || value.timestamp.toLocaleString()
+                }}</span>
                 <ResultIcon
                   :completed="value.completed"
                   :status="value.status || SimulationResultStatus.Optimal"
@@ -92,6 +119,7 @@ import {
   useGetSimulation,
   useListSimulations,
   useTriggerSimulation,
+  useUpdateSimulationName,
 } from '@/backend/simulate'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
@@ -112,6 +140,7 @@ const router = useRouter()
 const toast = useToast()
 
 const selSimulation = ref<SimulationInfo>()
+const simName = ref('')
 
 const advanced = inject('advanced')
 const logsVisible = ref(false)
@@ -121,6 +150,7 @@ const { mutate: triggerSimulation, isPending: simulating } =
   useTriggerSimulation(route)
 const { data: simulations } = useListSimulations(route)
 const { data: simulation } = useGetSimulation(route)
+const { mutate: updateSimulationName } = useUpdateSimulationName(route)
 
 function changeSimulation(event: SelectChangeEvent) {
   router.push({
@@ -133,22 +163,26 @@ function changeSimulation(event: SelectChangeEvent) {
 
 // update select if simulation in route
 watch(
-  [simulation, simulations],
+  [simulation, simulations, route],
   () => {
     if (simulation.value) {
       selSimulation.value = {
         id: simulation.value.id,
         timestamp: simulation.value.timestamp,
+        name: simulation.value.name || '',
         completed: true,
         status: simulation.value.status,
       }
+      simName.value = simulation.value.name || ''
       return
-    }
-    if (simulations.value && route.params.simId)
+    } else if (simulations.value && route.params.simId) {
       selSimulation.value = simulations.value.find(
         sim => sim.id === route.params.simId,
       )
-    else selSimulation.value = undefined
+      simName.value = selSimulation.value?.name || ''
+    } else {
+      selSimulation.value = undefined
+    }
   },
   { immediate: true },
 )
@@ -196,6 +230,12 @@ function trigger() {
       })
     },
   })
+}
+
+function updateName(callback: () => void) {
+  if (!selSimulation.value) return
+  updateSimulationName(simName.value)
+  callback()
 }
 </script>
 

@@ -102,7 +102,7 @@ export function useGetSimulationLogs(route: RouteLocationNormalized) {
     queryFn: () =>
       axios
         .get(
-          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/logs`,
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/logs/`,
           {},
         )
         .then(response => {
@@ -133,7 +133,7 @@ export function useGetSimulationConfig(route: RouteLocationNormalized) {
     queryFn: () =>
       axios
         .get(
-          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/config`,
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/config/`,
           {},
         )
         .then(response => {
@@ -148,5 +148,42 @@ export function useGetSimulationConfig(route: RouteLocationNormalized) {
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .then<any>(response => response.data),
+  })
+}
+
+export function useUpdateSimulationName(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) =>
+      axios
+        .post(
+          `/api/project/${route.params.proj}/simulate/result/${route.params.simId}/name/${name}/`,
+          {},
+          {
+            headers: {
+              'X-CSRFToken': csrf.value,
+            },
+          },
+        )
+        .then(response => response.data)
+        .then(res => {
+          return {
+            ...res,
+            timestamp: new Date(res.timestamp),
+          }
+        }),
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ['simulations', <string>route.params.proj],
+      })
+      queryClient.invalidateQueries({
+        queryKey: [
+          'simulation',
+          <string>route.params.proj,
+          <string>route.params.simId,
+        ],
+      })
+    },
   })
 }

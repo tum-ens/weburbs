@@ -309,6 +309,7 @@ class SimulationResultStatus(IntEnum):
 class SimulationResult(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     timestamp = models.DateTimeField(null=False, auto_now_add=True)
+    name = models.CharField(max_length=255, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
     completed = models.BooleanField(default=False)
     config = models.JSONField(null=False)

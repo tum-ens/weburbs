@@ -10,7 +10,7 @@ export function useUploadExcel() {
       const formData = new FormData()
       formData.append('file', data.file)
       return axios.post(
-        `/api/project/${data.project_name}/excelupload`,
+        `/api/project/${data.project_name}/excelupload/`,
         formData,
         {
           headers: {

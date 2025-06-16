@@ -153,15 +153,23 @@ urlpatterns = [
         simulate.get_simulation_result,
     ),
     path(
-        "project/<str:project_name>/simulate/result/<uuid:simid>/logs",
+        "project/<str:project_name>/simulate/result/<uuid:simid>/logs/",
         simulate.get_simulation_logs,
     ),
     path(
-        "project/<str:project_name>/simulate/result/<uuid:simid>/config",
+        "project/<str:project_name>/simulate/result/<uuid:simid>/config/",
         simulate.get_simulation_config,
     ),
     path(
-        "project/<str:project_name>/excelupload",
+        "project/<str:project_name>/simulate/result/<uuid:simid>/name/<str:name>/",
+        simulate.update_simulation_name,
+    ),
+    path(
+        "project/<str:project_name>/simulate/result/<uuid:simid>/name//",
+        simulate.update_simulation_name,
+    ),
+    path(
+        "project/<str:project_name>/excelupload/",
         excelupload.upload,
     ),
 ]
