@@ -3,7 +3,7 @@ services:
   backend:
     image: ghcr.io/tum-ens/weburbs-backend:latest
     # Use this to build the image locally
-    # build: backend
+    build: backend
     container_name: weburbs-backend
     environment:
       - SECRET_KEY=change_me
@@ -32,7 +32,7 @@ services:
   frontend:
     image: ghcr.io/tum-ens/weburbs-frontend:latest
     # Use this to build the image locally
-    # build: frontend
+    build: frontend
     container_name: weburbs-frontend
     # environment:
       # Replace localhost by your domain if it differs from the backend url
@@ -64,7 +64,10 @@ services:
 
   optimizer:
     image: ghcr.io/tum-ens/urbs-weburbs:latest
+#    image: ghcr.io/tum-ens/urbs-weburbs-gurobi:latest
     container_name: optimizer
+#    volumes:
+#      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
     networks:
       - urbs
 
