@@ -7,16 +7,6 @@
           <SupImOverview :site="site" />
         </template>
       </SiteOverviewComponent>
-      <Accordion lazy v-model:value="curSite">
-        <AccordionPanel
-          v-for="site in sites"
-          :key="site.name"
-          :value="site.name"
-        >
-          <AccordionHeader>{{ site.name }}</AccordionHeader>
-          <AccordionContent> </AccordionContent>
-        </AccordionPanel>
-      </Accordion>
 
       <div class="mt-3 flex justify-end gap-3">
         <Button
