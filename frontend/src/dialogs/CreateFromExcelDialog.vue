@@ -31,7 +31,7 @@
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
-import { useUploadExcel } from '@/backend/excelupload'
+import { useUploadExcel } from '@/backend/upload'
 import { useRouter } from 'vue-router'
 
 const toast = useToast()

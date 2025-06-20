@@ -43,7 +43,8 @@
     </Card>
   </DefaultLayout>
 
-  <CreateFromExcel v-model:visible="createFExcelVisible" />
+  <CreateFromExcelDialog v-model:visible="createFExcelVisible" />
+  <CreateFromConfigDialog v-model:visible="createFConfigVisible" />
 </template>
 
 <script setup lang="ts">
@@ -53,7 +54,8 @@ import { useRoute, useRouter } from 'vue-router'
 import Transformer from '@/components/TransformerComponent.vue'
 import { useProjectList } from '@/backend/projects'
 import DefaultLayout from '@/layout/DefaultLayout.vue'
-import CreateFromExcel from '@/dialogs/CreateFromExcel.vue'
+import CreateFromExcelDialog from '@/dialogs/CreateFromExcelDialog.vue'
+import CreateFromConfigDialog from '@/dialogs/CreateFromConfigDialog.vue'
 
 const { data: authenticated } = useAuthenticated()
 const router = useRouter()
@@ -82,9 +84,16 @@ const items = [
       createFExcelVisible.value = true
     },
   },
+  {
+    label: 'Create from Config',
+    command: () => {
+      createFConfigVisible.value = true
+    },
+  },
 ]
 
 const createFExcelVisible = ref(false)
+const createFConfigVisible = ref(false)
 </script>
 
 <style scoped></style>

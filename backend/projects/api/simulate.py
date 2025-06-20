@@ -100,9 +100,12 @@ def trigger_simulation(request, project_name):
         "site": {
             site.name: {
                 "area": "NaN" if site.area is None else site.area,
+                "lat": site.lat,
+                "lon": site.lon,
                 "commodity": {
                     commodity.name: {
                         "Type": commodity.get_com_type_label(),
+                        "description": commodity.description,
                         "price": commodity.price,
                         "max": None if commodity.max is None else negInf(commodity.max),
                         "maxperhour": None
@@ -119,6 +122,7 @@ def trigger_simulation(request, project_name):
                         else None,
                         "storage": {
                             storage.name: {
+                                "description": storage.description,
                                 "inst-cap-c": storage.instcapc,
                                 "cap-lo-c": storage.caploc,
                                 "cap-up-c": negInf(storage.capupc),
@@ -154,6 +158,7 @@ def trigger_simulation(request, project_name):
                 },
                 "process": {
                     process.name: {
+                        "description": process.description,
                         "inst-cap": process.instcap,
                         "cap-lo": process.caplo,
                         "cap-up": negInf(process.capup),

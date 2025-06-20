@@ -11,6 +11,7 @@ from projects.api import (
     demand,
     simulate,
     excelupload,
+    configupload,
     dsm,
     buysellprice,
     timevareff,
@@ -172,5 +173,9 @@ urlpatterns = [
     path(
         "project/<str:project_name>/excelupload/",
         excelupload.upload,
+    ),
+    path(
+        "project/<str:project_name>/configupload/",
+        configupload.upload,
     ),
 ]

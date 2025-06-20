@@ -26,3 +26,26 @@ export function useUploadExcel() {
     },
   })
 }
+
+export function useUploadConfig() {
+  const queryClient = useQueryClient()
+  const { data: csrf } = useCSRF()
+  return useMutation({
+    mutationFn: (data: { project_name: string; content: string }) => {
+      return axios.post(
+        `/api/project/${data.project_name}/configupload/`,
+        data.content,
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      )
+    },
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      })
+    },
+  })
+}
