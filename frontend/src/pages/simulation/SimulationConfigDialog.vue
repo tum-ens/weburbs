@@ -7,6 +7,11 @@
         severity="secondary"
         @click="copyToClipbaord"
       />
+      <Button
+        icon="pi pi-download"
+        severity="secondary"
+        @click="downloadConfig"
+      />
     </template>
     <p style="white-space: pre-wrap">
       {{ config }}
@@ -34,6 +39,20 @@ async function copyToClipbaord() {
     severity: 'success',
     life: 2000,
   })
+}
+
+async function downloadConfig() {
+  const fileContent = JSON.stringify(config.value)
+  const fileName = route.params.proj + '.urbs'
+  const blob = new Blob([fileContent], { type: 'text/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 </script>
 
