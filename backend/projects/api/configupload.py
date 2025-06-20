@@ -197,10 +197,9 @@ def upload(request, project_name):
                     sitein = Site.objects.get(project=project, name=siteinName)
                     commodityin = Commodity.objects.get(site=sitein, name=commodityName)
                     transmission = Transmission(
-                        transmission=TransmissionType[dataTransmission["Transmission"]],
+                        type=TransmissionType[dataTransmission["Transmission"]],
                         commodityout=commodity,
                         commodityin=commodityin,
-                        type=TransmissionType[dataTransmission["Transmission"]],
                         eff=dataTransmission["eff"],
                         invcost=dataTransmission["inv-cost"],
                         fixcost=dataTransmission["fix-cost"],
