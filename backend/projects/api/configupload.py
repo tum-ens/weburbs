@@ -49,9 +49,6 @@ def upload(request, project_name):
     if Project.objects.filter(user=request.user, name=project_name).exists():
         return HttpResponse("Project name already exists", status=409)
 
-    if "file" not in request.FILES:
-        return HttpResponse("File is missing", status=400)
-
     config = json.loads(request.body)
     if "CO2 limit" in config["global"]:
         co2limit = config["global"]["CO2 limit"]
@@ -79,10 +76,9 @@ def upload(request, project_name):
         for commodityName, dataCommodity in dataSite["commodity"].items():
             commodity = Commodity(
                 name=commodityName,
-                description=dataCommodity["description"],
                 site=site,
                 type=ComType[dataCommodity["Type"]],
-                price=dataCommodity["price"],
+                price=opt_num(dataCommodity, "price"),
                 max=opt_num(dataCommodity, "max"),
                 maxperhour=opt_num(dataCommodity, "maxperhour"),
                 unitR=dataCommodity["unitR"],
@@ -105,6 +101,7 @@ def upload(request, project_name):
                     commodity=commodity,
                     description="",
                     steps=dataCommodity["demand"],
+                    quantity=1,
                 )
                 demand.save()
 
@@ -116,11 +113,11 @@ def upload(request, project_name):
                         name=storageName,
                         description=dataStorage["description"],
                         instcapc=dataStorage["inst-cap-c"],
-                        caplocc=dataStorage["cap-lo-c"],
-                        capupc=parse_num(dataStorage["cap-up-c"]),
+                        caploc=dataStorage["cap-lo-c"],
+                        capupc=opt_num(dataStorage, "cap-up-c"),
                         instcapp=dataStorage["inst-cap-p"],
                         caplop=dataStorage["cap-lo-p"],
-                        capupp=parse_num(dataStorage["cap-up-p"]),
+                        capupp=opt_num(dataStorage, "cap-up-p"),
                         effin=dataStorage["eff-in"],
                         effout=dataStorage["eff-out"],
                         invcostp=dataStorage["inv-cost-p"],
@@ -133,7 +130,7 @@ def upload(request, project_name):
                         depreciation=dataStorage["depreciation"],
                         init=dataStorage["init"],
                         discharge=dataStorage["discharge"],
-                        epratio=dataStorage["ep-ratio"],
+                        epratio=opt_num(dataStorage, "ep-ratio"),
                     )
                     storage.save()
 
@@ -149,45 +146,45 @@ def upload(request, project_name):
                 )
                 dsm.save()
 
-            for processName, processData in dataCommodity["process"].items():
-                process = Process(
-                    name=processName,
-                    site=site,
-                    description=processData["description"],
-                    instcap=processData["inst-cap"],
-                    caplo=processData["cap-lo"],
-                    capup=parse_num(processData["cap-up"]),
-                    maxgrad=parse_num(processData["max-grad"]),
-                    minfraction=processData["min-fraction"],
-                    invcost=processData["inv-cost"],
-                    fixcost=processData["fix-cost"],
-                    varcost=processData["var-cost"],
-                    wacc=processData["wacc"],
-                    depreciation=processData["depreciation"],
-                    areapercap=parse_num(processData["area-per-cap"]),
+        for processName, processData in dataSite["process"].items():
+            process = Process(
+                name=processName,
+                site=site,
+                description=processData["description"],
+                instcap=processData["inst-cap"],
+                caplo=processData["cap-lo"],
+                capup=opt_num(processData, "cap-up"),
+                maxgrad=opt_num(processData, "max-grad"),
+                minfraction=processData["min-fraction"],
+                invcost=processData["inv-cost"],
+                fixcost=processData["fix-cost"],
+                varcost=processData["var-cost"],
+                wacc=processData["wacc"],
+                depreciation=processData["depreciation"],
+                areapercap=opt_num(processData, "area-per-cap"),
+            )
+            process.save()
+
+            for processCommodityName, processCommodityData in processData[
+                "commodity"
+            ].items():
+                processCommodity = Commodity.objects.get(
+                    site=site, name=processCommodityName
                 )
-                process.save()
+                processCommodity = ProcessCommodity(
+                    process=process,
+                    commodity=processCommodity,
+                    direction=ProcComDir[processCommodityData["Direction"]],
+                    ratio=processCommodityData["ratio"],
+                    ratiomin=opt_num(processCommodityData, "ratio-min"),
+                )
+                processCommodity.save()
 
-                for processCommodityName, processCommodityData in processData[
-                    "commodity"
-                ].items():
-                    processCommodity = Commodity.objects.get(
-                        site=site, name=processCommodityName
-                    )
-                    processCommodity = ProcessCommodity(
-                        process=process,
-                        commodity=processCommodity,
-                        direction=ProcComDir[processCommodityData["direction"]],
-                        ratio=processCommodityData["ratio"],
-                        ratiomin=processCommodityData["ratio-min"],
-                    )
-                    processCommodity.save()
-
-                if "timevareff" in processData:
-                    timevareff = TimeVarEff(
-                        process=process, steps=processData["timevareff"]
-                    )
-                    timevareff.save()
+            if "timevareff" in processData:
+                timevareff = TimeVarEff(
+                    process=process, steps=processData["timevareff"]
+                )
+                timevareff.save()
 
     for siteName, dataSite in config["site"].items():
         site = Site.objects.get(project=project, name=siteName)
@@ -213,9 +210,9 @@ def upload(request, project_name):
                         capup=dataTransmission["cap-up"],
                         wacc=dataTransmission["wacc"],
                         depreciation=dataTransmission["depreciation"],
-                        reactance=dataTransmission["reactance"],
-                        difflimit=dataTransmission["difflimit"],
-                        basevoltage=dataTransmission["basevoltage"],
+                        reactance=opt_num(dataTransmission, "reactance"),
+                        difflimit=opt_num(dataTransmission, "difflimit"),
+                        basevoltage=opt_num(dataTransmission, "basevoltage"),
                     )
                     transmission.save()
 
