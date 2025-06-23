@@ -69,7 +69,7 @@ async function onFileSelect(event: FileUploadSelectEvent) {
 }
 
 async function upload() {
-  if (!file) {
+  if (method.value === 0 && !file) {
     toast.add({
       summary: 'Upload error',
       detail: `No file selected`,
@@ -92,7 +92,7 @@ async function upload() {
   uploadConfig(
     {
       project_name: title.value,
-      content: method.value === 0 ? await file.text() : content.value,
+      content: method.value === 0 ? (await file?.text()) || '' : content.value,
     },
     {
       onSuccess() {
