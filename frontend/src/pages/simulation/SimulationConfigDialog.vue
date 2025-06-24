@@ -7,20 +7,24 @@
     class="w-11/12 md:w-10/12 xl:w-1/2"
   >
     <template #header>
-      <span class="p-dialog-title">Config</span>
-      <Button
-        icon="pi pi-clipboard"
-        severity="secondary"
-        @click="copyToClipboard"
-      />
-      <Button
-        icon="pi pi-download"
-        severity="secondary"
-        @click="downloadConfig"
-      />
+      <div class="flex flex-row items-center w-full justify-between mr-5">
+        <span class="p-dialog-title text-center">Config</span>
+        <div class="flex flex-row gap-3">
+          <Button
+            icon="pi pi-clipboard"
+            severity="secondary"
+            @click="copyToClipboard"
+          />
+          <Button
+            icon="pi pi-download"
+            severity="secondary"
+            @click="downloadConfig"
+          />
+        </div>
+      </div>
     </template>
     <p style="white-space: pre" class="overflow-y-scroll">
-      {{ text }}
+      {{ stringifyJSON(config) }}
     </p>
   </Dialog>
 </template>
@@ -29,7 +33,6 @@
 import { useGetSimulationConfig } from '@/backend/simulate'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import { ref, watch } from 'vue'
 
 const route = useRoute()
 const toast = useToast()
@@ -62,8 +65,6 @@ async function downloadConfig() {
   URL.revokeObjectURL(url)
 }
 
-const text = ref('Loading config...')
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function stringifyJSON(value: any, level = 0): string {
   const space = ' '.repeat(level)
@@ -86,16 +87,6 @@ function stringifyJSON(value: any, level = 0): string {
     return JSON.stringify(value)
   }
 }
-
-watch(
-  config,
-  () => {
-    setTimeout(() => {
-      text.value = stringifyJSON(config.value)
-    }, 100)
-  },
-  { immediate: true },
-)
 </script>
 
 <style scoped></style>
