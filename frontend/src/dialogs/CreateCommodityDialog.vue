@@ -3,7 +3,7 @@
     v-model:visible="visible"
     :draggable="false"
     modal
-    header="Create commodity"
+    header="Create Commodity"
     class="w-11/12 md:w-10/12 xl:w-1/2"
   >
     <CommodityForm

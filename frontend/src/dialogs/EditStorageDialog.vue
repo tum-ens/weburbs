@@ -3,7 +3,7 @@
     v-model:visible="visible"
     :draggable="false"
     modal
-    :header="'Edit \'' + props.storage.name + '\''"
+    :header="'Edit Storage \'' + props.storage.name + '\''"
     class="w-11/12 md:w-10/12 lg:w-1/2"
   >
     <StorageForm

@@ -3,7 +3,7 @@
     v-model:visible="visible"
     :draggable="false"
     modal
-    header="Edit transmission"
+    header="Edit Transmission"
     class="w-11/12 md:w-10/12 lg:w-1/2"
   >
     <TransmissionForm
