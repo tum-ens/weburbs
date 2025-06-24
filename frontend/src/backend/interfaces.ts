@@ -138,14 +138,8 @@ export interface DSM {
   capmaxup: number
 }
 
-export enum BuySellPriceType {
-  buy = 1,
-  sell = 2,
-}
-
 export interface BuySellPrice {
   name: string
-  type: BuySellPriceType
   steps: number[]
 }
 

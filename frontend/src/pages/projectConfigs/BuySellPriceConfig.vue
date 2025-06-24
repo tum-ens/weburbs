@@ -18,19 +18,6 @@
             v-model="com_name"
             :options="com_names"
           />
-          <Select
-            v-model="type"
-            :options="
-              Object.keys(BuySellPriceType)
-                .filter(key => isNaN(Number(key)))
-                .map(name => ({
-                  name,
-                  val: BuySellPriceType[name as keyof typeof BuySellPriceType],
-                }))
-            "
-            optionLabel="name"
-            option-value="val"
-          />
           <FileUpload
             :disabled="!com_name && !checkUploadFile"
             mode="basic"
@@ -76,7 +63,6 @@ import {
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { useProjectCommodities } from '@/backend/commodities'
 import { ref } from 'vue'
-import { BuySellPriceType } from '@/backend/interfaces'
 import { checkUploadFile } from '@/helper/upload'
 import { useToast } from 'primevue/usetoast'
 
@@ -86,7 +72,6 @@ const toast = useToast()
 
 const bsp = {
   name: '',
-  type: BuySellPriceType.buy,
   steps: [],
 }
 
@@ -97,14 +82,12 @@ const { mutate: uploadBSP } = useUploadBuySellPrice(route, bsp)
 const checkingUpload = ref(false)
 
 const com_name = ref<string | undefined>(undefined)
-const type = ref<BuySellPriceType>(BuySellPriceType.buy)
 
 async function upload(event: FileUploadSelectEvent) {
   if (!com_name.value) return
   checkingUpload.value = true
   const file = event.files[0]
   bsp.name = com_name.value
-  bsp.type = type.value
 
   checkUploadFile(toast, file)
     .then(res => {

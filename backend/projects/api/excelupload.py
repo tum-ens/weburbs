@@ -21,7 +21,6 @@ from projects.models import (
     TransmissionType,
     DSM,
     BuySellPrice,
-    BuySellPriceType,
     TimeVarEff,
 )
 
@@ -216,13 +215,11 @@ def upload(request, project_name):
             dsm.save()
 
         bsp_tab = xls.parse("Buy-Sell-Price").set_index(["t"])
-        for key in bsp_tab:
-            com, type = key.split(" ")
-            steps = bsp_tab[key].tolist()[1::]
+        for com in bsp_tab:
+            steps = bsp_tab[com].tolist()[1::]
             bsp = BuySellPrice(
                 project=project,
                 name=com,
-                type=BuySellPriceType[type],
                 steps=steps,
             )
             bsp.save()

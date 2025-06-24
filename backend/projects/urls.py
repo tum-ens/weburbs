@@ -131,11 +131,11 @@ urlpatterns = [
         buysellprice.listBSP,
     ),
     path(
-        "project/<str:project_name>/buysellprice/<str:com_name>/delete/<str:ty>/",
+        "project/<str:project_name>/buysellprice/<str:com_name>/delete/",
         buysellprice.deleteBSP,
     ),
     path(
-        "project/<str:project_name>/buysellprice/<str:com_name>/upload/<str:ty>/",
+        "project/<str:project_name>/buysellprice/<str:com_name>/upload/",
         buysellprice.uploadBSPProfile,
     ),
     # TimeVarEff: Get&Delete, Update

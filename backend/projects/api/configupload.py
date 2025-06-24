@@ -20,7 +20,6 @@ from projects.models import (
     TransmissionType,
     DSM,
     BuySellPrice,
-    BuySellPriceType,
     TimeVarEff,
 )
 
@@ -217,21 +216,11 @@ def upload(request, project_name):
 
     if "buysellprice" in config:
         for commodityName, dataBuySellPrice in config["buysellprice"].items():
-            if "buy" in dataBuySellPrice:
-                buysellprice = BuySellPrice(
-                    project=project,
-                    name=commodityName,
-                    type=BuySellPriceType.buy,
-                    steps=dataBuySellPrice["buy"],
-                )
-                buysellprice.save()
-            if "sell" in dataBuySellPrice:
-                buysellprice = BuySellPrice(
-                    project=project,
-                    name=commodityName,
-                    type=BuySellPriceType.sell,
-                    steps=dataBuySellPrice["sell"],
-                )
-                buysellprice.save()
+            buysellprice = BuySellPrice(
+                project=project,
+                name=commodityName,
+                steps=dataBuySellPrice,
+            )
+            buysellprice.save()
 
     return HttpResponse("Project created")

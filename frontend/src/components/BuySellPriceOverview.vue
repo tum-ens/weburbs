@@ -2,7 +2,7 @@
   <divider />
   <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-8 gap-3">
     <div class="flex flex-col gap-3">
-      <h1>{{ props.bsp.name }} - {{ props.bsp.type }}</h1>
+      <h1>{{ props.bsp.name }}</h1>
       <Button :disabled="!checkUploadFile" @click="del" severity="danger">
         Delete
       </Button>

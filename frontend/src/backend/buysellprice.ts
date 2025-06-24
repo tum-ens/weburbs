@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
 import { computed } from 'vue'
-import { type BuySellPrice, BuySellPriceType } from '@/backend/interfaces'
+import { type BuySellPrice } from '@/backend/interfaces'
 
 export function useGetBuySellPrices(route: RouteLocationNormalized) {
   return useQuery({
@@ -24,7 +24,7 @@ export function useUploadBuySellPrice(
   return useMutation({
     mutationFn: (steps: number[]) =>
       axios.post(
-        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/upload/${BuySellPriceType[bsp.type]}/`,
+        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/upload/`,
         steps,
         {
           headers: {
@@ -49,7 +49,7 @@ export function useDeleteBuySellPrice(
   return useMutation({
     mutationFn: () =>
       axios.delete(
-        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/delete/${bsp.type}/`,
+        `/api/project/${route.params.proj}/buysellprice/${bsp.name}/delete/`,
         {
           headers: {
             'X-CSRFToken': csrf.value,

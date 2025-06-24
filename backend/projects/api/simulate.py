@@ -74,9 +74,7 @@ def create_buysellprice_config(project: Project):
         return None
     buysellprice_config = {}
     for bsp in buysellprices:
-        if bsp.name not in buysellprice_config:
-            buysellprice_config[bsp.name] = {}
-        buysellprice_config[bsp.name][bsp.get_type_label()] = bsp.steps
+        buysellprice_config[bsp.name] = bsp.steps
     return buysellprice_config
 
 
@@ -190,7 +188,11 @@ def trigger_simulation(request, project_name):
             }
             for site in sites
         },
-        "buysellprice": create_buysellprice_config(project),
+        "buysellprice": {
+            bsp.name: bsp.steps for bsp in BuySellPrice.objects.filter(project=project)
+        }
+        if BuySellPrice.objects.filter(project=project).exists()
+        else None,
     }
     config = remove_none(config)
     simres.config = config

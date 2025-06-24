@@ -270,24 +270,11 @@ class DSM(models.Model):
     capmaxup = models.FloatField(null=False)
 
 
-class BuySellPriceType(IntEnum):
-    buy = 1
-    sell = 2
-
-    @classmethod
-    def choices(cls):
-        return [(key.value, key.name) for key in cls]
-
-
 class BuySellPrice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False)
     name = models.CharField(max_length=255, null=False, unique=False)
-    type = models.IntegerField(choices=BuySellPriceType.choices(), null=False)
     steps = models.JSONField(null=False)
-
-    def get_type_label(self):
-        return BuySellPriceType(self.type).name
 
 
 class TimeVarEff(models.Model):

@@ -7,18 +7,17 @@ from django.views.decorators.http import require_POST
 
 from projects.api.helper import get_project
 from projects.helper.validator import checkProfile
-from projects.models import BuySellPrice, BuySellPriceType
+from projects.models import BuySellPrice
 
 
 @login_required
 def listBSP(request, project_name):
     project = get_project(request.user, project_name)
-    BSPs = BuySellPrice.objects.filter(project=project).order_by("name", "type").all()
+    BSPs = BuySellPrice.objects.filter(project=project).order_by("name").all()
 
     bsp_list = [
         {
             **model_to_dict(bsp, exclude=["id", "project"]),
-            "type": BuySellPriceType(bsp.type).name,
         }
         for bsp in BSPs
     ]
@@ -32,30 +31,16 @@ def deleteBSP(request, project_name, com_name, ty):
 
     project = get_project(request.user, project_name)
 
-    if ty == "buy":
-        ty = BuySellPriceType.buy
-    elif ty == "sell":
-        ty = BuySellPriceType.sell
-    else:
-        return HttpResponse("Invalid type", status=400)
-
-    BuySellPrice.objects.filter(project=project, name=com_name, type=ty).delete()
+    BuySellPrice.objects.filter(project=project, name=com_name).delete()
     return HttpResponse("BuySellPrice deleted", status=200)
 
 
 @login_required
 @require_POST
-def uploadBSPProfile(request, project_name, com_name, ty):
+def uploadBSPProfile(request, project_name, com_name):
     project = get_project(request.user, project_name)
 
-    if ty == "buy":
-        ty = BuySellPriceType.buy
-    elif ty == "sell":
-        ty = BuySellPriceType.sell
-    else:
-        return HttpResponse("Invalid type", status=400)
-
-    if BuySellPrice.objects.filter(project=project, name=com_name, type=ty).exists():
+    if BuySellPrice.objects.filter(project=project, name=com_name).exists():
         return HttpResponse(
             "BuySellPrice already exists for this commodity", status=409
         )
@@ -66,7 +51,7 @@ def uploadBSPProfile(request, project_name, com_name, ty):
             "Profile needs to be an array with exactly 8760 numbers", status=400
         )
 
-    bsp = BuySellPrice(project=project, name=com_name, type=ty, steps=profile)
+    bsp = BuySellPrice(project=project, name=com_name, steps=profile)
     bsp.save()
 
     return JsonResponse({"detail": "BuySellPrice uploaded"})
