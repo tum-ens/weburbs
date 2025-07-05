@@ -108,6 +108,7 @@ export interface DemandProfile extends DemandConfig {
 
 export enum TransmissionType {
   hvac = 1,
+  pipe = 2,
 }
 
 export interface Transmission {
@@ -170,6 +171,7 @@ export interface SimulationsResults {
     Fuel: number
     Variable: number
     Environmental: number
+    Purchase: number
   }
   process: {
     [site: string]: {

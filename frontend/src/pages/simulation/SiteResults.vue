@@ -8,7 +8,7 @@
         title="Processes"
         :data="procCapacity"
         :bargap="0.6"
-        titleX="kW"
+        titleX="MW"
         :margin="{
           t: 150,
           l: 100,
@@ -21,7 +21,7 @@
         :key="proc.name"
         :name="proc.name"
         :value="proc.value"
-        suffix="kW"
+        suffix="MW"
       />
       <DataPoint
         v-for="stor in newStor"
@@ -45,7 +45,7 @@
         :data="storCapPow"
         :bargap="0.6"
         :titleX="storUnitC?.join(' / ') || 'kWh'"
-        :titleX2="storUnitR?.join(' / ') || 'kW'"
+        :titleX2="storUnitR?.join(' / ') || 'MW'"
         :margin="{
           t: 150,
           l: 150,
@@ -72,6 +72,29 @@
         :bargroupgap="0.2"
         :margin="{
           t: 150,
+        }"
+      />
+    </div>
+
+    <div class="md:col-span-2 xl:col-span-3 grid grid-cols-1 gap-3">
+      <FloatLabel variant="on" class="w-full md:w-1/2 xl:w-1/3">
+        <Select
+          fluid
+          id="commodityoptions"
+          :options="demandCommodityOptions"
+          v-model="selectedCommodity"
+        />
+        <label for="commodityoptions">Select Commodity for Production View</label>
+      </FloatLabel>
+      <PlotlyDiagram
+        v-if="annualProductionData"
+        :title="`Annual Production for ${selectedCommodity}`"
+        :data="annualProductionData"
+        titleX="GWh"
+        :bargap="0.5"
+        :margin="{
+          t: 150,
+          l: 150,
         }"
       />
     </div>
@@ -113,25 +136,38 @@ const commodityDetails = ref<{
 
 const groupOption = ref(groupOptions[0])
 
+// Refs for the annual production chart
+const demandCommodityOptions = ref<string[]>([])
+const selectedCommodity = ref<string>()
+const annualProductionData = ref<Partial<Plotly.Data>[]>()
+
 watch(
-  [simulation, advanced, groupOption],
+  [simulation, advanced, groupOption, selectedCommodity],
   () => {
+    // Resetting values on each change
     newProcs.value = []
     procCapacity.value = []
     newStor.value = []
     storCapPow.value = []
     storUnitR.value = []
     storUnitC.value = []
+    commodityDetails.value = {}
+    annualProductionData.value = undefined
+    demandCommodityOptions.value = []
+
+
     if (!simulation.value || !config.value) return
+
+    const siteConfig = config.value.site[props.site.name]
+    const siteResults = simulation.value.result
 
     // Init processes
     {
       const procsNew = []
       const procsInstalled = []
       const procsNames = []
-      for (const procName in simulation.value.result.process[props.site.name]) {
-        const procConf =
-          config.value['site'][props.site.name]['process'][procName]
+      for (const procName in siteResults.process[props.site.name]) {
+        const procConf = siteConfig.process[procName]
         let allIn = true
         let allOut = true
         for (const procConfName in procConf['commodity']) {
@@ -141,7 +177,7 @@ watch(
         }
         if (!advanced?.value && (allIn || allOut)) continue
 
-        const proc = simulation.value.result.process[props.site.name][procName]
+        const proc = siteResults.process[props.site.name][procName]
         procsNew.push(proc.New)
         procsInstalled.push(proc.Total - proc.New)
         procsNames.push(procName)
@@ -173,9 +209,8 @@ watch(
       const storPNew = []
       const storPInstalled = []
       const storNames = []
-      for (const comName in simulation.value.result.storage[props.site.name]) {
-        const storCom =
-          simulation.value.result.storage[props.site.name][comName]
+      for (const comName in siteResults.storage[props.site.name]) {
+        const storCom = siteResults.storage[props.site.name][comName]
         for (const storName in storCom) {
           const stor = storCom[storName]
 
@@ -185,7 +220,7 @@ watch(
           storPInstalled.push(stor.PTotal - stor.PNew)
           storNames.push(storName)
 
-          const com = config.value.site[props.site.name].commodity[comName]
+          const com = siteConfig.commodity[comName]
           newStor.value.push({
             name: storName,
             value: stor.CNew,
@@ -241,13 +276,19 @@ watch(
       ]
     }
 
-    const results = simulation.value.result.results[props.site.name]
+    // Init commodity details (timeseries)
+    const results = siteResults.results[props.site.name]
     const timeline = Array.from(
       { length: groupOption.value.groups },
       (_, i) => i + 1,
     )
     for (const comName in results) {
-      const com = config.value.site[props.site.name].commodity[comName]
+      const com = siteConfig.commodity[comName]
+      // Populate the dropdown options for the new chart
+      if (com.Type === 'Demand') {
+        demandCommodityOptions.value.push(comName)
+      }
+
       if (com.Type !== 'Demand') continue
 
       const comResults = results[comName]
@@ -287,6 +328,44 @@ watch(
           type: 'bar',
           yaxis: 'y1',
         })
+      }
+    }
+
+    // Logic for Annual Production Chart
+    {
+      // Set a default selected commodity if one isn't already set
+      if (!selectedCommodity.value && demandCommodityOptions.value.length > 0) {
+        selectedCommodity.value = demandCommodityOptions.value[0]
+      }
+
+      if (selectedCommodity.value && results[selectedCommodity.value]) {
+        const productionByProcess = results[selectedCommodity.value].created
+        const processNames: string[] = []
+        const productionTotals: number[] = []
+
+        for (const procName in productionByProcess) {
+          const yearlyProductionMWh = productionByProcess[procName].reduce(
+            (sum, current) => sum + current,
+            0,
+          )
+          // Convert from MWh to GWh
+          const yearlyProductionGWh = yearlyProductionMWh / 1000
+
+          processNames.push(procName)
+          productionTotals.push(yearlyProductionGWh)
+        }
+
+        if (processNames.length > 0) {
+            annualProductionData.value = [
+            {
+              name: 'Annual Production',
+              x: productionTotals,
+              y: processNames,
+              type: 'bar',
+              orientation: 'h',
+            },
+          ]
+        }
       }
     }
   },
