@@ -109,7 +109,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes('maxgrad')"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     'Maximum allowed power gradient relative to power throughput capacity. Set value to negative or greater than 1/dt to disable it. '
                   "

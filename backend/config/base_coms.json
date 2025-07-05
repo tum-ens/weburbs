@@ -3,43 +3,43 @@
     "Solar": {
       "type": "SupIm",
       "autoquery": "Solar",
-      "unitR": "kW",
-      "unitC": "kWh"
+      "unitR": "MW",
+      "unitC": "MWh"
     },
     "Wind": {
       "type": "SupIm",
       "autoquery": "Wind",
-      "unitR": "kW",
-      "unitC": "kWh"
+      "unitR": "MW",
+      "unitC": "MWh"
     },
     "Elec": {
       "type": "Demand",
-      "unitR": "kW",
-      "unitC": "kWh"
+      "unitR": "MW",
+      "unitC": "MWh"
     },
     "CO2": {
       "type": "Env",
       "price": 0,
       "max": -1,
       "maxperhour": -1,
-      "unitR": "kg/h",
-      "unitC": "kg"
+      "unitR": "tonne/h",
+      "unitC": "tonne"
     },
     "Grid Electricity": {
       "type": "Buy",
       "price": 0.1,
       "max": -1,
       "maxperhour": -1,
-      "unitR": "kW",
-      "unitC": "kWh"
+      "unitR": "MW",
+      "unitC": "MWh"
     },
     "Grid Sell": {
       "type": "Sell",
       "price": 0.0,
       "max": 10000,
       "maxperhour": -1,
-      "unitR": "kW",
-      "unitC": "kWh"
+      "unitR": "MW",
+      "unitC": "MWh"
     },
     "Diesel": {
       "type": "Stock",
@@ -61,6 +61,26 @@
       "type": "Demand",
       "unitR": "m³/h",
       "unitC": "m³"
+    },
+    "Heat": {
+      "type": "Demand",
+      "unitR": "MW",
+      "unitC": "MWh"
+    },
+    "Geothermal": {
+      "type": "Stock",
+      "unitR": "MW",
+      "unitC": "MWh"
+    },
+    "Gas": {
+      "type": "Stock",
+      "unitR": "MW",
+      "unitC": "MWh"
+    },
+    "Heat int": {
+      "type": "Stock",
+      "unitR": "MW",
+      "unitC": "MWh"
     }
   }
 }

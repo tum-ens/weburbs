@@ -222,7 +222,7 @@ class SupIm(SupImType):
 
 class TransmissionType(IntEnum):
     hvac = 1
-
+    pipe = 2
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]

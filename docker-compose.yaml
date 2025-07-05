@@ -1,7 +1,7 @@
 
 services:
   backend:
-    image: ghcr.io/tum-ens/weburbs-backend:latest
+#    image: ghcr.io/tum-ens/weburbs-backend:latest
     # Use this to build the image locally
     build: backend
     container_name: weburbs-backend
@@ -14,7 +14,7 @@ services:
       # Change this for production
       - HTTPS_ONLY=False
       # Insert API key for Renewable Ninjas
-      - RN_KEY=$RN_KEY
+      - RN_KEY=xx
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=urbs
       - SQL_USER=urbs
@@ -30,7 +30,7 @@ services:
     #  - ./yourfolder:/app/config
 
   frontend:
-    image: ghcr.io/tum-ens/weburbs-frontend:latest
+#    image: ghcr.io/tum-ens/weburbs-frontend:latest
     # Use this to build the image locally
     build: frontend
     container_name: weburbs-frontend
@@ -64,10 +64,12 @@ services:
 
   optimizer:
     image: ghcr.io/tum-ens/urbs-weburbs:latest
+    platform: linux/amd64
 #    image: ghcr.io/tum-ens/urbs-weburbs-gurobi:latest
+#    build: ../urbs-weburbs
     container_name: optimizer
-#    volumes:
-#      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
+    volumes:
+      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
     networks:
       - urbs
 

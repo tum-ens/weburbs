@@ -145,6 +145,121 @@
           "ratio": 2.68
         }
       }
+    },
+    "Heat Pump Stadt int": {
+      "description": "Generates intermediate heat (dummy)",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 0,
+      "fixcost": 0,
+      "varcost": 0,
+      "wacc": 0.07,
+      "depreciation": 20,
+      "commodities": {
+        "Elec": {
+          "direction": "In",
+          "ratio": 1
+        },
+        "Heat int": {
+          "direction": "Out",
+          "ratio": 1
+        }
+      }
+    },
+    "Heat Pump Stadt": {
+      "description": "Generates heat from the intermediate heat",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 5445,
+      "fixcost": 0,
+      "varcost": 18.4,
+      "wacc": 0.07,
+      "depreciation": 20,
+      "commodities": {
+        "Heat int": {
+          "direction": "In",
+          "ratio": 1
+        },
+        "Heat": {
+          "direction": "Out",
+          "ratio": 1
+        }
+      }
+    },
+    "Electric Heater": {
+      "description": "Generates heat from electricity",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 31099.3,
+      "fixcost": 0,
+      "varcost": 67.05,
+      "wacc": 0.07,
+      "depreciation": 20,
+      "commodities": {
+        "Elec": {
+          "direction": "In",
+          "ratio": 1.02
+        },
+        "Heat": {
+          "direction": "Out",
+          "ratio": 1
+        }
+      }
+    },
+    "Heat Pump KZone int": {
+      "description": "Generates intermediate heat (dummy)",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 0,
+      "fixcost": 0,
+      "varcost": 0,
+      "wacc": 0.07,
+      "depreciation": 20,
+      "commodities": {
+        "Elec": {
+          "direction": "In",
+          "ratio": 1
+        },
+        "Heat int": {
+          "direction": "Out",
+          "ratio": 1
+        }
+      }
+    },
+    "Heat Pump KZone": {
+      "description": "Generates heat from the intermediate heat",
+      "instcap": 0,
+      "caplo": 0,
+      "capup": -1,
+      "maxgrad": -1,
+      "minfraction": 0,
+      "invcost": 117222,
+      "fixcost": 0,
+      "varcost": 48.63,
+      "wacc": 0.07,
+      "depreciation": 20,
+      "commodities": {
+        "Heat int": {
+          "direction": "In",
+          "ratio": 1
+        },
+        "Heat": {
+          "direction": "Out",
+          "ratio": 1
+        }
+      }
     }
   }
 }
