@@ -84,7 +84,9 @@
           :options="demandCommodityOptions"
           v-model="selectedCommodity"
         />
-        <label for="commodityoptions">Select Commodity for Production View</label>
+        <label for="commodityoptions"
+          >Select Commodity for Production View</label
+        >
       </FloatLabel>
       <PlotlyDiagram
         v-if="annualProductionData"
@@ -154,7 +156,6 @@ watch(
     commodityDetails.value = {}
     annualProductionData.value = undefined
     demandCommodityOptions.value = []
-
 
     if (!simulation.value || !config.value) return
 
@@ -356,7 +357,7 @@ watch(
         }
 
         if (processNames.length > 0) {
-            annualProductionData.value = [
+          annualProductionData.value = [
             {
               name: 'Annual Production',
               x: productionTotals,
