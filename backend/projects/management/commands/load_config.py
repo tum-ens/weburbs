@@ -13,6 +13,8 @@ from projects.models import (
     DefStorage,
     DefSupIm,
     DefDemand,
+    DefProject,
+    DefProjectLoaded,
 )
 
 
@@ -31,8 +33,8 @@ class Command(BaseCommand):
         demands = {}
 
         for filename in os.listdir(folder_path):
-            if filename.endswith(".json"):
-                file_path = os.path.join(folder_path, filename)
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path) and filename.endswith(".json"):
                 try:
                     with open(file_path, "r") as file:
                         print(f"Loading {filename}... ", end="")
@@ -217,6 +219,53 @@ class Command(BaseCommand):
             def_demand.steps = demand["steps"]
             def_demand.save()
             print("\033[92mOK\033[0m")
+
+        DefProject.objects.all().delete()
+        for filename in os.listdir(os.path.join(folder_path, "defaultProjects")):
+            file_path = os.path.join(folder_path, "defaultProjects", filename)
+            if os.path.isfile(file_path) and filename.endswith(".urbs"):
+                try:
+                    with open(file_path, "r") as file:
+                        name = ".".join(filename.split(".")[:-1])
+                        print(f"Loading default project {name}... ", end="")
+                        data = json.load(file)
+
+                        preset = DefProject()
+                        preset.name = name
+                        preset.config = data
+                        preset.save()
+
+                    print("\033[92mOK\033[0m")
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.ERROR(f"Error processing file {filename}: {e}")
+                    )
+                    exit(1)
+
+        for filename in os.listdir(os.path.join(folder_path, "defaultProjectsLoaded")):
+            file_path = os.path.join(folder_path, "defaultProjectsLoaded", filename)
+            if os.path.isfile(file_path) and filename.endswith(".urbs"):
+                try:
+                    with open(file_path, "r") as file:
+                        name = ".".join(filename.split(".")[:-1])
+                        print(f"Loading default project (loaded) {name}... ", end="")
+                        data = json.load(file)
+
+                        preset = DefProject()
+                        preset.name = name
+                        preset.config = data
+                        preset.save()
+
+                        default = DefProjectLoaded()
+                        default.preset = preset
+                        default.save()
+
+                    print("\033[92mOK\033[0m")
+                except Exception as e:
+                    self.stdout.write(
+                        self.style.ERROR(f"Error processing file {filename}: {e}")
+                    )
+                    exit(1)
 
 
 def getDefault(dict, key, default):

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axios from 'axios'
 import { useCSRF } from '@/backend/security'
-import type { Project } from '@/backend/interfaces'
+import type { Project, ProjectName } from '@/backend/interfaces'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed } from 'vue'
 
@@ -21,10 +21,40 @@ export function useUpdateProject(route: RouteLocationNormalized) {
   })
 }
 
+export function useDefProjects() {
+  return useQuery({
+    queryKey: ['defProjects'],
+    queryFn: () =>
+      axios.get<ProjectName[]>(`/api/def_projects/`).then(res => res.data),
+  })
+}
+
 export function useProjectList() {
   return useQuery({
     queryKey: ['projects'],
     queryFn: () => axios.get<Project[]>(`/api/projects/`).then(res => res.data),
+  })
+}
+
+export function useLoadDefProject() {
+  const queryClient = useQueryClient()
+  const { data: csrf } = useCSRF()
+  return useMutation({
+    mutationFn: (name: string) =>
+      axios.post(
+        `/api/def_projects/${name}/load/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess() {
+      queryClient.invalidateQueries({
+        queryKey: ['projects'],
+      })
+    },
   })
 }
 

@@ -15,6 +15,7 @@ from projects.api import (
     dsm,
     buysellprice,
     timevareff,
+    projectpresets,
 )
 
 urlpatterns = [
@@ -177,5 +178,14 @@ urlpatterns = [
     path(
         "project/<str:project_name>/configupload/",
         configupload.upload,
+    ),
+    # default projects
+    path(
+        "def_projects/",
+        projectpresets.list_def_projects,
+    ),
+    path(
+        "def_projects/<str:project_name>/load/",
+        projectpresets.load_default,
     ),
 ]

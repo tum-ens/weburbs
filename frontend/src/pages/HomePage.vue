@@ -45,6 +45,7 @@
 
   <CreateFromExcelDialog v-model:visible="createFExcelVisible" />
   <CreateFromConfigDialog v-model:visible="createFConfigVisible" />
+  <DefaultProjectOverviewDialog v-model:visible="showDefaultsVisible" />
 </template>
 
 <script setup lang="ts">
@@ -56,6 +57,7 @@ import { useProjectList } from '@/backend/projects'
 import DefaultLayout from '@/layout/DefaultLayout.vue'
 import CreateFromExcelDialog from '@/dialogs/CreateFromExcelDialog.vue'
 import CreateFromConfigDialog from '@/dialogs/CreateFromConfigDialog.vue'
+import DefaultProjectOverviewDialog from '@/dialogs/DefaultProjectOverviewDialog.vue'
 
 const { data: authenticated } = useAuthenticated()
 const router = useRouter()
@@ -90,10 +92,17 @@ const items = [
       createFConfigVisible.value = true
     },
   },
+  {
+    label: 'Load Default',
+    command: () => {
+      showDefaultsVisible.value = true
+    },
+  },
 ]
 
 const createFExcelVisible = ref(false)
 const createFConfigVisible = ref(false)
+const showDefaultsVisible = ref(false)
 </script>
 
 <style scoped></style>

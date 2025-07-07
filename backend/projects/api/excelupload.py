@@ -163,7 +163,7 @@ def upload(request, project_name):
             site, com = key.split(".")
             demand = Demand(
                 commodity=coms[site][com],
-                name="Sum",
+                name="imported",
                 quantity=1,
                 steps=demand_tab[key].tolist()[1::],
             )

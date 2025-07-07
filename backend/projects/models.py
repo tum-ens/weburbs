@@ -303,3 +303,13 @@ class SimulationResult(models.Model):
     status = models.IntegerField(choices=SimulationResultStatus.choices(), null=True)
     result = models.JSONField(null=True)
     log = models.TextField(null=True)
+
+
+class DefProject(models.Model):
+    name = models.CharField(primary_key=True, max_length=255, null=False, unique=True)
+    config = models.JSONField(null=False)
+
+
+class DefProjectLoaded(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    preset = models.ForeignKey(DefProject, on_delete=models.CASCADE, null=False)

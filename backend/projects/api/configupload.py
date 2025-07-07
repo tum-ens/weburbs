@@ -48,7 +48,11 @@ def upload(request, project_name):
     if Project.objects.filter(user=request.user, name=project_name).exists():
         return HttpResponse("Project name already exists", status=409)
 
-    config = json.loads(request.body)
+    readConfig(request.user, project_name, json.loads(request.body))
+    return HttpResponse("Project created")
+
+
+def readConfig(user, project_name, config):
     if "CO2 limit" in config["global"]:
         co2limit = config["global"]["CO2 limit"]
     else:
@@ -58,7 +62,7 @@ def upload(request, project_name):
     else:
         costlimit = 35000000000
     project = Project(
-        user=request.user, name=project_name, co2limit=co2limit, costlimit=costlimit
+        user=user, name=project_name, co2limit=co2limit, costlimit=costlimit
     )
     project.save()
 
@@ -96,7 +100,7 @@ def upload(request, project_name):
 
             if "demand" in dataCommodity:
                 demand = Demand(
-                    name="",
+                    name="imported",
                     commodity=commodity,
                     description="",
                     steps=dataCommodity["demand"],
@@ -222,5 +226,3 @@ def upload(request, project_name):
                 steps=dataBuySellPrice,
             )
             buysellprice.save()
-
-    return HttpResponse("Project created")

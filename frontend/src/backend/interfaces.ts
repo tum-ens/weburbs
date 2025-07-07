@@ -1,5 +1,8 @@
-export interface Project {
+export interface ProjectName {
   name: string
+}
+
+export interface Project extends ProjectName {
   description: string
   co2limit: number
   costlimit: number
