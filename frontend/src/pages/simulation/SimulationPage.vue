@@ -77,12 +77,56 @@
             </template>
           </Select>
           <Button
+            v-if="advanced"
+            class="col-span-2"
+            icon="pi pi-caret-right"
+            label="Configure simulation"
+            :loading="simulating"
+            @click="configSimulation"
+          />
+          <Button
+            v-else
             class="col-span-2"
             icon="pi pi-caret-right"
             label="Simulate"
             :loading="simulating"
             @click="trigger"
           />
+          <Popover ref="simulatePop">
+            <div class="flex flex-col gap-3">
+              <SelectButton
+                fluid
+                v-model="generate_report"
+                :allow-empty="false"
+                optionLabel="label"
+                optionValue="value"
+                :options="[
+                  { label: 'No report', value: undefined },
+                  { label: 'Report', value: GenerateReport.SUMMARY },
+                  { label: 'With timeseries', value: GenerateReport.FULL },
+                ]"
+              />
+              <SelectButton
+                :pt="{ root: 'w-full', pcToggleButton: { root: 'flex-1' } }"
+                v-model="generate_h5"
+                :allow-empty="false"
+                optionLabel="label"
+                optionValue="value"
+                :options="[
+                  { label: 'No h5', value: undefined },
+                  { label: 'Generate h5', value: true },
+                ]"
+              />
+              <div class="flex flex-row justify-end">
+                <Button
+                  v-if="advanced && selSimulation"
+                  label="Simulate"
+                  :loading="simulating"
+                  @click="trigger"
+                />
+              </div>
+            </div>
+          </Popover>
         </div>
       </div>
     </template>
@@ -116,6 +160,7 @@
 
 <script setup lang="ts">
 import {
+  GenerateReport,
   useGetSimulation,
   useListSimulations,
   useTriggerSimulation,
@@ -124,7 +169,7 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import type { AxiosError } from 'axios'
-import { inject, ref, watch } from 'vue'
+import { inject, type Ref, ref, watch } from 'vue'
 import ResultIcon from '@/pages/simulation/ResultIcon.vue'
 import {
   type SimulationInfo,
@@ -133,7 +178,7 @@ import {
 import SimulationLogsDialog from '@/pages/simulation/SimulationLogsDialog.vue'
 import SimulationConfigDialog from '@/pages/simulation/SimulationConfigDialog.vue'
 import SimulationContent from '@/pages/simulation/SimulationContent.vue'
-import type { SelectChangeEvent } from 'primevue'
+import { Popover, type SelectChangeEvent } from 'primevue'
 
 const route = useRoute()
 const router = useRouter()
@@ -142,7 +187,7 @@ const toast = useToast()
 const selSimulation = ref<SimulationInfo>()
 const simName = ref('')
 
-const advanced = inject('advanced')
+const advanced = inject<Ref<boolean>>('advanced')
 const logsVisible = ref(false)
 const configVisible = ref(false)
 
@@ -203,33 +248,53 @@ watch(
   { immediate: true },
 )
 
+const simulatePop = ref<InstanceType<typeof Popover>>()
+const generate_report = ref<GenerateReport | undefined>(undefined)
+const generate_h5 = ref<boolean | undefined>(undefined)
+
+function configSimulation(event: Event) {
+  if (!advanced || !advanced.value) {
+    trigger()
+    return
+  }
+  if (!simulatePop.value) return
+
+  simulatePop.value.toggle(event)
+}
+
 function trigger() {
-  triggerSimulation(undefined, {
-    onSuccess(data) {
-      selSimulation.value = data
-      router.push({
-        name: 'SimulationResult',
-        params: {
-          simId: data.id,
-        },
-      })
-      toast.add({
-        summary: 'Success',
-        detail: 'Simulation started',
-        severity: 'success',
-        life: 2000,
-      })
+  triggerSimulation(
+    {
+      generate_report: generate_report.value,
+      generate_h5: generate_h5.value,
     },
-    onError(error) {
-      console.log(error)
-      toast.add({
-        summary: 'Simulation could not be started',
-        detail: (<AxiosError>error)?.response?.data,
-        severity: 'error',
-        life: 2000,
-      })
+    {
+      onSuccess(data) {
+        selSimulation.value = data
+        router.push({
+          name: 'SimulationResult',
+          params: {
+            simId: data.id,
+          },
+        })
+        toast.add({
+          summary: 'Success',
+          detail: 'Simulation started',
+          severity: 'success',
+          life: 2000,
+        })
+      },
+      onError(error) {
+        console.log(error)
+        toast.add({
+          summary: 'Simulation could not be started',
+          detail: (<AxiosError>error)?.response?.data,
+          severity: 'error',
+          life: 2000,
+        })
+      },
     },
-  })
+  )
 }
 
 function updateName(callback: () => void) {

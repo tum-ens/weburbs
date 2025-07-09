@@ -3,6 +3,7 @@ import os
 
 import requests
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import BadRequest
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
@@ -81,6 +82,8 @@ def create_buysellprice_config(project: Project):
 @login_required
 @require_POST
 def trigger_simulation(request, project_name):
+    fr_config = json.loads(request.body)
+
     project = get_project(request.user, project_name)
     sites = Site.objects.filter(project=project)
     commodities = Commodity.objects.filter(site__in=sites)
@@ -197,10 +200,24 @@ def trigger_simulation(request, project_name):
     config = remove_none(config)
     simres.config = config
     simres.save()
-    config["callback"] = (
+
+    run_config = {}
+    run_config["callback"] = (
         os.getenv("URBS_CALLBACK", "http://localhost:8000")
         + f"/callback/simulation/{simres.id}/"
     )
+    if "generate_report" in fr_config:
+        if fr_config["generate_report"] == "summary":
+            run_config["generate_report"] = "summary"
+        elif fr_config["generate_report"] == "full":
+            run_config["generate_report"] = "full"
+        else:
+            raise BadRequest("Invalid generate_report")
+    if "generate_h5" in fr_config:
+        if fr_config["generate_h5"]:
+            run_config["generate_h5"] = True
+
+    config["run_config"] = run_config
 
     response = requests.post(
         os.getenv("URBS", "http://localhost:5000/simulate"), json=config

@@ -5,15 +5,29 @@ import axios from 'axios'
 import { computed } from 'vue'
 import type { Simulation, SimulationInfo } from '@/backend/interfaces'
 
+export enum GenerateReport {
+  SUMMARY = 'summary',
+  FULL = 'full',
+}
+
 export function useTriggerSimulation(route: RouteLocationNormalized) {
   const { data: csrf } = useCSRF()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () =>
+    mutationFn: ({
+      generate_report,
+      generate_h5,
+    }: {
+      generate_report: GenerateReport | undefined
+      generate_h5: boolean | undefined
+    }) =>
       axios
         .post(
           `/api/project/${route.params.proj}/simulate/trigger/`,
-          {},
+          {
+            generate_report: !!generate_report ? generate_report : undefined,
+            generate_h5: !!generate_h5 ? generate_h5 : undefined,
+          },
           {
             headers: {
               'X-CSRFToken': csrf.value,
