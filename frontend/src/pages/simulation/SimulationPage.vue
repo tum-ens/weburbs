@@ -5,6 +5,20 @@
         <span>Simulations</span>
         <div class="grid grid-cols-2 md:flex md:flex-row gap-3">
           <Button
+            v-if="simulation && simulation.xlsx"
+            severity="info"
+            icon="pi pi-download"
+            label="XLSX"
+            @click="download('xlsx')"
+          />
+          <Button
+            v-if="simulation && simulation.h5"
+            severity="info"
+            icon="pi pi-download"
+            label="h5"
+            @click="download('h5')"
+          />
+          <Button
             v-if="advanced && selSimulation"
             severity="info"
             label="Configuration"
@@ -119,10 +133,14 @@
               />
               <div class="flex flex-row justify-end">
                 <Button
-                  v-if="advanced && selSimulation"
                   label="Simulate"
                   :loading="simulating"
-                  @click="trigger"
+                  @click="
+                    () => {
+                      trigger()
+                      simulatePop?.hide()
+                    }
+                  "
                 />
               </div>
             </div>
@@ -168,11 +186,11 @@ import {
 } from '@/backend/simulate'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
-import type { AxiosError } from 'axios'
+import axios, { type AxiosError } from 'axios'
 import { inject, type Ref, ref, watch } from 'vue'
 import ResultIcon from '@/pages/simulation/ResultIcon.vue'
 import {
-  type SimulationInfo,
+  type SimulationInfoFull,
   SimulationResultStatus,
 } from '@/backend/interfaces'
 import SimulationLogsDialog from '@/pages/simulation/SimulationLogsDialog.vue'
@@ -184,7 +202,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
-const selSimulation = ref<SimulationInfo>()
+const selSimulation = ref<SimulationInfoFull>()
 const simName = ref('')
 
 const advanced = inject<Ref<boolean>>('advanced')
@@ -217,13 +235,24 @@ watch(
         name: simulation.value.name || '',
         completed: true,
         status: simulation.value.status,
+        xlsx: simulation.value.xlsx,
+        h5: simulation.value.h5,
       }
       simName.value = simulation.value.name || ''
       return
     } else if (simulations.value && route.params.simId) {
-      selSimulation.value = simulations.value.find(
+      const foundSim = simulations.value.find(
         sim => sim.id === route.params.simId,
       )
+      if (foundSim) {
+        selSimulation.value = {
+          ...foundSim,
+          xlsx: false,
+          h5: false,
+        }
+      } else {
+        selSimulation.value = undefined
+      }
       simName.value = selSimulation.value?.name || ''
     } else {
       selSimulation.value = undefined
@@ -301,6 +330,11 @@ function updateName(callback: () => void) {
   if (!selSimulation.value) return
   updateSimulationName(simName.value)
   callback()
+}
+
+function download(file: string) {
+  const url = `${axios.defaults.baseURL || ''}/api/project/${route.params.proj}/simulate/result/${route.params.simId}/download/${file}/`
+  window.open(url, '_blank')
 }
 </script>
 

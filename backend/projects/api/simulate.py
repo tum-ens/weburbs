@@ -4,7 +4,7 @@ import os
 import requests
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
@@ -302,6 +302,12 @@ def get_simulation_result(request, project_name, simid):
     if not simres.completed:
         return HttpResponse("No result has been reported...", status="204")
 
+    result_dir = os.path.join(
+        "result", simres.timestamp.strftime("%Y%m%d"), str(simres.id)
+    )
+    xlsx = os.path.exists(os.path.join(result_dir, "result.xlsx"))
+    h5 = os.path.exists(os.path.join(result_dir, "result.h5"))
+
     return JsonResponse(
         {
             "id": simres.id,
@@ -310,6 +316,8 @@ def get_simulation_result(request, project_name, simid):
             "completed": simres.completed,
             "status": simres.status,
             "result": simres.result,
+            "xlsx": xlsx,
+            "h5": h5,
         }
     )
 
@@ -338,6 +346,31 @@ def get_simulation_config(request, project_name, simid):
         return HttpResponse("Simulation not found", status="204")
 
     return JsonResponse(simres.config)
+
+
+@login_required
+@require_GET
+def download_simulation_result(request, project_name, simid, file):
+    project = get_project(request.user, project_name)
+
+    simres = SimulationResult.objects.get(id=simid, project=project)
+
+    result_dir = os.path.join(
+        "result", simres.timestamp.strftime("%Y%m%d"), str(simres.id)
+    )
+
+    if file == "xlsx":
+        file_path = os.path.join(result_dir, "result.xlsx")
+        if not os.path.exists(file_path):
+            return BadRequest("No xlsx file found")
+        return FileResponse(open(file_path, "rb"), as_attachment=True)
+    elif file == "h5":
+        file_path = os.path.join(result_dir, "result.h5")
+        if not os.path.exists(file_path):
+            return BadRequest("No h5 file found")
+        return FileResponse(open(file_path, "rb"), as_attachment=True)
+
+    return BadRequest("Invalid file")
 
 
 @login_required

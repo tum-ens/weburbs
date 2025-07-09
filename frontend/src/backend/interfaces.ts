@@ -166,6 +166,11 @@ export interface SimulationInfo {
   status: SimulationResultStatus | null
 }
 
+export interface SimulationInfoFull extends SimulationInfo {
+  xlsx: boolean
+  h5: boolean
+}
+
 export interface SimulationsResults {
   costs: {
     Invest: number
@@ -211,6 +216,6 @@ export interface SimulationsResults {
   }
 }
 
-export interface Simulation extends SimulationInfo {
+export interface Simulation extends SimulationInfoFull {
   result: SimulationsResults
 }

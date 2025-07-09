@@ -164,6 +164,10 @@ urlpatterns = [
         simulate.get_simulation_config,
     ),
     path(
+        "project/<str:project_name>/simulate/result/<uuid:simid>/download/<str:file>/",
+        simulate.download_simulation_result,
+    ),
+    path(
         "project/<str:project_name>/simulate/result/<uuid:simid>/name/<str:name>/",
         simulate.update_simulation_name,
     ),
