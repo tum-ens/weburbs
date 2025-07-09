@@ -25,8 +25,9 @@ services:
       - db
     networks:
       - urbs
+    volumes:
+      - result_dir:/app/result
     # Use this to override the config
-    # volumes:
     #  - ./yourfolder:/app/config
 
   frontend:
@@ -66,13 +67,16 @@ services:
     image: ghcr.io/tum-ens/urbs-weburbs:latest
 #    image: ghcr.io/tum-ens/urbs-weburbs-gurobi:latest
     container_name: optimizer
-#    volumes:
+    volumes:
+      - result_dir:/app/result
+    # use this to store a gurobi license
 #      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
     networks:
       - urbs
 
 volumes:
   postgres_data:
+  result_dir:
 networks:
   urbs:
     driver: bridge
