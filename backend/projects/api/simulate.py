@@ -201,11 +201,11 @@ def trigger_simulation(request, project_name):
     simres.config = config
     simres.save()
 
-    run_config = {}
-    run_config["callback"] = (
-        os.getenv("URBS_CALLBACK", "http://localhost:8000")
-        + f"/callback/simulation/{simres.id}/"
-    )
+    run_config = {
+        "callback": os.getenv("URBS_CALLBACK", "http://localhost:8000")
+        + f"/callback/simulation/{simres.id}/",
+        "dir": f"{simres.timestamp.strftime('%Y%m%d')}/{simres.id}",
+    }
     if "generate_report" in fr_config:
         if fr_config["generate_report"] == "summary":
             run_config["generate_report"] = "summary"
