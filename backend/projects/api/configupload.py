@@ -209,7 +209,7 @@ def readConfig(user, project_name, config):
                         varcost=dataTransmission["var-cost"],
                         instcap=dataTransmission["inst-cap"],
                         caplo=dataTransmission["cap-lo"],
-                        capup=dataTransmission["cap-up"],
+                        capup=parse_num(dataTransmission["cap-up"]),
                         wacc=dataTransmission["wacc"],
                         depreciation=dataTransmission["depreciation"],
                         reactance=opt_num(dataTransmission, "reactance"),
