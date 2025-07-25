@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('@/pages/RegistrationPage.vue'),
     },
     {
+      name: 'Mail Verification',
+      path: '/verify_mail/:username/:token',
+      component: () => import('@/pages/VerifyMailPage.vue'),
+    },
+    {
       name: 'Reset password',
       path: '/resetPassword',
       component: () => import('@/pages/ResetPasswordPage.vue'),

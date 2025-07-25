@@ -150,3 +150,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_COOKIE_SECURE = getBoolEnv("HTTPS_ONLY", True)
 SESSION_COOKIE_SECURE = getBoolEnv("HTTPS_ONLY", True)
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", True)

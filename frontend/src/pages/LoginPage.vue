@@ -59,8 +59,21 @@
                 class="w-full"
                 @click="clogin"
               />
-              <Message v-if="error" class="mt-2" severity="error"
-                >{{ error }}
+              <Message
+                v-if="error"
+                class="flex-grow mt-2"
+                fluid
+                severity="error"
+              >
+                <div class="flex flex-row gap-3 items-center">
+                  <span>{{ error }}</span>
+                  <Button
+                    class=""
+                    label="Resend Token"
+                    severity="info"
+                    @click="cresend_token"
+                  />
+                </div>
               </Message>
             </div>
           </div>
@@ -75,9 +88,16 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { login, useAuthenticated, useCSRF } from '@/backend/security'
+import {
+  login,
+  resend_token,
+  useAuthenticated,
+  useCSRF,
+} from '@/backend/security'
 import { useQueryClient } from '@tanstack/vue-query'
 import { useRoute, useRouter } from 'vue-router'
+import type { AxiosError } from 'axios'
+import { useToast } from 'primevue/usetoast'
 
 const { data: authenticated } = useAuthenticated()
 const { data: csrf } = useCSRF()
@@ -88,6 +108,7 @@ const loading = ref(false)
 
 const router = useRouter()
 const route = useRoute()
+const toast = useToast()
 watch(
   authenticated,
   () => {
@@ -104,12 +125,49 @@ const queryClient = useQueryClient()
 
 async function clogin() {
   loading.value = true
-  if (!(await login(queryClient, csrf.value, username.value, password.value))) {
+  const login_result = await login(
+    queryClient,
+    csrf.value,
+    username.value,
+    password.value,
+  )
+  console.log(login_result)
+  if (login_result === 'verification') {
+    error.value = 'Please verify your mail first'
+    loading.value = false
+    return
+  }
+
+  if (!login_result) {
     error.value = 'Wrong username or password.'
   } else {
     error.value = ''
   }
   loading.value = false
+}
+
+function cresend_token() {
+  resend_token(csrf.value, username.value)
+    .then(() => {
+      toast.add({
+        summary: 'Success',
+        detail: `New token was sent out`,
+        severity: 'success',
+        life: 2000,
+      })
+    })
+    .catch(error => {
+      toast.add({
+        summary: 'Sending token failed',
+        detail: (<{ detail: string }>(<AxiosError>error)?.response?.data)
+          .detail,
+        severity: 'error',
+        life: 2000,
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 </script>
 
