@@ -145,7 +145,7 @@ def resend_mail(request, username):
 
 
 def send_verification_mail(username, email, token):
-    link = f"{os.environ.get("ORIGINS", "http://localhost:8080")}/verify_mail/{username}/{token}/"
+    link = f"{os.environ.get('ORIGINS', 'http://localhost:8080')}/verify_mail/{username}/{token}/"
     message = (
         f"Hi {username},\n"
         f"\n"
