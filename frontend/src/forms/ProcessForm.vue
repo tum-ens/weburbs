@@ -70,7 +70,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('invcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             'Total investement cost for adding capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
           "
@@ -83,7 +83,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('fixcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation independent costs for existing and new capacities per ${unitR} throughput power.`
           "
@@ -96,7 +96,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('varcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Variable costs per throughput energy unit (${unitC}) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.`
           "
@@ -356,21 +356,23 @@ const { data: def_commodities } = useDefCommodities()
 
 const coms = computed(() => {
   if (!commodities.value) return []
-  if (!def_commodities.value) return commodities.value
+
+  const mapped = commodities.value.map(com => {
+    return {
+      name: com.name,
+      disp_name: com.name,
+      default: false,
+      ratio: 1,
+      ratiomin: undefined,
+      unit: com.type === CommodityType.Demand,
+      unitR: com.unitR,
+      unitC: com.unitC,
+    }
+  })
+  if (!def_commodities.value) return mapped
 
   return [
-    ...commodities.value.map(com => {
-      return {
-        name: com.name,
-        disp_name: com.name,
-        default: false,
-        ratio: 1,
-        ratiomin: undefined,
-        unit: com.type === CommodityType.Demand,
-        unitR: com.unitR,
-        unitC: com.unitC,
-      }
-    }),
+    ...mapped,
     ...def_commodities.value
       .filter(
         def_com => !commodities.value.some(com => def_com.name == com.name),
@@ -423,64 +425,73 @@ interface ProcComTag extends ProcessCommodity {
 
 const inComs = ref<ProcComTag[]>([])
 const outComs = ref<ProcComTag[]>([])
-watch(
-  coms,
-  () => {
-    if (!props.process) {
-      inComs.value = []
-      outComs.value = []
-      return
-    }
+function tagProcCom(proccom: ProcessCommodity): ProcComTag {
+  const com = commodities.value?.find(c => c.name === proccom.name)
+  const def = def_commodities.value?.find(c => c.name === proccom.name)
+  const src = com || def
+  return {
+    ...proccom,
+    disp_name: proccom.name,
+    default: !com && !!def,
+    unit: src?.type === CommodityType.Demand,
+    unitR: src?.unitR,
+    unitC: src?.unitC,
+  }
+}
 
-    inComs.value = props.process.in.map(proccom => {
-      return {
-        ...proccom,
-        disp_name: proccom.name,
-        default: false,
-        unit: false,
-      }
-    })
-    outComs.value = props.process.out.map(proccom => {
-      return {
-        ...proccom,
-        disp_name: proccom.name,
-        default: false,
-        unit: false,
-      }
-    })
+watch(
+  [() => props.process, commodities, def_commodities],
+  () => {
+    if (!props.process) return
+
+    inComs.value = props.process.in.map(tagProcCom)
+    outComs.value = props.process.out.map(tagProcCom)
   },
   { immediate: true },
 )
 
-const unitR = computed(
-  () => outComs.value?.find(com => com.unit)?.unitR || 'MW',
-)
+const unitSource = computed(() => {
+  const outs = outComs.value || []
+  if (!outs.length) return undefined
+  const list = commodities.value || []
+  for (const out of outs) {
+    const com = list.find(c => c.name === out.name)
+    if (com?.type === CommodityType.Demand) return com
+  }
+  for (const out of outs) {
+    const com = list.find(c => c.name === out.name)
+    if (com?.unitR) return com
+  }
+  return outs.find(c => c.unitR)
+})
+
+const unitR = computed(() => unitSource.value?.unitR || 'MW')
 const unitRboxed = computed(() =>
   unitR.value.includes('/') ? `(${unitR.value})` : unitR.value,
 )
-const unitC = computed(
-  () => outComs.value?.find(com => com.unit)?.unitC || 'MWh',
-)
+const unitC = computed(() => unitSource.value?.unitC || 'MWh')
 const unitCboxed = computed(() =>
   unitR.value.includes('/') ? `(${unitC.value})` : unitC.value,
 )
 watch(
   commodities,
   () => {
-    if (!commodities.value || outComs.value.length === 0) return
+    if (!commodities.value) return
 
-    outComs.value = outComs.value.map(outCom => {
-      const com = commodities.value.find(com => com.name === outCom.name)
-      if (!com) return outCom
-      return {
-        ...outCom,
-        unit: com.type === CommodityType.Demand,
-        unitR: com.unitR,
-        unitC: com.unitC,
-      }
-    })
+    const retag = (list: ProcComTag[]) =>
+      list.map(item => {
+        const com = commodities.value.find(c => c.name === item.name)
+        if (!com) return item
+        return {
+          ...item,
+          unit: com.type === CommodityType.Demand,
+          unitR: com.unitR,
+          unitC: com.unitC,
+        }
+      })
+    outComs.value = retag(outComs.value)
+    inComs.value = retag(inComs.value)
   },
-  { immediate: true },
 )
 
 const invalids = ref<string[]>([])
