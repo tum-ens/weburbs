@@ -267,6 +267,21 @@ def trigger_simulation(request, project_name):
         if solver not in ("gurobi", "glpk"):
             raise BadRequest("Invalid solver")
         run_config["solver"] = solver
+    if "timeseries_commodity_types" in fr_config:
+        allowed_types = {"Demand", "Buy", "Sell", "Env"}
+        raw_types = fr_config.get("timeseries_commodity_types")
+        if raw_types is None:
+            run_config["timeseries_commodity_types"] = ["Demand"]
+        elif not isinstance(raw_types, list):
+            raise BadRequest("Invalid timeseries_commodity_types")
+        else:
+            cleaned = []
+            for item in raw_types:
+                if item not in allowed_types:
+                    raise BadRequest("Invalid timeseries commodity type")
+                if item not in cleaned:
+                    cleaned.append(item)
+            run_config["timeseries_commodity_types"] = cleaned
     if fr_config.get("timestep_from") is not None or fr_config.get("timestep_to") is not None:
         t_from = fr_config.get("timestep_from", 0)
         t_to = fr_config.get("timestep_to", config["c_timesteps"] - 1)

@@ -208,6 +208,9 @@ export interface SimulationsResults {
         created: {
           [process: string]: number[]
         }
+        consumed?: {
+          [process: string]: number[]
+        }
         storage: {
           Level: number[]
           Stored: number[]

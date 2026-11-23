@@ -163,6 +163,24 @@
                   { label: 'Generate h5', value: true },
                 ]"
               />
+              <FloatLabel
+                v-if="generate_report === GenerateReport.FULL"
+                variant="on"
+                class="w-full"
+              >
+                <MultiSelect
+                  inputId="timeseries-commodity-types"
+                  fluid
+                  display="chip"
+                  :options="timeseriesTypeOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  v-model="timeseriesCommodityTypes"
+                />
+                <label for="timeseries-commodity-types">
+                  Timeseries commodity types
+                </label>
+              </FloatLabel>
               <div class="flex flex-col gap-2">
                 <div class="flex items-center gap-2">
                   <Checkbox
@@ -435,6 +453,13 @@ const solver = ref<Solver>(Solver.GUROBI)
 const custom_timestep_range = ref(false)
 const timestep_from = ref<number | null>(0)
 const timestep_to = ref<number | null>(null)
+const timeseriesTypeOptions = [
+  { label: 'Demand', value: 'Demand' },
+  { label: 'Buy', value: 'Buy' },
+  { label: 'Sell', value: 'Sell' },
+  { label: 'Env', value: 'Env' },
+]
+const timeseriesCommodityTypes = ref<string[]>(['Demand'])
 
 function configSimulation(event: Event) {
   if (!advanced || !advanced.value) {
@@ -460,6 +485,11 @@ function trigger() {
       generate_report: generate_report.value,
       generate_h5: generate_h5.value,
       solver: solver.value,
+      ...(generate_report.value === GenerateReport.FULL
+        ? {
+            timeseries_commodity_types: [...timeseriesCommodityTypes.value],
+          }
+        : {}),
       ...timestepParams,
     },
     {

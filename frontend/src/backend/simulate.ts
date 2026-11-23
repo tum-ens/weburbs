@@ -35,12 +35,14 @@ export function useTriggerSimulation(route: RouteLocationNormalized) {
       solver,
       timestep_from,
       timestep_to,
+      timeseries_commodity_types,
     }: {
       generate_report: GenerateReport | undefined
       generate_h5: boolean | undefined
       solver: Solver | undefined
       timestep_from?: number
       timestep_to?: number
+      timeseries_commodity_types?: string[]
     }) => {
       const body: Record<string, unknown> = {
         generate_report: !!generate_report ? generate_report : undefined,
@@ -49,6 +51,9 @@ export function useTriggerSimulation(route: RouteLocationNormalized) {
       }
       if (timestep_from !== undefined) body.timestep_from = timestep_from
       if (timestep_to !== undefined) body.timestep_to = timestep_to
+      if (timeseries_commodity_types !== undefined) {
+        body.timeseries_commodity_types = timeseries_commodity_types
+      }
       return axios
         .post(
           `/api/project/${route.params.proj}/simulate/trigger/`,
