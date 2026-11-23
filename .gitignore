@@ -1,7 +1,6 @@
 .idea/**
 
 .env
-admin.env
 backups/
 
 .DS_Store
