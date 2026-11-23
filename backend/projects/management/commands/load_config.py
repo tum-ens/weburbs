@@ -249,8 +249,10 @@ class Command(BaseCommand):
                     )
                     sys.exit(1)
 
-        for filename in os.listdir(os.path.join(folder_path, "defaultProjectsLoaded")):
-            file_path = os.path.join(folder_path, "defaultProjectsLoaded", filename)
+        loaded_path = os.path.join(folder_path, "defaultProjectsLoaded")
+        loaded_files = os.listdir(loaded_path) if os.path.isdir(loaded_path) else []
+        for filename in loaded_files:
+            file_path = os.path.join(loaded_path, filename)
             if os.path.isfile(file_path) and filename.endswith(".urbs"):
                 try:
                     with open(file_path, "r") as file:
