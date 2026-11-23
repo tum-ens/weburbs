@@ -1,36 +1,78 @@
 <template>
-  <PanelMenu :model="items" :expanded-keys="expandedKey">
-    <template #item="{ item }">
-      <a class="flex items-center px-4 py-2 cursor-pointer group">
-        <span
-          :class="[
-            item.icon,
-            item.advanced ? 'text-orange-400' : 'text-primary',
-          ]"
-        />
-        <span
-          :class="['ml-2', { 'font-semibold': expandedKey[<string>item.key] }]"
-          class="select-none"
-        >
-          {{ item.label }}
-        </span>
-      </a>
-    </template>
-  </PanelMenu>
-  <Button
-    v-if="!!route.params.proj"
-    class="mt-3"
-    fluid
-    severity="danger"
-    label="Delete Project"
-    @click="deleteProject()"
-  />
-  <div class="flex flex-row pt-3 pl-3 gap-3">
-    <label for="advanced" class="select-none">Advanced mode</label>
-    <ToggleSwitch inputId="advanced" v-model="advanced" />
+  <div class="flex flex-col h-full">
+    <!-- Main content area -->
+    <div class="flex-1">
+      <PanelMenu :model="items" v-model:expandedKeys="expandedKey">
+        <template #item="{ item }">
+          <a class="flex items-center px-4 py-2 cursor-pointer group">
+            <span
+              :class="[
+                item.icon,
+                item.advanced ? 'text-orange-400' : 'text-primary',
+              ]"
+            />
+            <span
+              :class="[
+                'ml-2',
+                { 'font-semibold': expandedKey[<string>item.key] },
+              ]"
+              class="select-none"
+            >
+              {{ item.label }}
+            </span>
+          </a>
+        </template>
+      </PanelMenu>
+      <Button
+        v-if="!!route.params.proj"
+        class="mt-3"
+        fluid
+        severity="secondary"
+        label="Energy Diagram"
+        icon="pi pi-sitemap"
+        @click="openEnergyDiagram()"
+      />
+      <Button
+        v-if="!!route.params.proj"
+        class="mt-3"
+        fluid
+        severity="danger"
+        label="Delete Project"
+        @click="deleteProject()"
+      />
+      <div class="flex flex-row pt-3 pl-3 gap-3">
+        <label for="advanced" class="select-none">Advanced mode</label>
+        <ToggleSwitch inputId="advanced" v-model="advanced" />
+      </div>
+    </div>
+
+    <!-- Docs Button at bottom left -->
+    <div class="mt-auto pt-4 pl-3">
+      <Button
+        class="w-full"
+        severity="info"
+        label="Docs"
+        icon="pi pi-book"
+        @click="showDocs = true"
+      />
+    </div>
+
+    <!-- Compare scenarios (kept separate, below Docs) -->
+    <div
+      class="pt-3 pl-3 pb-3 border-t border-surface-200 dark:border-surface-700 mt-3"
+    >
+      <Button
+        class="w-full"
+        severity="help"
+        label="Compare Results"
+        icon="pi pi-chart-bar"
+        @click="router.push({ name: 'CompareResults' })"
+      />
+    </div>
   </div>
 
   <ConfirmDialog />
+  <DocumentationDialog v-model:visible="showDocs" />
 </template>
 
 <script setup lang="ts">
@@ -39,6 +81,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useDeleteProject, useProjectList } from '@/backend/projects'
 import { useConfirm } from 'primevue'
 import { useToast } from 'primevue/usetoast'
+import DocumentationDialog from '@/dialogs/DocumentationDialog.vue'
+import { useMe } from '@/backend/security'
 
 const toast = useToast()
 const route = useRoute()
@@ -50,7 +94,10 @@ const confirm = useConfirm()
 const { mutate: deleteProjectCall } = useDeleteProject(route)
 
 const expandedKey = ref<{ [key: string]: boolean }>({})
+const showDocs = ref(false)
 const { data: projects } = useProjectList()
+const { data: me } = useMe()
+const isAdmin = computed(() => !!me.value?.isStaff || !!me.value?.isSuperuser)
 watch(
   [route, projects],
   () => {
@@ -73,6 +120,16 @@ const items = computed(() => {
       icon: 'pi pi-home',
       command: () => router.push({ name: 'Home' }),
     },
+    ...(isAdmin.value
+      ? [
+          {
+            key: 'AdminApprovals',
+            label: 'User approvals',
+            icon: 'pi pi-user-plus',
+            command: () => router.push({ name: 'AdminApprovals' }),
+          },
+        ]
+      : []),
     {
       key: 'project',
       label: <string>route.params.proj || 'Project',
@@ -199,6 +256,12 @@ const items = computed(() => {
     },
   ]
 })
+
+function openEnergyDiagram() {
+  router.push({
+    name: 'ProjectEnergyDiagram',
+  })
+}
 
 function deleteProject() {
   confirm.require({

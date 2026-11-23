@@ -1,3 +1,7 @@
 .idea/**
 
 .env
+backups/
+
+.DS_Store
+**/.DS_Store

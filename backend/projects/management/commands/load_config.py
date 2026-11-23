@@ -1,21 +1,26 @@
 import json
 import os
+import sys
 
 from django.core.management.base import BaseCommand
 
 from projects.models import (
-    DefCommodity,
-    ComType,
     AutoQuery,
+    ComType,
+    DefCommodity,
+    DefDemand,
     DefProcess,
     DefProcessCommodity,
-    ProcComDir,
-    DefStorage,
-    DefSupIm,
-    DefDemand,
     DefProject,
     DefProjectLoaded,
+    DefStorage,
+    DefSupIm,
+    ProcComDir,
 )
+
+
+class ConfigError(Exception):
+    """Raised when a default configuration file is invalid."""
 
 
 class Command(BaseCommand):
@@ -43,45 +48,47 @@ class Command(BaseCommand):
                         if "commodity" in data:
                             for name, com in data["commodity"].items():
                                 if name in commodities:
-                                    raise Exception(
+                                    raise ConfigError(
                                         f"Commodity with name {name} is configured twice"
                                     )
                                 commodities[name] = com
                         if "process" in data:
                             for name, process in data["process"].items():
                                 if name in processes:
-                                    raise Exception(
+                                    raise ConfigError(
                                         f"Process with name {name} is configured twice"
                                     )
                                 processes[name] = process
                         if "storage" in data:
                             for name, storage in data["storage"].items():
                                 if name in storages:
-                                    raise Exception(
+                                    raise ConfigError(
                                         f"Storage with name {name} is configured twice"
                                     )
                                 storages[name] = storage
                         if "supim" in data:
                             for name, supim in data["supim"].items():
                                 if name in supims:
-                                    raise Exception(f"Supim {name} is configured twice")
+                                    raise ConfigError(
+                                        f"Supim {name} is configured twice"
+                                    )
                                 supims[name] = supim
                         if "demand" in data:
                             for name, demand in data["demand"].items():
                                 if name in demands:
-                                    raise Exception(
+                                    raise ConfigError(
                                         f"Demand {name} is configured twice"
                                     )
                                 demands[name] = demand
                         print("\033[92mOK\033[0m")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.stdout.write(
                         self.style.ERROR(f"Error processing file {filename}: {e}")
                     )
-                    exit(1)
+                    sys.exit(1)
 
         for def_com in DefCommodity.objects.all():
-            if def_com.name not in commodities.keys():
+            if def_com.name not in commodities:
                 def_com.delete()
         for name, com in commodities.items():
             def_procs = DefCommodity.objects.filter(name=name).all()
@@ -108,13 +115,13 @@ class Command(BaseCommand):
             def_com.max = getDefault(com, "max", None)
             def_com.maxperhour = getDefault(com, "maxperhour", None)
             def_com.autoadd = getDefault(com, "autoadd", False)
-            def_com.unitR = getDefault(com, "unitR", "kW")
-            def_com.unitC = getDefault(com, "unitC", "kWh")
+            def_com.unitR = getDefault(com, "unitR", "MW")
+            def_com.unitC = getDefault(com, "unitC", "MWh")
             def_com.save()
             print("\033[92mOK\033[0m")
 
         for def_proc in DefProcess.objects.all():
-            if def_proc.name not in processes.keys():
+            if def_proc.name not in processes:
                 def_proc.delete()
         DefProcessCommodity.objects.all().delete()
         for name, proc in processes.items():
@@ -154,7 +161,7 @@ class Command(BaseCommand):
             print("\033[92mOK\033[0m")
 
         for def_stor in DefStorage.objects.all():
-            if def_stor.name not in storages.keys():
+            if def_stor.name not in storages:
                 def_stor.delete()
         for name, stor in storages.items():
             def_stors = DefStorage.objects.filter(name=name).all()
@@ -189,7 +196,7 @@ class Command(BaseCommand):
             print("\033[92mOK\033[0m")
 
         for def_supim in DefSupIm.objects.all():
-            if def_supim.name not in supims.keys():
+            if def_supim.name not in supims:
                 def_supim.delete()
         for name, supim in supims.items():
             def_supims = DefSupIm.objects.filter(name=name).all()
@@ -205,7 +212,7 @@ class Command(BaseCommand):
             print("\033[92mOK\033[0m")
 
         for def_demand in DefDemand.objects.all():
-            if def_demand.name not in demands.keys():
+            if def_demand.name not in demands:
                 def_demand.delete()
         for name, demand in demands.items():
             def_demands = list(DefDemand.objects.filter(name=name).all())
@@ -236,11 +243,11 @@ class Command(BaseCommand):
                         preset.save()
 
                     print("\033[92mOK\033[0m")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.stdout.write(
                         self.style.ERROR(f"Error processing file {filename}: {e}")
                     )
-                    exit(1)
+                    sys.exit(1)
 
         for filename in os.listdir(os.path.join(folder_path, "defaultProjectsLoaded")):
             file_path = os.path.join(folder_path, "defaultProjectsLoaded", filename)
@@ -261,11 +268,11 @@ class Command(BaseCommand):
                         default.save()
 
                     print("\033[92mOK\033[0m")
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.stdout.write(
                         self.style.ERROR(f"Error processing file {filename}: {e}")
                     )
-                    exit(1)
+                    sys.exit(1)
 
 
 def getDefault(dict, key, default):

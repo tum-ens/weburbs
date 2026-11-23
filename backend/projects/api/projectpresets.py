@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.http import HttpResponse, JsonResponse
 
 from projects.api.configupload import readConfig
-from projects.models import Project, DefProjectLoaded, DefProject
+from projects.models import DefProject, DefProjectLoaded, Project
 
 
 def initUser(user: AbstractUser):

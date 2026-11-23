@@ -9,7 +9,10 @@
         :description="commodityTypeToName(com.type)"
         :in="[]"
         :out="[]"
+        :show-actions="true"
+        component-type="commodity"
         @click="emit('clickCommodity', com)"
+        @duplicate="emit('duplicateCommodity', com)"
       />
     </template>
   </div>
@@ -35,6 +38,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   clickCommodity: [commodity: Commodity]
+  duplicateCommodity: [commodity: Commodity]
 }>()
 
 const { data: commodities } = useCommodities(route, props.site)

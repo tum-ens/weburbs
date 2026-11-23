@@ -9,6 +9,14 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
+    <Message
+      v-if="nameValidationError"
+      severity="error"
+      variant="simple"
+      size="small"
+    >
+      {{ nameValidationError }}
+    </Message>
     <div class="grid grid-cols-2 gap-3">
       <FloatLabel variant="on">
         <Select
@@ -25,7 +33,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('price')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Cost for purchasing one unit (${unitC}) of a stock or buy commodity. Revenue for selling one unit (${unitC}) of a sell commodity. Cost for creating one unit of environmental commodity.\n` +
             `Multiplier for sheet \'Buy-Sell-Price\' for commodity types \'Buy\' and \'Sell\'.`
@@ -110,9 +118,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { type Commodity, CommodityTypes } from '@/backend/interfaces'
+import { getNameValidationError } from '@/helper/nameValidation'
 
 const toast = useToast()
 
@@ -148,14 +157,16 @@ const price = ref(defaultValue(props.commodity?.price, undefined))
 const max = ref(defaultValue(props.commodity?.max, undefined))
 const maxperhour = ref(defaultValue(props.commodity?.maxperhour, undefined))
 
-const unitR = ref(defaultValue(props.commodity?.unitR, 'kW'))
-const unitC = ref(defaultValue(props.commodity?.unitC, 'kWh'))
+const unitR = ref(defaultValue(props.commodity?.unitR, 'MW'))
+const unitC = ref(defaultValue(props.commodity?.unitC, 'MWh'))
 
 const invalids = ref<string[]>([])
+const nameValidationError = computed(() => getNameValidationError(name.value))
 
 function check() {
   invalids.value = []
   if (!name.value) invalids.value.push('name')
+  if (getNameValidationError(name.value)) invalids.value.push('name')
 
   if (type.value === undefined) invalids.value.push('type')
   if (price.value !== undefined && price.value < 0) invalids.value.push('price')
@@ -170,7 +181,8 @@ function submit() {
   if (!check()) {
     toast.add({
       summary: 'Error',
-      detail: 'Not all fields have been filled properly',
+      detail:
+        nameValidationError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

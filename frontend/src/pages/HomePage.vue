@@ -27,6 +27,9 @@
               :description="proj.description"
               :in="[]"
               :out="[]"
+              :show-actions="true"
+              :download-loading="downloading === proj.name"
+              component-type="project"
               @click="
                 () =>
                   router.push({
@@ -36,6 +39,8 @@
                     },
                   })
               "
+              @duplicate="duplicate(proj.name)"
+              @download="type => downloadProject(proj.name, type)"
             />
           </template>
         </div>
@@ -53,11 +58,19 @@ import { useAuthenticated } from '@/backend/security'
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Transformer from '@/components/TransformerComponent.vue'
-import { useProjectList } from '@/backend/projects'
+import {
+  downloadProjectConfig,
+  downloadProjectExcel,
+  triggerBlobDownload,
+  useDuplicateProject,
+  useProjectList,
+} from '@/backend/projects'
 import DefaultLayout from '@/layout/DefaultLayout.vue'
 import CreateFromExcelDialog from '@/dialogs/CreateFromExcelDialog.vue'
 import CreateFromConfigDialog from '@/dialogs/CreateFromConfigDialog.vue'
 import DefaultProjectOverviewDialog from '@/dialogs/DefaultProjectOverviewDialog.vue'
+import { useToast } from 'primevue/usetoast'
+import type { AxiosError } from 'axios'
 
 const { data: authenticated } = useAuthenticated()
 const router = useRouter()
@@ -78,6 +91,55 @@ watch(
 )
 
 const { data: projects } = useProjectList()
+const toast = useToast()
+const { mutateAsync: duplicateProject } = useDuplicateProject()
+const downloading = ref<string | null>(null)
+
+async function downloadProject(name: string, type: 'config' | 'excel') {
+  if (downloading.value) return
+  downloading.value = name
+  const fallbackName = type === 'config' ? `${name}.urbs` : `${name}.xlsx`
+
+  try {
+    const response =
+      type === 'config'
+        ? await downloadProjectConfig(name)
+        : await downloadProjectExcel(name)
+    triggerBlobDownload(response, fallbackName)
+  } catch (err) {
+    toast.add({
+      severity: 'error',
+      summary: 'Download failed',
+      detail:
+        (<{ detail?: string }>(<AxiosError>err)?.response?.data)?.detail ||
+        name,
+      life: 4000,
+    })
+  } finally {
+    downloading.value = null
+  }
+}
+
+async function duplicate(name: string) {
+  try {
+    const res = await duplicateProject(name)
+    toast.add({
+      severity: 'success',
+      summary: 'Project duplicated',
+      detail: res.new_name,
+      life: 3000,
+    })
+  } catch (err) {
+    toast.add({
+      severity: 'error',
+      summary: 'Duplicate failed',
+      detail:
+        (<{ detail?: string }>(<AxiosError>err)?.response?.data)?.detail ||
+        name,
+      life: 4000,
+    })
+  }
+}
 
 const items = [
   {

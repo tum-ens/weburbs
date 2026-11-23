@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { provide, type Ref, ref } from 'vue'
 
-const advanced = ref(false)
+const advanced = ref(true)
 provide<Ref<boolean>>('advanced', advanced)
 </script>
 

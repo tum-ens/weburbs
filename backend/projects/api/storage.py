@@ -1,13 +1,13 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
-from projects.api.helper import get_project, get_site
 from projects.api import commodity
-from projects.models import Site, DefStorage, Storage, Commodity, DefCommodity
-from django.forms.models import model_to_dict
+from projects.api.helper import get_project, get_site, validate_name_http_response
+from projects.models import Commodity, DefCommodity, DefStorage, Site, Storage
 
 
 @login_required
@@ -107,9 +107,15 @@ def update_storage(request, project_name, site_name, storage_name):
 
     data = json.loads(request.body)
 
-    if storage_name != data["name"]:
-        if Storage.objects.filter(site=site, name=data["name"]).exists():
-            return HttpResponse("Storage with the same name already exists", status=409)
+    err = validate_name_http_response(data.get("name"), "Storage name")
+    if err:
+        return err
+
+    if (
+        storage_name != data["name"]
+        and Storage.objects.filter(site=site, name=data["name"]).exists()
+    ):
+        return HttpResponse("Storage with the same name already exists", status=409)
 
     try:
         storage = Storage.objects.get(site=site, name=storage_name)
@@ -162,3 +168,54 @@ def delete_storage(request, project_name, site_name, storage_name):
     storage.delete()
 
     return JsonResponse({"detail": "Storage deleted"})
+
+
+@login_required
+@require_POST
+def duplicate_storage(request, project_name, site_name, storage_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    try:
+        original_storage = Storage.objects.get(site=site, name=storage_name)
+    except Storage.DoesNotExist:
+        return HttpResponse("Storage not found", status=404)
+
+    # Find the next available name with _1, _2, etc.
+    base_name = original_storage.name
+    counter = 1
+    new_name = f"{base_name}_{counter}"
+
+    while Storage.objects.filter(site=site, name=new_name).exists():
+        counter += 1
+        new_name = f"{base_name}_{counter}"
+
+    # Create the duplicate storage
+    duplicate_storage = Storage(
+        site=site,
+        commodity=original_storage.commodity,
+        name=new_name,
+        description=original_storage.description,
+        instcapc=original_storage.instcapc,
+        caploc=original_storage.caploc,
+        capupc=original_storage.capupc,
+        instcapp=original_storage.instcapp,
+        caplop=original_storage.caplop,
+        capupp=original_storage.capupp,
+        effin=original_storage.effin,
+        effout=original_storage.effout,
+        invcostp=original_storage.invcostp,
+        invcostc=original_storage.invcostc,
+        fixcostp=original_storage.fixcostp,
+        fixcostc=original_storage.fixcostc,
+        varcostp=original_storage.varcostp,
+        varcostc=original_storage.varcostc,
+        wacc=original_storage.wacc,
+        depreciation=original_storage.depreciation,
+        init=original_storage.init,
+        discharge=original_storage.discharge,
+        epratio=original_storage.epratio,
+    )
+    duplicate_storage.save()
+
+    return JsonResponse({"detail": "Storage duplicated", "new_name": new_name})

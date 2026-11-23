@@ -20,6 +20,7 @@
                 "
                 :site="site"
                 @update="name => (curSite = name)"
+                @delete="onSiteDeleted"
                 @updateMarker="updateMarker"
                 @deleteMarker="deleteMarker"
               />
@@ -128,6 +129,11 @@ function updateMarker(lat: number, lng: number) {
 
 function deleteMarker() {
   marker.value = undefined
+}
+
+function onSiteDeleted() {
+  deleteMarker()
+  curSite.value = '__new'
 }
 
 function mapClick(event: L.LeafletMouseEvent) {

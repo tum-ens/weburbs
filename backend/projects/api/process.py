@@ -3,21 +3,21 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.forms import model_to_dict
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
-from projects.api.helper import get_project, get_site
+from projects.api import commodity
+from projects.api.helper import get_project, get_site, validate_name_http_response
 from projects.models import (
-    DefProcess,
-    Process,
-    Site,
-    DefProcessCommodity,
-    ProcComDir,
-    ProcessCommodity,
     Commodity,
     DefCommodity,
+    DefProcess,
+    DefProcessCommodity,
+    ProcComDir,
+    Process,
+    ProcessCommodity,
+    Site,
 )
-from projects.api import commodity
 
 
 @login_required
@@ -181,9 +181,15 @@ def update_process(request, project_name, site_name, process_name):
 
     data = json.loads(request.body)
 
-    if process_name != data["name"]:
-        if Process.objects.filter(site=site, name=data["name"]).exists():
-            return HttpResponse("Process with the same name already exists", status=409)
+    err = validate_name_http_response(data.get("name"), "Process name")
+    if err:
+        return err
+
+    if (
+        process_name != data["name"]
+        and Process.objects.filter(site=site, name=data["name"]).exists()
+    ):
+        return HttpResponse("Process with the same name already exists", status=409)
 
     try:
         process = Process.objects.get(site=site, name=process_name)
@@ -251,3 +257,55 @@ def delete_process(request, project_name, site_name, process_name):
     process.delete()
 
     return JsonResponse({"detail": "Process deleted"})
+
+
+@login_required
+@require_POST
+def duplicate_process(request, project_name, site_name, process_name):
+    project = get_project(request.user, project_name)
+    site = get_site(project, site_name)
+
+    try:
+        original_process = Process.objects.get(site=site, name=process_name)
+    except Process.DoesNotExist:
+        return HttpResponse("Process not found", status=404)
+
+    # Find the next available name with _1, _2, etc.
+    base_name = original_process.name
+    counter = 1
+    new_name = f"{base_name}_{counter}"
+
+    while Process.objects.filter(site=site, name=new_name).exists():
+        counter += 1
+        new_name = f"{base_name}_{counter}"
+
+    # Create the duplicate process
+    duplicate_process = Process(
+        site=site,
+        name=new_name,
+        description=original_process.description,
+        instcap=original_process.instcap,
+        caplo=original_process.caplo,
+        capup=original_process.capup,
+        maxgrad=original_process.maxgrad,
+        minfraction=original_process.minfraction,
+        invcost=original_process.invcost,
+        fixcost=original_process.fixcost,
+        varcost=original_process.varcost,
+        wacc=original_process.wacc,
+        depreciation=original_process.depreciation,
+        areapercap=original_process.areapercap,
+    )
+    duplicate_process.save()
+
+    # Duplicate process commodities
+    for proc_com in ProcessCommodity.objects.filter(process=original_process):
+        ProcessCommodity(
+            process=duplicate_process,
+            commodity=proc_com.commodity,
+            direction=proc_com.direction,
+            ratio=proc_com.ratio,
+            ratiomin=proc_com.ratiomin,
+        ).save()
+
+    return JsonResponse({"detail": "Process duplicated", "new_name": new_name})

@@ -1,15 +1,15 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
 from projects.models import (
-    Commodity,
     DSM,
+    Commodity,
 )
-from django.forms.models import model_to_dict
 
 
 @login_required
@@ -41,11 +41,8 @@ def update_dsm(request, project_name, site_name, com_name):
     data = json.loads(request.body)
 
     com_new = Commodity.objects.get(site=site, name=data["commodity"])
-    if com_name != data["commodity"]:
-        if DSM.objects.filter(commodity=com_new).exists():
-            return HttpResponse(
-                "DSM with for this commodity already exists", status=409
-            )
+    if com_name != data["commodity"] and DSM.objects.filter(commodity=com_new).exists():
+        return HttpResponse("DSM with for this commodity already exists", status=409)
 
     try:
         dsm = DSM.objects.get(commodity=com)

@@ -9,6 +9,9 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
+    <Message v-if="nameError" severity="error" variant="simple" size="small">
+      {{ nameError }}
+    </Message>
     <FloatLabel variant="on">
       <Textarea class="w-full" id="description" v-model="description" />
       <label for="description">Description</label>
@@ -69,9 +72,10 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { inject, ref, watch } from 'vue'
 import type { Project } from '@/backend/interfaces'
 import { useToast } from 'primevue/usetoast'
+import { getNameValidationError } from '@/helper/nameValidation'
 
 const toast = useToast()
 
@@ -97,24 +101,50 @@ const co2limit = ref(props.project.co2limit)
 const costlimit = ref(props.project.costlimit)
 
 const nameInvalid = ref(false)
+const nameError = ref<string | null>(null)
 const co2limitInvalid = ref(false)
 const costlimitInvalid = ref(false)
+
+watch(name, () => {
+  if (!name.value) {
+    nameInvalid.value = false
+    nameError.value = null
+    return
+  }
+  nameError.value = getNameValidationError(name.value)
+  nameInvalid.value = nameError.value !== null
+})
 
 function submit() {
   let error = false
   if (!name.value) {
     error = true
     nameInvalid.value = true
+    nameError.value = null
   } else {
-    nameInvalid.value = false
+    nameError.value = getNameValidationError(name.value)
+    if (nameError.value) {
+      error = true
+      nameInvalid.value = true
+    } else {
+      nameInvalid.value = false
+    }
   }
-  if (!co2limit.value || co2limit.value < 0) {
+  if (
+    co2limit.value === null ||
+    co2limit.value === undefined ||
+    co2limit.value < 0
+  ) {
     error = true
     co2limitInvalid.value = true
   } else {
     co2limitInvalid.value = false
   }
-  if (!costlimit.value || costlimit.value < 0) {
+  if (
+    costlimit.value === null ||
+    costlimit.value === undefined ||
+    costlimit.value < 0
+  ) {
     error = true
     costlimitInvalid.value = true
   } else {
@@ -124,7 +154,7 @@ function submit() {
   if (error) {
     toast.add({
       summary: 'Error',
-      detail: 'Not all fields have been filled properly',
+      detail: nameError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

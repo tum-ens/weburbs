@@ -3,6 +3,13 @@
   <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-8 gap-3">
     <div class="flex flex-col gap-3">
       <h1>{{ props.bsp.name }}</h1>
+      <Button
+        v-if="props.bsp.steps?.length"
+        icon="pi pi-download"
+        label="Download"
+        class="w-full"
+        @click="download"
+      />
       <Button :disabled="!checkUploadFile" @click="del" severity="danger">
         Delete
       </Button>
@@ -36,7 +43,11 @@ import { computed, type Ref, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import BarDiagramm from '@/plotly/PlotlyDiagram.vue'
-import { checkUploadFile } from '@/helper/upload'
+import {
+  checkUploadFile,
+  downloadTimeseriesExcel,
+  projectLabel,
+} from '@/helper/upload'
 import { useToast } from 'primevue/usetoast'
 import { useDeleteBuySellPrice } from '@/backend/buysellprice'
 
@@ -61,6 +72,15 @@ const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
     },
   ]
 })
+
+function download() {
+  if (!props.bsp.steps?.length) return
+  downloadTimeseriesExcel(
+    props.bsp.steps,
+    projectLabel(route.params.proj),
+    props.bsp.name,
+  )
+}
 
 function del() {
   deleteBSP(undefined, {

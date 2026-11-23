@@ -67,3 +67,29 @@ export function useDeleteTransmission(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useDuplicateTransmission(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: {
+      sitein_name: string
+      siteout_name: string
+      com_name: string
+    }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/transmission/duplicate/${data.sitein_name}/${data.siteout_name}/${data.com_name}/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess() {
+      client.invalidateQueries({
+        queryKey: ['transmissions', route.params.proj],
+      })
+    },
+  })
+}

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axios from 'axios'
-import type { Process, Site } from '@/backend/interfaces'
+import type { Process } from '@/backend/interfaces'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed } from 'vue'
 import { useCSRF } from '@/backend/security'
@@ -15,7 +15,10 @@ export function useDefProcesses() {
   })
 }
 
-export function useProcesses(route: RouteLocationNormalized, site: Site) {
+export function useProcesses(
+  route: RouteLocationNormalized,
+  site: { name: string },
+) {
   return useQuery({
     queryKey: ['processes', computed(() => route.params.proj), site.name],
     queryFn: () =>
@@ -82,6 +85,28 @@ export function useDeleteProcess(route: RouteLocationNormalized) {
     mutationFn: (data: { site_name: string; process_name: string }) =>
       axios.post(
         `/api/project/${route.params.proj}/site/${data.site_name}/process/${data.process_name}/delete/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['processes', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}
+
+export function useDuplicateProcess(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { site_name: string; process_name: string }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/process/${data.process_name}/duplicate/`,
         {},
         {
           headers: {

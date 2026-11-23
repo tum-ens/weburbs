@@ -120,7 +120,11 @@ import type { Commodity, DemandConfig, Site } from '@/backend/interfaces'
 import { useRoute } from 'vue-router'
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { useToast } from 'primevue/usetoast'
-import { checkUploadFile } from '@/helper/upload'
+import {
+  projectLabel,
+  readTimeseriesUpload,
+  seriesNameFromUpload,
+} from '@/helper/upload'
 
 const advanced = inject('advanced')
 
@@ -197,13 +201,14 @@ function uploadProfile() {
   if (nameAlreadyExists(uploadName.value)) return
 
   demands.value.push({
-    quantity: 1,
+    quantity: uploadQuantity.value,
     steps: uploadSteps.value,
     name: uploadName.value,
     description: '',
   })
   uploadSteps.value = null
   uploadName.value = ''
+  uploadQuantity.value = 1
   // @ts-expect-error Wrong type description
   if (profileUpload.value) profileUpload.value.clear()
 }
@@ -220,19 +225,27 @@ function save() {
 const profileUpload = ref<InstanceType<typeof FileUpload>>()
 const uploadSteps = ref<number[] | null>(null)
 const uploadName = ref('')
+const uploadQuantity = ref(1)
 const checkingUpload = ref(false)
 
 function onFileSelect(event: FileUploadSelectEvent) {
   checkingUpload.value = true
   const file = event.files[0]
-  checkUploadFile(toast, file)
+  readTimeseriesUpload(toast, file)
     .then(res => {
-      uploadSteps.value = res
-      uploadName.value = file.name.split('.').slice(0, -1).join('.')
+      uploadSteps.value = res.steps
+      uploadQuantity.value = res.quantity
+      uploadName.value = seriesNameFromUpload(
+        file.name,
+        projectLabel(route.params.proj),
+        props.site.name,
+        props.commodity.name,
+      )
     })
     .catch(() => {
       uploadSteps.value = null
       uploadName.value = ''
+      uploadQuantity.value = 1
       // @ts-expect-error Wrong type description
       if (profileUpload.value) profileUpload.value.clear()
     })

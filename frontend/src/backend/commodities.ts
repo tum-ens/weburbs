@@ -115,3 +115,25 @@ export function useDeleteCommodity(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useDuplicateCommodity(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { site_name: string; commodity_name: string }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/commodity/${data.commodity_name}/duplicate/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['commodities', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}

@@ -27,6 +27,40 @@ export function useUpdateSite(route: RouteLocationNormalized) {
   })
 }
 
+export function useDeleteSite(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (site_name: string) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${site_name}/delete/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(_data, site_name) {
+      client.invalidateQueries({
+        queryKey: ['projects', 'sites', computed(() => route.params.proj)],
+      })
+      client.invalidateQueries({
+        queryKey: ['transmissions', route.params.proj],
+      })
+      client.removeQueries({
+        queryKey: ['commodities', route.params.proj, site_name],
+      })
+      client.removeQueries({
+        queryKey: ['processes', route.params.proj, site_name],
+      })
+      client.removeQueries({
+        queryKey: ['storage', route.params.proj, site_name],
+      })
+    },
+  })
+}
+
 export function useSites(route: RouteLocationNormalized) {
   return useQuery({
     queryKey: ['projects', 'sites', computed(() => route.params.proj)],

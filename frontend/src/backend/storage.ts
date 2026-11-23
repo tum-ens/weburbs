@@ -94,3 +94,25 @@ export function useDeleteStorage(route: RouteLocationNormalized) {
     },
   })
 }
+
+export function useDuplicateStorage(route: RouteLocationNormalized) {
+  const { data: csrf } = useCSRF()
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (data: { site_name: string; storage_name: string }) =>
+      axios.post(
+        `/api/project/${route.params.proj}/site/${data.site_name}/storage/${data.storage_name}/duplicate/`,
+        {},
+        {
+          headers: {
+            'X-CSRFToken': csrf.value,
+          },
+        },
+      ),
+    onSuccess(data, vars) {
+      client.invalidateQueries({
+        queryKey: ['storage', route.params.proj, vars.site_name],
+      })
+    },
+  })
+}

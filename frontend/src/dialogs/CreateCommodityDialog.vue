@@ -17,19 +17,37 @@
 
 <script setup lang="ts">
 import type { Commodity } from '@/backend/interfaces'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { AxiosError } from 'axios'
 import { useToast } from 'primevue/usetoast'
 import { useUpdateCommodity } from '@/backend/commodities'
 import CommodityForm from '@/forms/CommodityForm.vue'
+import { watch } from 'vue'
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const visible = defineModel<boolean>('visible', { default: false })
 const props = defineProps<{
   site_name: string
 }>()
+
+// Watch for dialog close and navigate back to energy diagram if needed
+watch(visible, (newValue, oldValue) => {
+  if (
+    oldValue === true &&
+    newValue === false &&
+    route.query.from === 'energy-diagram'
+  ) {
+    console.log('Navigating back to energy diagram from commodity creation')
+    router.push({
+      name: 'ProjectEnergyDiagram',
+      params: { proj: route.params.proj },
+      query: { site: props.site_name },
+    })
+  }
+})
 
 const { mutate: updateCommodity, isPending: loading } =
   useUpdateCommodity(route)

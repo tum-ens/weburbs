@@ -117,8 +117,8 @@ const commodity = ref<ComTag | undefined>(
   props.dsm?.commodity
     ? {
         name: props.dsm?.commodity,
-        unitR: 'kW',
-        unitC: 'kWh',
+        unitR: 'MW',
+        unitC: 'MWh',
       }
     : undefined,
 )
@@ -150,7 +150,7 @@ watch(
   },
   { immediate: true },
 )
-const unitR = computed(() => commodity.value?.unitR || 'kW')
+const unitR = computed(() => commodity.value?.unitR || 'MW')
 
 const delay = ref(defaultValue(props.dsm?.delay, undefined))
 const eff = ref(defaultValue(props.dsm?.eff, undefined))

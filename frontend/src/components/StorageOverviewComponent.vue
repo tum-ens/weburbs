@@ -10,7 +10,10 @@
       :description="sto.description"
       :in="[sto.commodity]"
       :out="[sto.commodity]"
+      :show-actions="true"
+      component-type="storage"
       @click="emit('clickStorage', sto)"
+      @duplicate="emit('duplicateStorage', sto)"
     />
   </div>
   <div v-else>
@@ -31,6 +34,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   clickStorage: [storage: Storage]
+  duplicateStorage: [storage: Storage]
 }>()
 
 const { data: storage } = useStorage(route, props.site)

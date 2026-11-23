@@ -8,6 +8,10 @@
     v-else-if="status === SimulationResultStatus.Infeasible"
     class="pi pi-exclamation-circle"
   ></i>
+  <i
+    v-else-if="status === SimulationResultStatus.Cancelled"
+    class="pi pi-stop-circle"
+  ></i>
   <i v-else class="pi pi-times-circle"></i>
 </template>
 

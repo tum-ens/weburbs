@@ -5,22 +5,26 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 
+from projects.api.helper import (
+    validate_config_names_http_response,
+    validate_name_http_response,
+)
 from projects.models import (
-    Project,
-    Site,
-    Commodity,
-    ComType,
-    Process,
-    ProcessCommodity,
-    ProcComDir,
-    Storage,
-    Demand,
-    SupIm,
-    Transmission,
-    TransmissionType,
     DSM,
     BuySellPrice,
+    Commodity,
+    ComType,
+    Demand,
+    ProcComDir,
+    Process,
+    ProcessCommodity,
+    Project,
+    Site,
+    Storage,
+    SupIm,
     TimeVarEff,
+    Transmission,
+    TransmissionType,
 )
 
 
@@ -29,6 +33,23 @@ def parse_num(num):
         return -1
     else:
         return num
+
+
+def _is_zeroish(value):
+    if value is None:
+        return True
+    try:
+        return float(value) == 0.0
+    except (TypeError, ValueError):
+        return False
+
+
+def strip_t0(values):
+    """Drop the leading URBS t=0 placeholder so stored steps match the Excel
+    upload representation (steps without the t=0 row)."""
+    if isinstance(values, list) and values and _is_zeroish(values[0]):
+        return values[1:]
+    return values
 
 
 def opt_num(obj, key):
@@ -48,7 +69,16 @@ def upload(request, project_name):
     if Project.objects.filter(user=request.user, name=project_name).exists():
         return HttpResponse("Project name already exists", status=409)
 
-    readConfig(request.user, project_name, json.loads(request.body))
+    err = validate_name_http_response(project_name, "Project name")
+    if err:
+        return err
+
+    config = json.loads(request.body)
+    err = validate_config_names_http_response(config, project_name)
+    if err:
+        return err
+
+    readConfig(request.user, project_name, config)
     return HttpResponse("Project created")
 
 
@@ -71,8 +101,8 @@ def readConfig(user, project_name, config):
             project=project,
             name=siteName,
             area=None if dataSite["area"] == "NaN" else dataSite["area"],
-            lat=dataSite["lat"] if "lat" in dataSite else 0,
-            lon=dataSite["lon"] if "lon" in dataSite else 0,
+            lat=dataSite.get("lat", 0),
+            lon=dataSite.get("lon", 0),
         )
         site.save()
 
@@ -94,7 +124,7 @@ def readConfig(user, project_name, config):
                     name="",
                     commodity=commodity,
                     description="",
-                    steps=dataCommodity["supim"],
+                    steps=strip_t0(dataCommodity["supim"]),
                 )
                 supim.save()
 
@@ -103,7 +133,7 @@ def readConfig(user, project_name, config):
                     name="imported",
                     commodity=commodity,
                     description="",
-                    steps=dataCommodity["demand"],
+                    steps=strip_t0(dataCommodity["demand"]),
                     quantity=1,
                 )
                 demand.save()
@@ -185,44 +215,63 @@ def readConfig(user, project_name, config):
 
             if "timevareff" in processData:
                 timevareff = TimeVarEff(
-                    process=process, steps=processData["timevareff"]
+                    process=process, steps=strip_t0(processData["timevareff"])
                 )
                 timevareff.save()
 
+    # Handle transmissions - only create for specific relationships defined in config
+    # The key insight: only create transmissions for the EXACT relationships defined in the config
+    # NOT for every possible combination of sites with the same commodity name
     for siteName, dataSite in config["site"].items():
         site = Site.objects.get(project=project, name=siteName)
         for commodityName, dataCommodity in dataSite["commodity"].items():
             commodity = Commodity.objects.get(site=site, name=commodityName)
-            if "transmission" in dataCommodity:
+            if (
+                "transmission" in dataCommodity
+                and dataCommodity["transmission"] is not None
+            ):
+                # Only create transmissions for the specific relationships defined in the config
                 for siteinName, dataTransmission in dataCommodity[
                     "transmission"
                 ].items():
-                    sitein = Site.objects.get(project=project, name=siteinName)
-                    commodityin = Commodity.objects.get(site=sitein, name=commodityName)
-                    transmission = Transmission(
-                        type=TransmissionType[dataTransmission["Transmission"]],
-                        commodityout=commodity,
-                        commodityin=commodityin,
-                        eff=dataTransmission["eff"],
-                        invcost=dataTransmission["inv-cost"],
-                        fixcost=dataTransmission["fix-cost"],
-                        varcost=dataTransmission["var-cost"],
-                        instcap=dataTransmission["inst-cap"],
-                        caplo=dataTransmission["cap-lo"],
-                        capup=parse_num(dataTransmission["cap-up"]),
-                        wacc=dataTransmission["wacc"],
-                        depreciation=dataTransmission["depreciation"],
-                        reactance=opt_num(dataTransmission, "reactance"),
-                        difflimit=opt_num(dataTransmission, "difflimit"),
-                        basevoltage=opt_num(dataTransmission, "basevoltage"),
-                    )
-                    transmission.save()
+                    # Only create transmission if the source site exists and has the commodity
+                    try:
+                        sitein = Site.objects.get(project=project, name=siteinName)
+                        commodityin = Commodity.objects.get(
+                            site=sitein, name=commodityName
+                        )
+
+                        # Check if transmission already exists to avoid duplicates
+                        if not Transmission.objects.filter(
+                            commodityin=commodityin, commodityout=commodity
+                        ).exists():
+                            transmission = Transmission(
+                                type=TransmissionType[dataTransmission["Transmission"]],
+                                commodityout=commodity,
+                                commodityin=commodityin,
+                                eff=dataTransmission["eff"],
+                                invcost=dataTransmission["inv-cost"],
+                                fixcost=dataTransmission["fix-cost"],
+                                varcost=dataTransmission["var-cost"],
+                                instcap=dataTransmission["inst-cap"],
+                                caplo=dataTransmission["cap-lo"],
+                                capup=opt_num(dataTransmission, "cap-up"),
+                                wacc=dataTransmission["wacc"],
+                                depreciation=dataTransmission["depreciation"],
+                                reactance=opt_num(dataTransmission, "reactance"),
+                                difflimit=opt_num(dataTransmission, "difflimit"),
+                                basevoltage=opt_num(dataTransmission, "basevoltage"),
+                            )
+                            transmission.save()
+                    except (Site.DoesNotExist, Commodity.DoesNotExist):
+                        # Skip transmission if source site or commodity doesn't exist
+                        continue
 
     if "buysellprice" in config:
         for commodityName, dataBuySellPrice in config["buysellprice"].items():
             buysellprice = BuySellPrice(
                 project=project,
                 name=commodityName,
-                steps=dataBuySellPrice,
+                steps=strip_t0(dataBuySellPrice),
             )
             buysellprice.save()

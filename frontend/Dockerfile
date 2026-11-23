@@ -11,6 +11,7 @@ FROM nginx:stable-alpine AS production-stage
 # Copy entrypoint and nginx config
 WORKDIR /app
 COPY entrypoint.sh .
+RUN sed -i 's/\r$//g' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80

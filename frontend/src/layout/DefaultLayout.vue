@@ -18,8 +18,10 @@ import Header from '@/components/HeaderComponent.vue'
 import SidebarComponent from '@/layout/SidebarComponent.vue'
 import { ref } from 'vue'
 import SidebarContent from '@/layout/SidebarContent.vue'
+import { usePresenceHeartbeat } from '@/backend/security'
 
 const sidebar = ref(false)
+usePresenceHeartbeat()
 </script>
 
 <style scoped></style>

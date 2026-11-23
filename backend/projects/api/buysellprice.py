@@ -2,10 +2,10 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.forms import model_to_dict
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 
-from projects.api.helper import get_project
+from projects.api.helper import get_project, validate_name_http_response
 from projects.helper.validator import checkProfile
 from projects.models import BuySellPrice
 
@@ -25,11 +25,15 @@ def listBSP(request, project_name):
 
 
 @login_required
-def deleteBSP(request, project_name, com_name, ty):
+def deleteBSP(request, project_name, com_name):
     if request.method != "DELETE":
         return HttpResponse("Method not allowed", status=405)
 
     project = get_project(request.user, project_name)
+
+    err = validate_name_http_response(com_name, "Buy-sell price name")
+    if err:
+        return err
 
     BuySellPrice.objects.filter(project=project, name=com_name).delete()
     return HttpResponse("BuySellPrice deleted", status=200)
@@ -39,6 +43,10 @@ def deleteBSP(request, project_name, com_name, ty):
 @require_POST
 def uploadBSPProfile(request, project_name, com_name):
     project = get_project(request.user, project_name)
+
+    err = validate_name_http_response(com_name, "Buy-sell price name")
+    if err:
+        return err
 
     if BuySellPrice.objects.filter(project=project, name=com_name).exists():
         return HttpResponse(

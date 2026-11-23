@@ -19,9 +19,18 @@
         pt:root:class="justify-start"
       />
       <FloatLabel variant="on">
-        <InputText fluid id="title" v-model="title" :disabled="uploading" />
+        <InputText
+          fluid
+          id="title"
+          v-model="title"
+          :disabled="uploading"
+          :invalid="!!titleError"
+        />
         <label for="name">Title</label>
       </FloatLabel>
+      <Message v-if="titleError" severity="error" variant="simple" size="small">
+        {{ titleError }}
+      </Message>
       <Button label="Upload" @click="upload" :loading="uploading" />
     </div>
   </Dialog>
@@ -32,6 +41,8 @@ import { FileUpload, type FileUploadSelectEvent } from 'primevue'
 import { ref, watch } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useUploadExcel } from '@/backend/upload'
+import { axiosErrorMessage } from '@/helper/axiosError'
+import { getNameValidationError } from '@/helper/nameValidation'
 import { useRouter } from 'vue-router'
 
 const toast = useToast()
@@ -44,7 +55,12 @@ const excelUpload = ref<InstanceType<typeof FileUpload>>()
 const visible = defineModel<boolean>('visible', { default: false })
 
 const title = ref('')
+const titleError = ref<string | null>(null)
 let file: Blob | null = null
+
+watch(title, () => {
+  titleError.value = title.value ? getNameValidationError(title.value) : null
+})
 
 async function onFileSelect(event: FileUploadSelectEvent) {
   file = <Blob>event.files[0]
@@ -71,6 +87,16 @@ function upload() {
     })
     return
   }
+  titleError.value = getNameValidationError(title.value)
+  if (titleError.value) {
+    toast.add({
+      summary: 'Upload error',
+      detail: titleError.value,
+      severity: 'error',
+      life: 2000,
+    })
+    return
+  }
 
   uploading.value = true
   uploadExcel(
@@ -89,10 +115,9 @@ function upload() {
       onError(error) {
         toast.add({
           summary: 'Upload failed',
-          // @ts-expect-error Axios error is the only error possible
-          detail: error.response.data,
+          detail: axiosErrorMessage(error, 'Excel upload failed'),
           severity: 'error',
-          life: 2000,
+          life: 6000,
         })
         uploading.value = false
       },
@@ -100,11 +125,14 @@ function upload() {
   )
 }
 
-watch(visible, () => {
-  // @ts-expect-error Wrong type description
-  if (excelUpload.value) excelUpload.value.clear()
-  title.value = ''
-  uploading.value = false
+watch(visible, open => {
+  if (!open) {
+    // @ts-expect-error Wrong type description
+    if (excelUpload.value) excelUpload.value.clear()
+    title.value = ''
+    file = null
+    uploading.value = false
+  }
 })
 </script>
 

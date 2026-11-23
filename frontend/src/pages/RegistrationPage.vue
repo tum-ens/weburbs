@@ -121,7 +121,7 @@ async function cregister() {
     .then(() => {
       toast.add({
         summary: 'Success',
-        detail: `Account was created, you can now log in`,
+        detail: `Account was created. Verify your email, then wait for admin approval.`,
         severity: 'success',
         life: 2000,
       })

@@ -125,23 +125,40 @@ const queryClient = useQueryClient()
 
 async function clogin() {
   loading.value = true
+  if (!csrf.value) {
+    error.value =
+      'Still loading security token. Please wait a moment and try again.'
+    loading.value = false
+    return
+  }
+
   const login_result = await login(
     queryClient,
     csrf.value,
     username.value,
     password.value,
   )
-  console.log(login_result)
   if (login_result === 'verification') {
     error.value = 'Please verify your mail first'
     loading.value = false
     return
   }
+  if (login_result === 'approval') {
+    error.value = 'Your email is verified. Waiting for admin approval.'
+    loading.value = false
+    return
+  }
 
-  if (!login_result) {
-    error.value = 'Wrong username or password.'
-  } else {
+  if (login_result === true) {
     error.value = ''
+  } else if (
+    typeof login_result === 'object' &&
+    login_result !== null &&
+    'detail' in login_result
+  ) {
+    error.value = login_result.detail || 'Wrong username or password.'
+  } else {
+    error.value = 'Wrong username or password.'
   }
   loading.value = false
 }

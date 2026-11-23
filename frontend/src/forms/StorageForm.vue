@@ -10,6 +10,14 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
+    <Message
+      v-if="nameValidationError"
+      severity="error"
+      variant="simple"
+      size="small"
+    >
+      {{ nameValidationError }}
+    </Message>
     <FloatLabel variant="on">
       <Textarea
         fluid
@@ -62,7 +70,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.invcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             'Total investement cost for adding storage capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
           "
@@ -75,7 +83,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.fixcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation independent costs for existing and new storage capacities per ${unitC}.`
           "
@@ -88,7 +96,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.varcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation dependent costs per ${unitC} stored. This value is usually zero, but can be exploited for modelling short-term storage technologies or ones that have increased wear and tear proportional to amount of stored energy.`
           "
@@ -175,7 +183,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.invcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     'Total investement cost for adding power input/output capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
                   "
@@ -190,7 +198,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.fixcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     `Operation independent costs for existing and new capacities per ${unitR} input/output power.`
                   "
@@ -203,7 +211,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.varcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     `Operation dependent costs for input or output of energy per ${unitC}_out stored or retrieved.`
                   "
@@ -330,6 +338,7 @@ import {
   useDefCommodities,
   useProjectSiteCommodities,
 } from '@/backend/commodities'
+import { getNameValidationError } from '@/helper/nameValidation'
 
 const toast = useToast()
 const route = useRoute()
@@ -429,14 +438,14 @@ const commodity = ref<ComTag | undefined>(
         name: props.storage.commodity,
         disp_name: props.storage.commodity,
         default: false,
-        unitR: 'kW',
-        unitC: 'kWh',
+        unitR: 'MW',
+        unitC: 'MWh',
       }
     : undefined,
 )
 
-const unitR = computed(() => commodity.value?.unitR || 'kW')
-const unitC = computed(() => commodity.value?.unitC || 'kWh')
+const unitR = computed(() => commodity.value?.unitR || 'MW')
+const unitC = computed(() => commodity.value?.unitC || 'MWh')
 watch(
   commodities,
   () => {
@@ -478,10 +487,12 @@ enum Errors {
 }
 
 const invalids = ref<Errors[]>([])
+const nameValidationError = computed(() => getNameValidationError(name.value))
 
 function check() {
   invalids.value = []
   if (!name.value) invalids.value.push(Errors.name)
+  if (getNameValidationError(name.value)) invalids.value.push(Errors.name)
 
   if (instcapc.value === undefined || instcapc.value < 0)
     invalids.value.push(Errors.instcapc)
@@ -568,7 +579,8 @@ function submit() {
   if (!check()) {
     toast.add({
       summary: 'Error',
-      detail: 'Not all fields have been filled properly',
+      detail:
+        nameValidationError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

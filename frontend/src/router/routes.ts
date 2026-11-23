@@ -29,9 +29,24 @@ const router = createRouter({
       component: () => import('@/pages/ResetPasswordPage.vue'),
     },
     {
+      name: 'Set new password',
+      path: '/resetPassword/:username/:token',
+      component: () => import('@/pages/ResetPasswordPage.vue'),
+    },
+    {
       name: 'Home',
       path: '/home',
       component: () => import('@/pages/HomePage.vue'),
+    },
+    {
+      name: 'AdminApprovals',
+      path: '/admin/approvals',
+      component: () => import('@/pages/AdminApprovalsPage.vue'),
+    },
+    {
+      name: 'CompareResults',
+      path: '/compare',
+      component: () => import('@/pages/CompareResultsPage.vue'),
     },
     {
       name: 'CreateProject',
@@ -68,6 +83,12 @@ const router = createRouter({
           path: 'transmission',
           component: () =>
             import('@/pages/projectConfigs/TransmissionConfig.vue'),
+        },
+        {
+          name: 'ProjectEnergyDiagram',
+          path: 'energy-diagram',
+          component: () =>
+            import('@/pages/projectConfigs/EnergyDiagramCanvas.vue'),
         },
         {
           name: 'ProjectStorage',

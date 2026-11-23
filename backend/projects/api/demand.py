@@ -1,12 +1,12 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 
-from projects.api.helper import get_project, get_site, get_commodity
+from projects.api.helper import get_commodity, get_project, get_site
 from projects.helper.validator import checkProfile
-from projects.models import Demand, DefDemand
+from projects.models import DefDemand, Demand
 
 
 @login_required
@@ -26,14 +26,14 @@ def updateDemands(request, project_name, site_name, com_name):
     ndemands = json.loads(request.body)
 
     for demand in demands:
-        if demand.name not in map(lambda dem: dem["name"], ndemands):
+        if demand.name not in (dem["name"] for dem in ndemands):
             demand.delete()
     for ndemand in ndemands:
         demand = next(
             (demand for demand in demands if demand.name == ndemand["name"]), None
         )
 
-        if "default" in ndemand and ndemand["default"]:
+        if ndemand.get("default"):
             if demand is not None:
                 demand.delete()
             defdemand = DefDemand.objects.get(name=ndemand["name"])
@@ -44,7 +44,7 @@ def updateDemands(request, project_name, site_name, com_name):
                 defdemand=defdemand,
                 commodity=commodity,
             )
-        elif "steps" in ndemand and ndemand["steps"]:
+        elif ndemand.get("steps"):
             if demand is not None:
                 demand.delete()
             if not checkProfile(ndemand["steps"]):

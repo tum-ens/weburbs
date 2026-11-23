@@ -8,6 +8,13 @@
         severity="info"
         label="Configure"
       />
+      <Button
+        v-if="demands && demands.length > 0"
+        icon="pi pi-download"
+        label="Download"
+        class="w-full"
+        @click="download"
+      />
       <FloatLabel variant="on">
         <Select
           fluid
@@ -52,6 +59,7 @@ import { useGetDemand } from '@/backend/demand'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import ConfigureDemandDialog from '@/dialogs/ConfigureDemandDialog.vue'
 import BarDiagramm from '@/plotly/PlotlyDiagram.vue'
+import { downloadTimeseriesExcels, projectLabel } from '@/helper/upload'
 
 const route = useRoute()
 
@@ -68,6 +76,20 @@ const { data: demands, isPending: pending } = useGetDemand(
   props.site,
   props.commodity,
 )
+
+function download() {
+  if (!demands.value?.length) return
+  downloadTimeseriesExcels(
+    demands.value
+      .filter(demand => demand.steps?.length)
+      .map(demand => ({
+        values: demand.steps,
+        seriesName: `${props.site.name}_${props.commodity.name}_${demand.name}`,
+        quantity: demand.quantity,
+      })),
+    projectLabel(route.params.proj),
+  )
+}
 
 const data: Ref<Partial<Plotly.Data>[]> = computed(() => {
   if (!demands.value) return []

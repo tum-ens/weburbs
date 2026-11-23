@@ -10,7 +10,10 @@
         :description="proc.description"
         :in="proc.in.map(proccom => proccom.name)"
         :out="proc.out.map(proccom => proccom.name)"
+        :show-actions="true"
+        component-type="process"
         @click="emit('clickProcess', proc)"
+        @duplicate="emit('duplicateProcess', proc)"
       />
     </template>
   </div>
@@ -35,6 +38,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   clickProcess: [process: Process]
+  duplicateProcess: [process: Process]
 }>()
 
 const { data: processes } = useProcesses(route, props.site)

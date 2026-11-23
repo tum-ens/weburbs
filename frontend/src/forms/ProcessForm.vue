@@ -10,6 +10,14 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
+    <Message
+      v-if="nameValidationError"
+      severity="error"
+      variant="simple"
+      size="small"
+    >
+      {{ nameValidationError }}
+    </Message>
     <FloatLabel variant="on">
       <Textarea
         fluid
@@ -62,7 +70,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('invcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             'Total investement cost for adding capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
           "
@@ -75,7 +83,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('fixcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation independent costs for existing and new capacities per ${unitR} throughput power.`
           "
@@ -88,7 +96,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('varcost')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Variable costs per throughput energy unit (${unitC}) produced. This includes wear and tear of moving parts, operation liquids, but excluding fuel costs, as they are included in table Commodity, column \'price\'.`
           "
@@ -109,7 +117,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes('maxgrad')"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     'Maximum allowed power gradient relative to power throughput capacity. Set value to negative or greater than 1/dt to disable it. '
                   "
@@ -224,9 +232,7 @@
                         'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
                       "
                       v-model="inCom.ratiomin"
-                      :invalid="
-                        inCom.ratiomin === undefined || inCom.ratiomin < 0
-                      "
+                      :invalid="inCom.ratiomin != null && inCom.ratiomin < 0"
                     />
                     <label for="ratiomin">Minimum ratio</label>
                   </FloatLabel>
@@ -278,9 +284,7 @@
                         'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
                       "
                       v-model="outCom.ratiomin"
-                      :invalid="
-                        outCom.ratiomin === undefined || outCom.ratiomin < 0
-                      "
+                      :invalid="outCom.ratiomin != null && outCom.ratiomin < 0"
                     />
                     <label for="ratiomin">Minimum ratio</label>
                   </FloatLabel>
@@ -323,6 +327,7 @@ import {
   useDefCommodities,
   useProjectSiteCommodities,
 } from '@/backend/commodities'
+import { getNameValidationError } from '@/helper/nameValidation'
 import { useRoute } from 'vue-router'
 
 const toast = useToast()
@@ -347,21 +352,23 @@ const { data: def_commodities } = useDefCommodities()
 
 const coms = computed(() => {
   if (!commodities.value) return []
-  if (!def_commodities.value) return commodities.value
+
+  const mapped = commodities.value.map(com => {
+    return {
+      name: com.name,
+      disp_name: com.name,
+      default: false,
+      ratio: 1,
+      ratiomin: undefined,
+      unit: com.type === CommodityType.Demand,
+      unitR: com.unitR,
+      unitC: com.unitC,
+    }
+  })
+  if (!def_commodities.value) return mapped
 
   return [
-    ...commodities.value.map(com => {
-      return {
-        name: com.name,
-        disp_name: com.name,
-        default: false,
-        ratio: 1,
-        ratiomin: 1,
-        unit: com.type === CommodityType.Demand,
-        unitR: com.unitR,
-        unitC: com.unitC,
-      }
-    }),
+    ...mapped,
     ...def_commodities.value
       .filter(
         def_com => !commodities.value.some(com => def_com.name == com.name),
@@ -372,7 +379,7 @@ const coms = computed(() => {
           disp_name: def_com.name + ' (Default)',
           default: true,
           ratio: 1,
-          ratiomin: 1,
+          ratiomin: undefined,
           unit: def_com.type === CommodityType.Demand,
           unitR: def_com.unitR,
           unitC: def_com.unitC,
@@ -414,71 +421,79 @@ interface ProcComTag extends ProcessCommodity {
 
 const inComs = ref<ProcComTag[]>([])
 const outComs = ref<ProcComTag[]>([])
-watch(
-  coms,
-  () => {
-    if (!props.process) {
-      inComs.value = []
-      outComs.value = []
-      return
-    }
+function tagProcCom(proccom: ProcessCommodity): ProcComTag {
+  const com = commodities.value?.find(c => c.name === proccom.name)
+  const def = def_commodities.value?.find(c => c.name === proccom.name)
+  const src = com || def
+  return {
+    ...proccom,
+    disp_name: proccom.name,
+    default: !com && !!def,
+    unit: src?.type === CommodityType.Demand,
+    unitR: src?.unitR,
+    unitC: src?.unitC,
+  }
+}
 
-    inComs.value = props.process.in.map(proccom => {
-      return {
-        ...proccom,
-        disp_name: proccom.name,
-        default: false,
-        unit: false,
-      }
-    })
-    outComs.value = props.process.out.map(proccom => {
-      return {
-        ...proccom,
-        disp_name: proccom.name,
-        default: false,
-        unit: false,
-      }
-    })
+watch(
+  [() => props.process, commodities, def_commodities],
+  () => {
+    if (!props.process) return
+
+    inComs.value = props.process.in.map(tagProcCom)
+    outComs.value = props.process.out.map(tagProcCom)
   },
   { immediate: true },
 )
 
-const unitR = computed(
-  () => outComs.value?.find(com => com.unit)?.unitR || 'kW',
-)
+const unitSource = computed(() => {
+  const outs = outComs.value || []
+  if (!outs.length) return undefined
+  const list = commodities.value || []
+  for (const out of outs) {
+    const com = list.find(c => c.name === out.name)
+    if (com?.type === CommodityType.Demand) return com
+  }
+  for (const out of outs) {
+    const com = list.find(c => c.name === out.name)
+    if (com?.unitR) return com
+  }
+  return outs.find(c => c.unitR)
+})
+
+const unitR = computed(() => unitSource.value?.unitR || 'MW')
 const unitRboxed = computed(() =>
   unitR.value.includes('/') ? `(${unitR.value})` : unitR.value,
 )
-const unitC = computed(
-  () => outComs.value?.find(com => com.unit)?.unitC || 'kWh',
-)
+const unitC = computed(() => unitSource.value?.unitC || 'MWh')
 const unitCboxed = computed(() =>
   unitR.value.includes('/') ? `(${unitC.value})` : unitC.value,
 )
-watch(
-  commodities,
-  () => {
-    if (!commodities.value || outComs.value.length === 0) return
+watch(commodities, () => {
+  if (!commodities.value) return
 
-    outComs.value = outComs.value.map(outCom => {
-      const com = commodities.value.find(com => com.name === outCom.name)
-      if (!com) return outCom
+  const retag = (list: ProcComTag[]) =>
+    list.map(item => {
+      const com = commodities.value.find(c => c.name === item.name)
+      if (!com) return item
       return {
-        ...outCom,
+        ...item,
         unit: com.type === CommodityType.Demand,
         unitR: com.unitR,
         unitC: com.unitC,
       }
     })
-  },
-  { immediate: true },
-)
+  outComs.value = retag(outComs.value)
+  inComs.value = retag(inComs.value)
+})
 
 const invalids = ref<string[]>([])
+const nameValidationError = computed(() => getNameValidationError(name.value))
 
 function check() {
   invalids.value = []
   if (!name.value) invalids.value.push('name')
+  if (getNameValidationError(name.value)) invalids.value.push('name')
 
   if (instcap.value === undefined || instcap.value < 0)
     invalids.value.push('instcap')
@@ -515,13 +530,13 @@ function check() {
   for (const inCom of inComs.value) {
     if (inCom.ratio !== undefined && inCom.ratio < 0)
       invalids.value.push('inComRatio')
-    if (inCom.ratiomin !== undefined && inCom.ratiomin < 0)
+    if (inCom.ratiomin != null && inCom.ratiomin < 0)
       invalids.value.push('inComRatioMin')
   }
   for (const outCom of outComs.value) {
     if (outCom.ratio !== undefined && outCom.ratio < 0)
       invalids.value.push('outComRatio')
-    if (outCom.ratiomin !== undefined && outCom.ratiomin < 0)
+    if (outCom.ratiomin != null && outCom.ratiomin < 0)
       invalids.value.push('outComRatioMin')
   }
 
@@ -532,7 +547,8 @@ function submit() {
   if (!check()) {
     toast.add({
       summary: 'Error',
-      detail: 'Not all fields have been filled properly',
+      detail:
+        nameValidationError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })
@@ -557,14 +573,14 @@ function submit() {
       return {
         name: com.name,
         ratio: com.ratio,
-        ratiomin: com.ratiomin,
+        ratiomin: com.ratiomin ?? null,
       }
     }),
     out: outComs.value.map(com => {
       return {
         name: com.name,
         ratio: com.ratio,
-        ratiomin: com.ratiomin,
+        ratiomin: com.ratiomin ?? null,
       }
     }),
   })

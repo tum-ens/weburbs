@@ -1,32 +1,42 @@
 
 services:
   backend:
-    image: ghcr.io/tum-ens/weburbs-backend:latest
+    # image: ghcr.io/tum-ens/weburbs-backend:latest
     # Use this to build the image locally
     build: backend
     container_name: weburbs-backend
+    env_file:
+      - admin.env
     environment:
       - SECRET_KEY=change_me
       - URBS=http://optimizer:5000/simulate
       - URBS_CALLBACK=http://backend:8000
       # Replace localhost by your domain, or add more domains, separated by comma
-      - ORIGINS=http://localhost
-      # Change this for production
+      # ORIGINS is set via .env (defaults to http://localhost if unset)
+      - ORIGINS=${ORIGINS:-http://localhost}
+      # True for production HTTPS only; False allows login on http://localhost
       - HTTPS_ONLY=False
+      # ADMIN_USERNAMES is in admin.env (comma-separated list)
       # Insert API key for Renewable Ninjas
-      - RN_KEY=$RN_KEY
+      - RN_KEY=${RN_KEY}
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=urbs
       - SQL_USER=urbs
       - SQL_PASSWORD=urbs
       - SQL_HOST=db
       - SQL_PORT=5432
+      # Resend (transactional email)
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME}
     depends_on:
       - db
     networks:
       - urbs
     volumes:
       - result_dir:/app/result
+      - ./backend:/app
+    restart: unless-stopped
     # Use this to override the config
     #  - ./yourfolder:/app/config
 
@@ -35,11 +45,12 @@ services:
     # Use this to build the image locally
     build: frontend
     container_name: weburbs-frontend
-    # environment:
-      # Replace localhost by your domain if it differs from the backend url
-      # - VUE_APP_API_URL=http://localhost:9000
+    environment:
+      # Empty = same-origin /api via reverse proxy (avoids mixed-content warnings)
+      - VUE_APP_API_URL=
     networks:
       - urbs
+    restart: unless-stopped
 
   db:
     image: postgres:17
@@ -52,6 +63,7 @@ services:
       - POSTGRES_DB=urbs
     networks:
       - urbs
+    restart: unless-stopped
 
   reverse-proxy:
     image: nginx:alpine
@@ -62,17 +74,30 @@ services:
       - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
       - urbs
+    restart: unless-stopped
+
+  # pinggy:
+  #   image: alpine:3.20
+  #   container_name: weburbs-pinggy
+  #   command: sh -c "apk add --no-cache openssh-client && ssh -p 443 -o StrictHostKeyChecking=no -N -R 80:reverse-proxy:9000 -l ${PINGGY_TOKEN} a.pinggy.io"
+  #   depends_on:
+  #     - reverse-proxy
+  #   networks:
+  #     - urbs
+  #   restart: unless-stopped
 
   optimizer:
-    image: ghcr.io/tum-ens/urbs-weburbs:latest
+#    image: ghcr.io/tum-ens/urbs-weburbs:latest
 #    image: ghcr.io/tum-ens/urbs-weburbs-gurobi:latest
+    build: ../urbs-weburbs
     container_name: optimizer
     volumes:
+      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
+      # Share result directory with backend so .h5 and .xlsx files are visible
       - result_dir:/app/result
-    # use this to store a gurobi license
-#      - ~/gurobi.lic:/opt/gurobi/gurobi.lic:ro
     networks:
       - urbs
+    restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -9,6 +9,9 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
+    <Message v-if="nameError" severity="error" variant="simple" size="small">
+      {{ nameError }}
+    </Message>
     <FloatLabel variant="on">
       <InputMask
         :auto-clear="false"
@@ -52,8 +55,51 @@
       </AccordionPanel>
     </Accordion>
 
-    <Button @click="submit">{{ !!site ? 'Update' : 'Create' }}</Button>
+    <div class="flex flex-row gap-3">
+      <Button
+        v-if="site"
+        fluid
+        :loading="deleting"
+        label="Delete"
+        severity="danger"
+        @click="showDeleteDialog = true"
+      />
+      <Button fluid :loading="updating" @click="submit">
+        {{ site ? 'Update' : 'Create' }}
+      </Button>
+    </div>
   </div>
+
+  <Dialog
+    v-if="site"
+    v-model:visible="showDeleteDialog"
+    modal
+    header="Delete Site"
+    :style="{ width: '450px' }"
+    :closable="false"
+  >
+    <div class="flex items-center space-x-3 mb-4">
+      <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
+      <span class="text-lg">
+        Are you sure you want to delete the site
+        <strong>"{{ site.name }}"</strong>?
+      </span>
+    </div>
+    <p class="text-gray-600 mb-4">
+      This action cannot be undone. All commodities, processes, storage, demand,
+      and other data for this site will be permanently removed. Transmissions
+      connected to this site will also be deleted.
+    </p>
+    <template #footer>
+      <Button text class="mr-2" @click="showDeleteDialog = false">
+        Cancel
+      </Button>
+      <Button severity="danger" :loading="deleting" @click="deleteSite">
+        <span v-if="deleting">Deleting...</span>
+        <span v-else>Delete</span>
+      </Button>
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -62,7 +108,9 @@ import { inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { decimalToDms, dmsToDecimal } from '@/helper/coordinates'
-import { useUpdateSite } from '@/backend/sites'
+import type { AxiosError } from 'axios'
+import { useDeleteSite, useUpdateSite } from '@/backend/sites'
+import { getNameValidationError } from '@/helper/nameValidation'
 import { defaultSite } from '@/backend/defaults'
 
 const toast = useToast()
@@ -72,9 +120,12 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{
   update: [string]
+  delete: []
   updateMarker: [number, number]
   deleteMarker: []
 }>()
+
+const showDeleteDialog = ref(false)
 
 const advanced = inject('advanced')
 
@@ -88,12 +139,24 @@ const lon = ref(
 )
 
 const nameInvalid = ref(false)
+const nameError = ref<string | null>(null)
 const areaInvalid = ref(false)
 const lonInvalid = ref(false)
 const latInvalid = ref(false)
 
 const latReg = /([NS])(\d+)°(\d+)'([\d.]+)''/
 const lonReg = /([EW])(\d+)°(\d+)'([\d.]+)''/
+
+watch(name, () => {
+  if (!name.value) {
+    nameInvalid.value = false
+    nameError.value = null
+    return
+  }
+  nameError.value = getNameValidationError(name.value)
+  nameInvalid.value = nameError.value !== null
+})
+
 watch(
   [lon, lat],
   () => {
@@ -115,15 +178,23 @@ function mapClick(event: L.LeafletMouseEvent) {
 
 defineExpose({ mapClick })
 
-const { mutate: updateSite } = useUpdateSite(route)
+const { mutate: updateSite, isPending: updating } = useUpdateSite(route)
+const { mutate: removeSite, isPending: deleting } = useDeleteSite(route)
 
 function submit() {
   let error = false
   if (!name.value) {
     error = true
     nameInvalid.value = true
+    nameError.value = null
   } else {
-    nameInvalid.value = false
+    nameError.value = getNameValidationError(name.value)
+    if (nameError.value) {
+      error = true
+      nameInvalid.value = true
+    } else {
+      nameInvalid.value = false
+    }
   }
   if (!lon.value || !lon.value.match(lonReg)) {
     error = true
@@ -141,7 +212,7 @@ function submit() {
   if (error) {
     toast.add({
       summary: 'Error',
-      detail: 'Not all fields have been filled properly',
+      detail: nameError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })
@@ -170,6 +241,33 @@ function submit() {
       },
     },
   )
+}
+
+function deleteSite() {
+  if (!props.site) return
+
+  removeSite(props.site.name, {
+    onSuccess() {
+      showDeleteDialog.value = false
+      toast.add({
+        summary: 'Deleted',
+        detail: `Site ${props.site!.name} has been deleted`,
+        severity: 'success',
+        life: 2000,
+      })
+      emit('delete')
+    },
+    onError(error) {
+      toast.add({
+        summary: 'Error deleting',
+        detail:
+          (<AxiosError>error)?.response?.data ||
+          `An error occurred when deleting ${props.site!.name}`,
+        severity: 'error',
+        life: 2000,
+      })
+    },
+  })
 }
 </script>
 

@@ -44,7 +44,7 @@ export interface Commodity {
 export interface ProcessCommodity {
   name: string
   ratio: number
-  ratiomin: number
+  ratiomin?: number | null
 }
 
 export interface Process {
@@ -111,6 +111,7 @@ export interface DemandProfile extends DemandConfig {
 
 export enum TransmissionType {
   hvac = 1,
+  pipe = 2,
 }
 
 export interface Transmission {
@@ -156,6 +157,7 @@ export enum SimulationResultStatus {
   Optimal = 1,
   Infeasible = 2,
   Error = 3,
+  Cancelled = 4,
 }
 
 export interface SimulationInfo {
@@ -206,11 +208,48 @@ export interface SimulationsResults {
         created: {
           [process: string]: number[]
         }
+        consumed?: {
+          [process: string]: number[]
+        }
         storage: {
           Level: number[]
           Stored: number[]
           Retrieved: number[]
         }
+        imported?: {
+          [sourceSite: string]: number[]
+        }
+        exported?: {
+          [destSite: string]: number[]
+        }
+        transmission?: {
+          [sourceSite: string]: number[]
+        }
+        transmission_net?: number[]
+      }
+    }
+  }
+  transmission?: {
+    [sitein: string]: {
+      [siteout: string]: {
+        [commodity: string]: number[]
+      }
+    }
+  }
+  // Optional detailed cost breakdowns provided by the optimizer container
+  // Indexed as process_costs[site][process][costType]
+  process_costs?: {
+    [site: string]: {
+      [process: string]: {
+        [costType: string]: number
+      }
+    }
+  }
+  // Indexed as storage_costs[site][storageLabel][costType]
+  storage_costs?: {
+    [site: string]: {
+      [storage: string]: {
+        [costType: string]: number
       }
     }
   }
@@ -218,4 +257,28 @@ export interface SimulationsResults {
 
 export interface Simulation extends SimulationInfoFull {
   result: SimulationsResults
+}
+
+export type SimulationStepStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+
+export interface SimulationProgressStep {
+  id: string
+  label: string
+  status: SimulationStepStatus
+  duration_seconds?: number
+  started_at?: string
+}
+
+export interface SimulationProgress {
+  steps: SimulationProgressStep[]
+  current_step: string | null
+  failed_at: string | null
+  error_message: string | null
+  progress_percent: number
+  cancelled?: boolean
 }
