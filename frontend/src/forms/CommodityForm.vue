@@ -33,7 +33,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes('price')"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Cost for purchasing one unit (${unitC}) of a stock or buy commodity. Revenue for selling one unit (${unitC}) of a sell commodity. Cost for creating one unit of environmental commodity.\n` +
             `Multiplier for sheet \'Buy-Sell-Price\' for commodity types \'Buy\' and \'Sell\'.`

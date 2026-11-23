@@ -70,7 +70,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.invcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             'Total investement cost for adding storage capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
           "
@@ -83,7 +83,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.fixcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation independent costs for existing and new storage capacities per ${unitC}.`
           "
@@ -96,7 +96,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.varcostc)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           v-tooltip.bottom="
             `Operation dependent costs per ${unitC} stored. This value is usually zero, but can be exploited for modelling short-term storage technologies or ones that have increased wear and tear proportional to amount of stored energy.`
           "
@@ -183,7 +183,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.invcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     'Total investement cost for adding power input/output capacity. Is annualized in the model using the annuity factor derived from \'wacc\' and \'depreciation\'.'
                   "
@@ -198,7 +198,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.fixcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     `Operation independent costs for existing and new capacities per ${unitR} input/output power.`
                   "
@@ -211,7 +211,7 @@
               <FloatLabel variant="on">
                 <InputNumber
                   :invalid="invalids.includes(Errors.varcostp)"
-                  :max-fraction-digits="2"
+                  :max-fraction-digits="6"
                   v-tooltip.bottom="
                     `Operation dependent costs for input or output of energy per ${unitC}_out stored or retrieved.`
                   "

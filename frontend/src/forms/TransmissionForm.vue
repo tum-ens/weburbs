@@ -78,7 +78,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.invcost)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           id="invcost"
           fluid
           v-model="invcost"
@@ -91,7 +91,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.fixcost)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           id="fixcost"
           fluid
           v-model="fixcost"
@@ -104,7 +104,7 @@
       <FloatLabel variant="on">
         <InputNumber
           :invalid="invalids.includes(Errors.fixcost)"
-          :max-fraction-digits="2"
+          :max-fraction-digits="6"
           id="fixcost"
           fluid
           v-model="varcost"
