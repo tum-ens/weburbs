@@ -45,18 +45,6 @@
                 crossOrigin: true
               }"
             />
-            <!-- Fallback tile layer in case OpenStreetMap fails -->
-            <l-tile-layer
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-              layer-type="base"
-              name="CartoDB Light"
-              :options="{ 
-                maxZoom: 19,
-                attribution: '© CartoDB',
-                crossOrigin: true
-              }"
-              style="display: none;"
-            />
             <l-marker
               v-for="site in sites"
               :key="site.name"
@@ -499,6 +487,54 @@ const retryMap = () => {
   })
 }
 
+function findCommodityForStorage(stor: Storage) {
+  const name = stor.commodity?.trim()
+  if (name) {
+    const exact = diagramData.value.commodities.find(c => c.name === name)
+    if (exact) return exact
+    const lower = name.toLowerCase()
+    const fuzzy = diagramData.value.commodities.find(
+      c => c.name.toLowerCase() === lower,
+    )
+    if (fuzzy) return fuzzy
+  }
+  return undefined
+}
+
+const STORAGE_BODY_W = 48
+const STORAGE_BODY_H = 64
+const STORAGE_LABEL_H = 32
+const STORAGE_PAD = 14
+
+function rectsOverlap(
+  a: { left: number; right: number; top: number; bottom: number },
+  b: { left: number; right: number; top: number; bottom: number },
+) {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+}
+
+function storageBounds(x: number, y: number, name: string) {
+  const labelW = Math.max(STORAGE_BODY_W, name.length * 7 + 20)
+  return {
+    left: x + STORAGE_BODY_W / 2 - labelW / 2 - STORAGE_PAD,
+    right: x + STORAGE_BODY_W / 2 + labelW / 2 + STORAGE_PAD,
+    top: y - STORAGE_LABEL_H - STORAGE_PAD,
+    bottom: y + STORAGE_BODY_H + STORAGE_PAD,
+  }
+}
+
+function processBounds(p: { x?: number; y?: number; width?: number; height?: number; name?: string }) {
+  const width = p.width || 120
+  const height = p.height || 40
+  const labelW = Math.max(width, (p.name?.length || 0) * 7)
+  return {
+    left: Math.min(p.x || 0, (p.x || 0) + width / 2 - labelW / 2) - 8,
+    right: Math.max((p.x || 0) + width, (p.x || 0) + width / 2 + labelW / 2) + 8,
+    top: (p.y || 0) - 8,
+    bottom: (p.y || 0) + height + 8,
+  }
+}
+
 // Initialize diagram data when site is selected
 const initializeDiagramData = async () => {
   if (!selectedSite.value) return
@@ -932,41 +968,58 @@ const initializeDiagramData = async () => {
     }
   })
 
-  // Initialize storage - position at the bottom of commodity lines
+  // Initialize storage on the commodity selected in the storage form,
+  // then drop it below any process that occupies the same column.
   const siteStorage = storage.value || []
-  
+  const placedStorage: { x: number; y: number; name: string }[] = []
+
   diagramData.value.storage = siteStorage.map((stor, index) => {
-    // Find the commodity this storage should be attached to
-    // For now, attach to the rightmost commodity (most output usage), but this could be made configurable
-    const targetCommodity = diagramData.value.commodities
-      .sort((a, b) => b.x - a.x)[0]
-    
+    const targetCommodity = findCommodityForStorage(stor)
+
     if (!targetCommodity) {
-      return {
+      const fallback = {
         id: `storage-${stor.name}`,
         name: stor.name,
         x: 800,
-        y: 300 + (index * 80),
-        type: 'storage',
-        data: stor
+        y: 300 + index * 80,
+        type: 'storage' as const,
+        data: stor,
       }
+      placedStorage.push(fallback)
+      return fallback
     }
-    
-    // Position storage to the right of the commodity line, like processes
-    const storageX = targetCommodity.x + 60 // Position storage to the right of commodity line
-    const commodityBottomY = (targetCommodity.y || 0) + 120 // Bottom of commodity line
-    
-    // Position storage a bit above where the commodity line ends
-    const storageY = commodityBottomY - 40 + (index * 80)
-    
-    return {
+
+    const storageX = targetCommodity.x + 60
+    const occupied = [
+      ...diagramData.value.processes.map(p => processBounds(p)),
+      ...placedStorage.map(s => storageBounds(s.x, s.y, s.name)),
+    ]
+
+    const candidate = storageBounds(storageX, 0, stor.name)
+    const blocking = occupied.filter(
+      rect => rect.left < candidate.right && rect.right > candidate.left,
+    )
+    let storageY = blocking.length
+      ? Math.max(...blocking.map(rect => rect.bottom)) + STORAGE_LABEL_H + 16
+      : 110
+
+    // Safety scan in case two items still collide after the column drop
+    for (let step = 0; step < 80; step++) {
+      const next = storageBounds(storageX, storageY, stor.name)
+      if (!occupied.some(rect => rectsOverlap(next, rect))) break
+      storageY += 16
+    }
+
+    const placed = {
       id: `storage-${stor.name}`,
       name: stor.name,
       x: storageX,
       y: storageY,
-      type: 'storage',
-      data: stor
+      type: 'storage' as const,
+      data: stor,
     }
+    placedStorage.push(placed)
+    return placed
   })
 
 
@@ -1085,25 +1138,22 @@ const generateConnections = () => {
     }
   })
   
-  // Connect storage to commodity lines like processes
-  diagramData.value.storage.forEach(storage => {
-    // Find the commodity this storage is attached to (rightmost = most output usage)
-    const targetCommodity = diagramData.value.commodities
-      .sort((a, b) => b.x - a.x)[0]
-    
-    if (targetCommodity && storage.y !== undefined) {
-      const storageCenterY = storage.y + 8 // Middle of storage cylinder
-      
-      // Create horizontal line from commodity to storage (like process connections)
+  // Connect each storage to the commodity configured on that storage
+  diagramData.value.storage.forEach(storageEl => {
+    const targetCommodity = findCommodityForStorage(storageEl.data as Storage)
+
+    if (targetCommodity && storageEl.y !== undefined) {
+      const storageCenterY = storageEl.y + 8
+
       diagramData.value.connections.push({
-        id: `conn-storage-${storage.name}-${targetCommodity.name}`,
-        x1: targetCommodity.x + 2, // From center of commodity line
-        y1: storageCenterY, // Same Y level as storage center
-        x2: storage.x, // To storage left edge
-        y2: storageCenterY, // Same Y level - horizontal line
-        type: 'storage', // Mark as storage connection
-        strokeWidth: 2, // Normal line for storage
-        strokeColor: '#ca8a04' // Dark yellow color for storage connections
+        id: `conn-storage-${storageEl.name}-${targetCommodity.name}`,
+        x1: targetCommodity.x + 2,
+        y1: storageCenterY,
+        x2: storageEl.x,
+        y2: storageCenterY,
+        type: 'storage',
+        strokeWidth: 2,
+        strokeColor: '#ca8a04',
       })
     }
   })
