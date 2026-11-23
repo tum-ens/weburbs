@@ -95,6 +95,62 @@
               />
             </div>
 
+            <!-- LCOE generated / consumed comparison -->
+            <div>
+              <div class="flex items-end gap-3 flex-wrap mb-3">
+                <h3 class="font-bold">Levelized cost</h3>
+                <FloatLabel variant="on" class="w-56">
+                  <Select
+                    inputId="compare-lcoe-metric"
+                    fluid
+                    :options="lcoeMetricOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    v-model="selectedLcoeMetric"
+                  />
+                  <label for="compare-lcoe-metric">LCOE metric</label>
+                </FloatLabel>
+                <FloatLabel variant="on" class="w-44">
+                  <Select
+                    inputId="compare-lcoe-carrier"
+                    fluid
+                    :options="lcoeCarrierOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    v-model="selectedLcoeCarrier"
+                  />
+                  <label for="compare-lcoe-carrier">Commodity</label>
+                </FloatLabel>
+                <FloatLabel variant="on" class="w-36">
+                  <Select
+                    inputId="compare-lcoe-unit"
+                    fluid
+                    :options="lcoeUnitOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    v-model="selectedLcoeUnit"
+                  />
+                  <label for="compare-lcoe-unit">LCOE unit</label>
+                </FloatLabel>
+              </div>
+              <PlotlyDiagram
+                v-if="lcoeChartData.length"
+                :title="lcoeChartTitle"
+                :data="lcoeChartData"
+                titleX="Project"
+                :titleY="lcoeChartAxis"
+                :bargap="0.35"
+                :margin="{ t: 60, l: 100, r: 30, b: 90 }"
+              />
+              <div
+                v-else
+                class="text-sm text-surface-500 dark:text-surface-400"
+              >
+                No energy data available to compute
+                {{ selectedLcoeCarrier === 'heat' ? 'LCOH' : 'LCOE' }}.
+              </div>
+            </div>
+
             <!-- Process installed capacity (grouped by process name) -->
             <div v-if="processCapChart.length">
               <h3 class="font-bold mb-1">Installed capacity — Processes</h3>
@@ -188,6 +244,7 @@ import type {
 } from '@/backend/interfaces'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import { convertToDisplayEnergy, findCarrierUnits } from '@/helper/units'
 
 const router = useRouter()
 const route = useRoute()
@@ -216,10 +273,18 @@ interface ProjectMetrics {
   storageCycles: Record<string, number>
 }
 
+interface LcoeValues {
+  elecGenerated: number
+  elecConsumed: number
+  heatGenerated: number
+  heatConsumed: number
+}
+
 interface CompareRow {
   project: string
   costs: Record<string, number> | null
   metrics: ProjectMetrics | null
+  lcoe: LcoeValues | null
   error?: string
 }
 
@@ -418,6 +483,86 @@ const processProdChart = computed(() => groupedChart('processProd'))
 const storageCapChart = computed(() => groupedChart('storageCap'))
 const storageCyclesChart = computed(() => groupedChart('storageCycles'))
 
+const lcoeMetricOptions = [
+  { label: 'LCOE generated (per delivered)', value: 'generated' },
+  { label: 'LCOE consumed (per demand)', value: 'consumed' },
+]
+const lcoeCarrierOptions = [
+  { label: 'Electricity', value: 'elec' },
+  { label: 'Heat', value: 'heat' },
+]
+const lcoeUnitOptions = [
+  { label: '€/MWh', value: 'MWh' },
+  { label: '€/kWh', value: 'kWh' },
+]
+const selectedLcoeMetric = ref<'generated' | 'consumed'>('generated')
+const selectedLcoeCarrier = ref<'elec' | 'heat'>('elec')
+const selectedLcoeUnit = ref<'MWh' | 'kWh'>('MWh')
+
+const lcoeUnitSuffix = computed(() => `€/${selectedLcoeUnit.value}`)
+
+const lcoeChartTitle = computed(() => {
+  const name = selectedLcoeCarrier.value === 'heat' ? 'LCOH' : 'LCOE'
+  return selectedLcoeMetric.value === 'generated'
+    ? `${name} generated (per delivered)`
+    : `${name} consumed (per demand)`
+})
+
+const lcoeChartAxis = computed(() => {
+  const name = selectedLcoeCarrier.value === 'heat' ? 'LCOH' : 'LCOE'
+  return `${name} [${lcoeUnitSuffix.value}]`
+})
+
+// Stored LCOE is €/MWh; kWh is 1/1000 of that.
+function lcoeInSelectedUnit(valuePerMWh: number): number {
+  return selectedLcoeUnit.value === 'kWh' ? valuePerMWh / 1000 : valuePerMWh
+}
+
+function formatLcoe(value: number): string {
+  if (Math.abs(value) < 1e-12) return ''
+  return selectedLcoeUnit.value === 'kWh' ? value.toFixed(4) : value.toFixed(2)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lcoeChartData = computed<any[]>(() => {
+  const valid = chartProjects.value.filter(r => r.lcoe)
+  if (!valid.length) return []
+
+  const key: keyof LcoeValues =
+    selectedLcoeCarrier.value === 'heat'
+      ? selectedLcoeMetric.value === 'generated'
+        ? 'heatGenerated'
+        : 'heatConsumed'
+      : selectedLcoeMetric.value === 'generated'
+        ? 'elecGenerated'
+        : 'elecConsumed'
+
+  const yValues = valid.map(r => lcoeInSelectedUnit(r.lcoe?.[key] ?? 0))
+  if (yValues.every(v => Math.abs(v) < 1e-12)) return []
+
+  const unit = lcoeUnitSuffix.value
+  return [
+    {
+      type: 'bar',
+      name: lcoeChartTitle.value,
+      x: valid.map(r => r.project),
+      y: yValues,
+      text: yValues.map(v => formatLcoe(v)),
+      texttemplate: '%{text}',
+      textposition: 'outside',
+      textfont: { size: 11 },
+      cliponaxis: false,
+      hovertemplate: `%{x}: %{y:,.4f} ${unit}<extra></extra>`,
+      marker: {
+        color: valid.map(
+          (_, i) => PROJECT_COLORS[i % PROJECT_COLORS.length],
+        ),
+      },
+      showlegend: false,
+    },
+  ]
+})
+
 function sumArray(arr: unknown): number {
   return Array.isArray(arr)
     ? arr.reduce<number>((a, b) => a + (typeof b === 'number' ? b : 0), 0)
@@ -499,6 +644,86 @@ function computeMetrics(
   return { processCap, processProd, storageCap, storageCycles }
 }
 
+function isElecCommodity(name: string): boolean {
+  return name.toUpperCase().includes('ELEC')
+}
+
+function isHeatCommodity(name: string): boolean {
+  const n = name.toUpperCase()
+  return (
+    n.includes('HEAT') ||
+    n.includes('THERMAL') ||
+    n.includes('MJ') ||
+    n.includes('GJ') ||
+    n.includes('KWH_TH')
+  )
+}
+
+function totalSystemCost(costs: Record<string, number>): number {
+  return (
+    (costs.Invest || 0) +
+    (costs.Fixed || 0) +
+    (costs.Fuel || 0) +
+    (costs.Variable || 0) +
+    (costs.Purchase || 0) +
+    (costs.Environmental ?? costs.Environment ?? 0)
+  )
+}
+
+function lcoeFromEnergy(
+  totalCost: number,
+  energyNative: number,
+  unitC?: string,
+): number {
+  if (!energyNative || !totalCost) return 0
+  const energyMWh = convertToDisplayEnergy(energyNative, unitC, 'MW')
+  if (!energyMWh) return 0
+  return totalCost / energyMWh
+}
+
+function sumCarrierEnergy(
+  result: SimulationsResults,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: any,
+  match: (name: string) => boolean,
+): { generated: number; consumed: number } {
+  let generated = 0
+  let consumed = 0
+  const resultsObj = result.results ?? {}
+  for (const site of Object.keys(resultsObj)) {
+    const siteConfig = config?.site?.[site]
+    for (const com of Object.keys(resultsObj[site] ?? {})) {
+      if (!match(com)) continue
+      const comResults = resultsObj[site][com]
+      for (const procName of Object.keys(comResults?.created ?? {})) {
+        if (!siteConfig?.process?.[procName]) continue
+        generated += sumArray(comResults.created[procName])
+      }
+      consumed += sumArray(comResults?.demand)
+    }
+  }
+  return { generated, consumed }
+}
+
+function computeLcoe(
+  result: SimulationsResults,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config: any,
+  costs: Record<string, number>,
+): LcoeValues {
+  const totalCost = totalSystemCost(costs)
+  const elec = sumCarrierEnergy(result, config, isElecCommodity)
+  const heat = sumCarrierEnergy(result, config, isHeatCommodity)
+  const elecUnitC = findCarrierUnits(config, 'elec').unitC
+  const heatUnitC = findCarrierUnits(config, 'heat').unitC
+  return {
+    elecGenerated: lcoeFromEnergy(totalCost, elec.generated, elecUnitC),
+    elecConsumed: lcoeFromEnergy(totalCost, elec.consumed, elecUnitC),
+    heatGenerated: lcoeFromEnergy(totalCost, heat.generated, heatUnitC),
+    heatConsumed: lcoeFromEnergy(totalCost, heat.consumed, heatUnitC),
+  }
+}
+
 async function loadProjectCosts(project: string): Promise<CompareRow> {
   try {
     const sims = await axios
@@ -513,7 +738,13 @@ async function loadProjectCosts(project: string): Promise<CompareRow> {
       )
 
     if (!completed.length) {
-      return { project, costs: null, metrics: null, error: 'No simulation results' }
+      return {
+        project,
+        costs: null,
+        metrics: null,
+        lcoe: null,
+        error: 'No simulation results',
+      }
     }
 
     const simId = completed[0].id
@@ -533,9 +764,16 @@ async function loadProjectCosts(project: string): Promise<CompareRow> {
       if (typeof value === 'number') costs[key] = value
     }
     const metrics = computeMetrics(full.result, config)
-    return { project, costs, metrics }
+    const lcoe = computeLcoe(full.result, config, costs)
+    return { project, costs, metrics, lcoe }
   } catch {
-    return { project, costs: null, metrics: null, error: 'Failed to load results' }
+    return {
+      project,
+      costs: null,
+      metrics: null,
+      lcoe: null,
+      error: 'Failed to load results',
+    }
   }
 }
 
