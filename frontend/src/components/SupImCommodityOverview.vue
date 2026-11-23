@@ -20,6 +20,13 @@
         <!-- hide label -->
         <template #filelabel><template /></template>
       </FileUpload>
+      <Button
+        v-if="supim?.data?.length"
+        icon="pi pi-download"
+        label="Download"
+        class="w-full"
+        @click="download"
+      />
       <Button @click="del" severity="danger" :disabled="!supim?.data">
         Delete SupIm
       </Button>
@@ -62,7 +69,11 @@ import BarDiagramm from '@/plotly/PlotlyDiagram.vue'
 import QuerySupImDialog from '@/dialogs/QuerySupImDialog.vue'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
-import { checkUploadFile } from '@/helper/upload'
+import {
+  checkUploadFile,
+  downloadTimeseriesExcel,
+  projectLabel,
+} from '@/helper/upload'
 
 const route = useRoute()
 const toast = useToast()
@@ -122,6 +133,15 @@ function del() {
 
 function query() {
   queryVisible.value = true
+}
+
+function download() {
+  if (!supim.value?.data?.length) return
+  downloadTimeseriesExcel(
+    supim.value.data,
+    projectLabel(route.params.proj),
+    `${props.site.name}_${props.commodity.name}`,
+  )
 }
 
 const { mutate: uploadSupIm } = useUploadSupIm(

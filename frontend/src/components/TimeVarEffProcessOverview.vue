@@ -14,6 +14,13 @@
         <!-- hide label -->
         <template #filelabel><template /></template>
       </FileUpload>
+      <Button
+        v-if="steps?.data?.length"
+        icon="pi pi-download"
+        label="Download"
+        class="w-full"
+        @click="download"
+      />
       <Button @click="del" severity="danger" :disabled="!steps?.data">
         Delete TimeVarEff
       </Button>
@@ -59,7 +66,11 @@ import {
   useUploadTimeVarEff,
 } from '@/backend/timevareff'
 import { FileUpload, type FileUploadSelectEvent } from 'primevue'
-import { checkUploadFile } from '@/helper/upload'
+import {
+  checkUploadFile,
+  downloadTimeseriesExcel,
+  projectLabel,
+} from '@/helper/upload'
 import { useToast } from 'primevue/usetoast'
 import { useCommodities } from '@/backend/commodities'
 
@@ -133,6 +144,15 @@ async function upload(event: FileUploadSelectEvent) {
       checkingUpload.value = false
     })
 }
+function download() {
+  if (!steps.value?.data?.length) return
+  downloadTimeseriesExcel(
+    steps.value.data,
+    projectLabel(route.params.proj),
+    `${props.site.name}_${props.process.name}`,
+  )
+}
+
 function del() {
   deleteTimeVarEff(undefined, {
     onSuccess() {
