@@ -101,8 +101,8 @@ def readConfig(user, project_name, config):
             project=project,
             name=siteName,
             area=None if dataSite["area"] == "NaN" else dataSite["area"],
-            lat=dataSite["lat"] if "lat" in dataSite else 0,
-            lon=dataSite["lon"] if "lon" in dataSite else 0,
+            lat=dataSite.get("lat", 0),
+            lon=dataSite.get("lon", 0),
         )
         site.save()
 
