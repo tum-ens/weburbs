@@ -127,7 +127,7 @@
       <AccordionPanel v-for="site in sites" :key="site.name" :value="site.name">
         <AccordionHeader>{{ site.name }}</AccordionHeader>
         <AccordionContent>
-          <SiteResults :site="site" :selected-commodity-type="selectedCommodityType" :selected-display-unit="selectedDisplayUnit" />
+          <SiteResults :site="site" :selected-display-unit="selectedDisplayUnit" />
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
@@ -192,7 +192,7 @@
           <thead>
             <tr class="border-b">
               <th class="text-left py-1 pr-2">Technology</th>
-              <th class="text-right py-1 px-2">Energy [MWh]</th>
+              <th class="text-right py-1 px-2">Energy [{{ energySuffix }}]</th>
               <th class="text-right py-1 pl-2">Invest [€]</th>
               <th class="text-right py-1 pl-2">Fixed [€]</th>
               <th class="text-right py-1 pl-2">Fuel [€]</th>
@@ -209,7 +209,7 @@
             >
               <td class="py-1 pr-2">{{ tech.name }}</td>
               <td class="py-1 px-2 text-right">
-                {{ tech.energy.toFixed(1) }}
+                {{ convertEnergyToDisplayUnit(tech.energy).toFixed(1) }}
               </td>
               <td class="py-1 pl-2 text-right">
                   {{ tech.invest.toFixed(0) }}
@@ -357,6 +357,16 @@ import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import { useTransmission } from '@/backend/transmission'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
+import {
+  convertToDisplayEnergy,
+  convertToDisplayMass,
+  convertToDisplayPower,
+  displayEnergyLabel,
+  displayMassLabel,
+  displayPowerLabel,
+  findCarrierUnits,
+  inferDisplayScale,
+} from '@/helper/units'
 import FloatLabel from 'primevue/floatlabel';
 import Select from 'primevue/select';
 
@@ -400,8 +410,28 @@ const techVarCostHeat = ref<Record<string, number>>({})
 // Dropdown selection for which commodity's results to show
 const selectedCommodityType = ref('elec') // Default to Electricity
 
-// Display Units dropdown (now controls LCO units too)
-const selectedDisplayUnit = ref('MW') // Default to MW & tonnes (meaning MWh and tonnes base units)
+// Display Units dropdown — initialized from the electricity commodity unit
+const selectedDisplayUnit = ref('MW')
+const displayUnitInitialized = ref(false)
+
+watch(
+  config,
+  () => {
+    if (displayUnitInitialized.value || !config.value) return
+    selectedDisplayUnit.value = inferDisplayScale(config.value)
+    displayUnitInitialized.value = true
+  },
+  { immediate: true },
+)
+
+const nativeElecUnits = computed(() => findCarrierUnits(config.value, 'elec'))
+const nativeHeatUnits = computed(() => findCarrierUnits(config.value, 'heat'))
+const nativeCo2Units = computed(() => findCarrierUnits(config.value, 'co2'))
+const nativeEnergyUnitC = computed(() =>
+  selectedCommodityType.value === 'elec'
+    ? nativeElecUnits.value.unitC
+    : nativeHeatUnits.value.unitC,
+)
 
 
 // Watcher to calculate ALL base metrics for both commodities
@@ -635,23 +665,31 @@ const currentSlackProduction = computed(() => {
 });
 
 // Computed properties for Energy/Mass DISPLAY values and Suffixes
-const convertEnergyToDisplayUnit = (value: number) => {
-  // Base is MWh. If kW is selected, convert to kWh by multiplying by 1000.
-  return selectedDisplayUnit.value === 'kW' ? value * 1000 : value;
-};
+const convertEnergyToDisplayUnit = (value: number) =>
+  convertToDisplayEnergy(
+    value,
+    nativeEnergyUnitC.value,
+    selectedDisplayUnit.value as 'kW' | 'MW',
+  )
 
-const convertCO2ToDisplayUnit = (value: number) => {
-  // Base is tonnes. If kW is selected (implying kg), convert to kg by multiplying by 1000.
-  return selectedDisplayUnit.value === 'kW' ? value * 1000 : value;
-};
+const convertCO2ToDisplayUnit = (value: number) =>
+  convertToDisplayMass(
+    value,
+    nativeCo2Units.value.unitC,
+    selectedDisplayUnit.value as 'kW' | 'MW',
+  )
 
 const currentProducedDisplay = computed(() => convertEnergyToDisplayUnit(currentProduced.value));
 const currentConsumedDisplay = computed(() => convertEnergyToDisplayUnit(currentConsumed.value));
 const currentLostDisplay = computed(() => convertEnergyToDisplayUnit(currentProduced.value - currentConsumed.value));
 
-const energySuffix = computed(() => selectedDisplayUnit.value === 'kW' ? 'kWh' : 'MWh');
+const energySuffix = computed(() =>
+  displayEnergyLabel(nativeEnergyUnitC.value, selectedDisplayUnit.value as 'kW' | 'MW'),
+)
 
-const co2Suffix = computed(() => selectedDisplayUnit.value === 'kW' ? 'kg' : 'tonnes');
+const co2Suffix = computed(() =>
+  displayMassLabel(nativeCo2Units.value.unitC, selectedDisplayUnit.value as 'kW' | 'MW'),
+)
 
 const co2SavedDisplay = computed(() => {
   // Baseline: 560 kg CO2 per MWh.
@@ -683,36 +721,28 @@ const lcoName = computed(() =>
 const lcoDeliveredValue = computed(() => {
   if (!overview.value) return 0;
 
-  const energyMWh = currentProduced.value; // delivered/produced energy in MWh
-  if (!energyMWh) return 0;
+  const energy = currentProduced.value
+  if (!energy) return 0
 
-  // Total system cost in €
-  const total = totalCost.value;
-
-  const costPerMWh = total / energyMWh;
-
-  // Display in €/MWh (MW mode) or €/kWh (kW mode)
-  return selectedDisplayUnit.value === 'kW' ? costPerMWh / 1000 : costPerMWh;
+  const energyDisplay = convertEnergyToDisplayUnit(energy)
+  if (!energyDisplay) return 0
+  return totalCost.value / energyDisplay
 });
 
 // LCO based on consumed energy (demand)
 const lcoConsumedValue = computed(() => {
   if (!overview.value) return 0;
 
-  const energyMWh = currentConsumed.value; // consumed energy in MWh
-  if (!energyMWh) return 0;
+  const energy = currentConsumed.value
+  if (!energy) return 0
 
-  // Total system cost in €
-  const total = totalCost.value;
-
-  const costPerMWh = total / energyMWh;
-
-  // Display in €/MWh (MW mode) or €/kWh (kW mode)
-  return selectedDisplayUnit.value === 'kW' ? costPerMWh / 1000 : costPerMWh;
+  const energyDisplay = convertEnergyToDisplayUnit(energy)
+  if (!energyDisplay) return 0
+  return totalCost.value / energyDisplay
 });
 
 const lcoSuffix = computed(() =>
-  selectedDisplayUnit.value === 'kW' ? '€/kWh' : '€/MWh',
+  `€/${energySuffix.value}`,
 );
 
 type TechCostRow = {
@@ -1180,17 +1210,24 @@ const transmissionCharts = computed(() => {
     )
     if (!rawFlow || !rawFlow.some(v => Math.abs(v) > 1e-9)) continue
 
-    let unit = 'kW'
+    let unit = displayPowerLabel(
+      undefined,
+      selectedDisplayUnit.value as 'kW' | 'MW',
+    )
     if (config.value.site?.[siteA]?.commodity?.[commodity]?.unitR) {
       const comConfig = config.value.site[siteA].commodity[commodity]
-      unit =
-        selectedDisplayUnit.value === 'kW'
-          ? comConfig.unitR
-          : comConfig.unitR.replace('k', 'M')
+      unit = displayPowerLabel(
+        comConfig.unitR,
+        selectedDisplayUnit.value as 'kW' | 'MW',
+      )
     }
 
     const scaledFlow = rawFlow.map(v =>
-      selectedDisplayUnit.value === 'kW' ? v * 1000 : v,
+      convertToDisplayPower(
+        v,
+        config.value.site?.[siteA]?.commodity?.[commodity]?.unitR,
+        selectedDisplayUnit.value as 'kW' | 'MW',
+      ),
     )
     const groupedFlow = chunkAdd(
       scaledFlow,

@@ -8,7 +8,7 @@
         title="Processes"
         :data="procCapacity"
         :bargap="0.6"
-        titleX="MW"
+        :titleX="procUnitR || 'MW'"
         :margin="{
           t: 150,
           l: 100,
@@ -21,7 +21,7 @@
         :key="proc.name"
         :name="proc.name"
         :value="proc.value"
-        suffix="MW"
+        :suffix="proc.suffix"
       />
       <DataPoint
         v-for="stor in newStor"
@@ -32,9 +32,7 @@
       />
       <DataPoint
         name="Storage cycles per year"
-        :value="
-          storRetrieved / newStor.map(s => s.value).reduce((a, b) => a + b, 0)
-        "
+        :value="storCapNative ? storRetrieved / storCapNative : 0"
         suffix=""
       />
     </div>
@@ -92,7 +90,7 @@
           v-if="annualProductionData && annualProductionData.length > 0"
           :title="productionChartTitle"
           :data="annualProductionData"
-          titleX="GWh"
+          :titleX="annualProductionUnit"
           :bargap="0.5"
           :xaxis-range="annualProductionXRange"
           :margin="{
@@ -121,12 +119,20 @@ import { useGetSimulation, useGetSimulationConfig } from '@/backend/simulate'
 import PlotlyDiagram from '@/plotly/PlotlyDiagram.vue'
 import DataPoint from '@/pages/simulation/DataPoint.vue'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
+import {
+  convertToDisplayEnergy,
+  convertToDisplayPower,
+  displayEnergyLabel,
+  displayPowerLabel,
+  processOutputUnit,
+  siteDemandPowerUnit,
+  type DisplayScale,
+} from '@/helper/units'
 
 const route = useRoute()
 
 const props = defineProps<{
   site: Site
-  selectedCommodityType?: string
   selectedDisplayUnit?: string
 }>()
 
@@ -135,8 +141,17 @@ const advanced = inject<Ref<boolean>>('advanced')
 const { data: simulation } = useGetSimulation(route)
 const { data: config } = useGetSimulationConfig(route)
 
+const displayScale = computed<DisplayScale | undefined>(() =>
+  props.selectedDisplayUnit === 'kW' || props.selectedDisplayUnit === 'MW'
+    ? props.selectedDisplayUnit
+    : undefined,
+)
+
 const procCapacity = ref<Partial<Plotly.Data>[]>()
-const newProcs = ref<{ name: string; value: number }[]>([])
+const procUnitR = ref('MW')
+const newProcs = ref<{ name: string; value: number; suffix: string }[]>([])
+const storCapNative = ref(0)
+const annualProductionUnit = ref('MWh')
 
 const storCapPow = ref<Partial<Plotly.Data>[]>()
 const storUnitR = ref<string[]>()
@@ -170,12 +185,26 @@ const productionChartTitle = computed(() => {
   return `Annual Production for ${com}`
 })
 
+const timeseriesCommodityTypes = computed(() => {
+  const types = config.value?.run_config?.timeseries_commodity_types
+  if (Array.isArray(types)) return types as string[]
+  return ['Demand']
+})
+
 watch(
-  [simulation, advanced, groupOption, selectedCommodity],
+  [
+    simulation,
+    config,
+    advanced,
+    groupOption,
+    selectedCommodity,
+    () => props.selectedDisplayUnit,
+  ],
   () => {
     // Resetting values on each change
     newProcs.value = []
     procCapacity.value = []
+    procUnitR.value = 'MW'
     newStor.value = []
     storCapPow.value = []
     storUnitR.value = []
@@ -184,20 +213,29 @@ watch(
     annualProductionData.value = undefined
     demandCommodityOptions.value = []
     storRetrieved.value = 0
+    storCapNative.value = 0
+    annualProductionUnit.value = 'MWh'
 
 
     if (!simulation.value || !config.value) return
 
     const siteConfig = config.value.site[props.site.name]
     const siteResults = simulation.value.result
+    const commodities = siteConfig.commodity || {}
+    const scale = displayScale.value
+    const fallbackPower = siteDemandPowerUnit(commodities) || 'MW'
 
-    // Init processes
+    // Init processes — every process at this site, independent of the
+    // electricity / heat KPI dropdown at the top of the results page.
     {
       const procsNew = []
       const procsInstalled = []
       const procsNames = []
-      for (const procName in siteResults.process[props.site.name]) {
-        const procConf = siteConfig.process[procName]
+      const procUnits = new Set<string>()
+      const shown = Object.keys(siteResults.process?.[props.site.name] || {})
+      for (const procName of shown) {
+        const procConf = siteConfig.process?.[procName]
+        if (!procConf) continue
         let allIn = true
         let allOut = true
         for (const procConfName in procConf['commodity']) {
@@ -208,12 +246,27 @@ watch(
         if (!advanced?.value && (allIn || allOut)) continue
 
         const proc = siteResults.process[props.site.name][procName]
-        procsNew.push(proc.New)
-        procsInstalled.push(proc.Total - proc.New)
+        const nativeUnit =
+          processOutputUnit(procConf, commodities).unitR || fallbackPower
+        const suffix = displayPowerLabel(nativeUnit, scale)
+        procUnits.add(suffix)
+        procsNew.push(convertToDisplayPower(proc.New, nativeUnit, scale))
+        procsInstalled.push(
+          convertToDisplayPower(proc.Total - proc.New, nativeUnit, scale),
+        )
         procsNames.push(procName)
 
-        newProcs.value.push({ name: procName, value: proc.Total })
+        newProcs.value.push({
+          name: procName,
+          value: convertToDisplayPower(proc.Total, nativeUnit, scale),
+          suffix,
+        })
       }
+      procUnitR.value =
+        procUnits.size === 1
+          ? [...procUnits][0]
+          : [...procUnits].join(' / ') ||
+            displayPowerLabel(fallbackPower, scale)
       procCapacity.value = [
         {
           name: 'Installed Capacity',
@@ -232,32 +285,40 @@ watch(
       ]
     }
 
-    // Init storage
+    // Init storage — every storage at this site (electricity and heat).
     {
       const storCNew = []
       const storCInstalled = []
       const storPNew = []
       const storPInstalled = []
       const storNames = []
-      for (const comName in siteResults.storage[props.site.name]) {
-        const storCom = siteResults.storage[props.site.name][comName]
+      const storageByCom = siteResults.storage?.[props.site.name] || {}
+      const qualifyStor = Object.keys(storageByCom).length > 1
+      for (const comName in storageByCom) {
+        const storCom = storageByCom[comName]
         for (const storName in storCom) {
           const stor = storCom[storName]
 
-          storCNew.push(stor.CNew)
-          storCInstalled.push(stor.CTotal - stor.CNew)
-          storPNew.push(stor.PNew)
-          storPInstalled.push(stor.PTotal - stor.PNew)
-          storNames.push(storName)
-
           const com = siteConfig.commodity[comName]
+          storCNew.push(convertToDisplayEnergy(stor.CNew, com.unitC, scale))
+          storCInstalled.push(
+            convertToDisplayEnergy(stor.CTotal - stor.CNew, com.unitC, scale),
+          )
+          storPNew.push(convertToDisplayPower(stor.PNew, com.unitR, scale))
+          storPInstalled.push(
+            convertToDisplayPower(stor.PTotal - stor.PNew, com.unitR, scale),
+          )
+          const label = qualifyStor ? `${storName} (${comName})` : storName
+          storNames.push(label)
+
+          storCapNative.value += stor.CTotal
           newStor.value.push({
-            name: storName,
-            value: stor.CTotal,
-            suffix: com.unitC,
+            name: label,
+            value: convertToDisplayEnergy(stor.CTotal, com.unitC, scale),
+            suffix: displayEnergyLabel(com.unitC, scale),
           })
-          storUnitR.value.push(com.unitR)
-          storUnitC.value.push(com.unitC)
+          storUnitR.value.push(displayPowerLabel(com.unitR, scale))
+          storUnitC.value.push(displayEnergyLabel(com.unitC, scale))
         }
       }
       storCapPow.value = [
@@ -315,16 +376,20 @@ watch(
     const hasFlow = (series?: number[]) =>
       Array.isArray(series) && series.some(v => Math.abs(v) > 1e-9)
 
-    // Iterate the site's *configured* commodities so that every demand
-    // commodity gets a chart, even when no timeseries was uploaded/simulated.
+    // Iterate the site's configured commodities and chart those whose type
+    // was selected when the simulation was started.
     for (const comName in siteConfig.commodity) {
       const com = siteConfig.commodity[comName]
+      const comType = String(com.Type || com.type || '')
+      const selectedTypes = timeseriesCommodityTypes.value.map(t =>
+        String(t).toLowerCase(),
+      )
+      if (!selectedTypes.includes(comType.toLowerCase())) continue
 
-      // Only build a timeseries chart for demand commodities of this site.
-      if (com.Type !== 'Demand') continue
-
-      // Populate the dropdown options for the annual production chart.
-      demandCommodityOptions.value.push(comName)
+      // Annual production view stays demand-only.
+      if (comType === 'Demand') {
+        demandCommodityOptions.value.push(comName)
+      }
 
       // Result data may be missing entirely when nothing was simulated for it.
       const comResults = results?.[comName]
@@ -335,13 +400,38 @@ watch(
         0,
       )
 
+      const scaleEnergy = (arr: number[]) =>
+        arr.map(v => convertToDisplayEnergy(v, com.unitC, scale))
+
       const traces: Partial<Plotly.Data>[] = []
 
       // Production per process (positive bars); skip all-zero series.
       for (const procName in comResults?.created ?? {}) {
-        const series = chunkAdd(
-          comResults!.created[procName],
-          groupOption.value.groupSize,
+        const series = scaleEnergy(
+          chunkAdd(
+            comResults!.created[procName],
+            groupOption.value.groupSize,
+          ),
+        )
+        if (!hasFlow(series)) continue
+        traces.push({
+          name: procName,
+          x: timeline,
+          y: series,
+          type: 'bar',
+          yaxis: 'y1',
+        })
+      }
+
+      // Process consumption (Grid Sell, curtailment, …) as negative bars,
+      // matching storage charging / export.
+      for (const procName in comResults?.consumed ?? {}) {
+        const series = scaleEnergy(
+          chunkAdd(
+            comResults!.consumed![procName],
+            groupOption.value.groupSize,
+            -1,
+          ),
         )
         if (!hasFlow(series)) continue
         traces.push({
@@ -354,9 +444,11 @@ watch(
       }
 
       // Storage retrieved (positive) and stored (negative); no Level.
-      const retrieved = chunkAdd(
-        comResults?.storage?.Retrieved ?? [],
-        groupOption.value.groupSize,
+      const retrieved = scaleEnergy(
+        chunkAdd(
+          comResults?.storage?.Retrieved ?? [],
+          groupOption.value.groupSize,
+        ),
       )
       if (hasFlow(retrieved)) {
         traces.push({
@@ -367,10 +459,12 @@ watch(
           yaxis: 'y1',
         })
       }
-      const stored = chunkAdd(
-        comResults?.storage?.Stored ?? [],
-        groupOption.value.groupSize,
-        -1,
+      const stored = scaleEnergy(
+        chunkAdd(
+          comResults?.storage?.Stored ?? [],
+          groupOption.value.groupSize,
+          -1,
+        ),
       )
       if (hasFlow(stored)) {
         traces.push({
@@ -384,9 +478,11 @@ watch(
 
       // Import from neighbouring sites (positive bars); skip all-zero series.
       for (const sourceSite in comResults?.imported ?? {}) {
-        const series = chunkAdd(
-          comResults!.imported![sourceSite],
-          groupOption.value.groupSize,
+        const series = scaleEnergy(
+          chunkAdd(
+            comResults!.imported![sourceSite],
+            groupOption.value.groupSize,
+          ),
         )
         if (!hasFlow(series)) continue
         traces.push({
@@ -400,10 +496,12 @@ watch(
 
       // Export to neighbouring sites (negative bars); skip all-zero series.
       for (const destSite in comResults?.exported ?? {}) {
-        const series = chunkAdd(
-          comResults!.exported![destSite],
-          groupOption.value.groupSize,
-          -1,
+        const series = scaleEnergy(
+          chunkAdd(
+            comResults!.exported![destSite],
+            groupOption.value.groupSize,
+            -1,
+          ),
         )
         if (!hasFlow(series)) continue
         traces.push({
@@ -415,23 +513,33 @@ watch(
         })
       }
 
-      // Demand line. Always shown for a demand commodity so the plot exists
-      // even when no demand timeseries was uploaded (flat zero in that case).
+      // Demand line: always for Demand commodities; otherwise only if present.
       const demandRaw = comResults?.demand ?? []
-      const demand = demandRaw.length
-        ? chunkAdd(demandRaw, groupOption.value.groupSize)
-        : new Array(groupOption.value.groups).fill(0)
-      traces.push({
-        name: 'Demand',
-        x: timeline,
-        y: demand,
-        type: 'scatter',
-        yaxis: 'y1',
-      })
+      const demand = scaleEnergy(
+        demandRaw.length
+          ? chunkAdd(demandRaw, groupOption.value.groupSize)
+          : new Array(groupOption.value.groups).fill(0),
+      )
+      if (comType === 'Demand' || hasFlow(demand)) {
+        traces.push({
+          name: comType === 'Demand' ? 'Demand' : comType,
+          x: timeline,
+          y: demand,
+          type: 'scatter',
+          yaxis: 'y1',
+        })
+      }
 
-      commodityDetails.value[comName] = {
-        unitR: com.unitR,
-        unitC: com.unitC,
+      if (!traces.length) continue
+
+      const chartName =
+        timeseriesCommodityTypes.value.length === 1 &&
+        timeseriesCommodityTypes.value[0] === 'Demand'
+          ? comName
+          : `${comName} (${comType})`
+      commodityDetails.value[chartName] = {
+        unitR: displayPowerLabel(com.unitR, scale),
+        unitC: displayEnergyLabel(com.unitC, scale),
         data: traces,
       }
     }
@@ -455,6 +563,10 @@ watch(
 
       if (selectedCommodity.value && results && results[selectedCommodity.value]) {
         const commodityResult = results[selectedCommodity.value]
+        annualProductionUnit.value = displayEnergyLabel(
+          siteConfig.commodity[selectedCommodity.value]?.unitC,
+          scale,
+        )
         
         // Check if created property exists
         if (commodityResult && commodityResult.created) {
@@ -470,17 +582,22 @@ watch(
                 const processProduction = productionByProcess[procName]
                 // Ensure it's an array and has values
                 if (Array.isArray(processProduction) && processProduction.length > 0) {
-                  const yearlyProductionMWh = processProduction.reduce(
+                  const yearlyProduction = processProduction.reduce(
                     (sum, current) => sum + (current || 0),
                     0,
                   )
-                  // Convert from MWh to GWh
-                  const yearlyProductionGWh = yearlyProductionMWh / 1000
+                  const nativeUnitC =
+                    siteConfig.commodity[selectedCommodity.value]?.unitC
+                  const displayProduction = convertToDisplayEnergy(
+                    yearlyProduction,
+                    nativeUnitC,
+                    scale,
+                  )
 
                   // Only add processes with non-zero production
-                  if (yearlyProductionGWh > 0) {
+                  if (displayProduction > 0) {
                     processNames.push(procName)
-                    productionTotals.push(yearlyProductionGWh)
+                    productionTotals.push(displayProduction)
                   }
                 }
               }
