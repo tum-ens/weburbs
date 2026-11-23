@@ -106,7 +106,7 @@ const duplicateProcess = async (process: Process) => {
   try {
     await duplicateProcessMutation.mutateAsync({
       site_name: curSite.value,
-      process_name: process.name
+      process_name: process.name,
     })
   } catch (error) {
     console.error('Failed to duplicate process:', error)
@@ -125,49 +125,58 @@ watch(
 // Watch for query parameters to auto-open edit dialog or create dialog
 watch(
   () => route.query,
-  (query) => {
+  query => {
     // Handle auto-edit for existing processes
     if (query.autoEdit === 'true' && query.edit && query.site) {
       curSite.value = query.site as string
-      
+
       // Get processes for the specified site
-      const { data: processes } = useProcesses(route, { name: query.site } as any)
-      
+      const { data: processes } = useProcesses(route, {
+        name: query.site as string,
+      })
+
       watch(
         processes,
-        (procs) => {
+        procs => {
           if (procs) {
             const targetProcess = procs.find(p => p.name === query.edit)
             if (targetProcess) {
               clickedProcess.value = targetProcess
               editVisible.value = true
-              console.log('Auto-opening edit dialog for process:', targetProcess.name)
+              console.log(
+                'Auto-opening edit dialog for process:',
+                targetProcess.name,
+              )
             }
           }
         },
-        { immediate: true }
+        { immediate: true },
       )
     }
-    
+
     // Handle auto-create for new processes
-    if (query.create === 'true' && query.site && query.from === 'energy-diagram') {
+    if (
+      query.create === 'true' &&
+      query.site &&
+      query.from === 'energy-diagram'
+    ) {
       console.log('Auto-create triggered for process at site:', query.site)
       curSite.value = query.site as string
-      
+
       // Wait for sites to load and then open create dialog
       watch(
         sites,
-        (sitesData) => {
+        sitesData => {
           if (sitesData && sitesData.length > 0) {
             createVisible.value = true
             console.log('✅ Auto-opening create dialog for process')
           }
         },
-        { immediate: true }
+        { immediate: true },
       )
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const items = [

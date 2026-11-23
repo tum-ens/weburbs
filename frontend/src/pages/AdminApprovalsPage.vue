@@ -14,7 +14,10 @@
         </div>
       </template>
       <template #content>
-        <div v-if="!authenticated" class="text-surface-600 dark:text-surface-300">
+        <div
+          v-if="!authenticated"
+          class="text-surface-600 dark:text-surface-300"
+        >
           Please log in first.
         </div>
 
@@ -80,7 +83,10 @@
             </div>
 
             <div v-if="error" class="text-red-500">Failed to load users.</div>
-            <div v-else-if="loading" class="text-surface-600 dark:text-surface-300">
+            <div
+              v-else-if="loading"
+              class="text-surface-600 dark:text-surface-300"
+            >
               Loading…
             </div>
             <div
@@ -104,29 +110,39 @@
                       title="Online now"
                     />
                     <span
-                      v-if="status === 'approved' && runningForUser(u.username).length"
+                      v-if="
+                        status === 'approved' &&
+                        runningForUser(u.username).length
+                      "
                       class="inline-block w-2.5 h-2.5 rounded-full bg-green-500 shrink-0"
                       title="Simulation running"
                     />
                     {{ u.username }}
                   </span>
-                  <span class="text-sm text-surface-600 dark:text-surface-300">{{
-                    u.email
-                  }}</span>
                   <span
-                    v-if="status === 'approved' && !u.is_online && u.last_seen_at"
+                    class="text-sm text-surface-600 dark:text-surface-300"
+                    >{{ u.email }}</span
+                  >
+                  <span
+                    v-if="
+                      status === 'approved' && !u.is_online && u.last_seen_at
+                    "
                     class="text-xs text-surface-500 dark:text-surface-400"
                   >
                     Last seen {{ formatDateTime(u.last_seen_at) }}
                   </span>
                   <span
-                    v-else-if="status === 'approved' && !u.is_online && !u.last_seen_at"
+                    v-else-if="
+                      status === 'approved' && !u.is_online && !u.last_seen_at
+                    "
                     class="text-xs text-surface-500 dark:text-surface-400"
                   >
                     Last seen: never
                   </span>
                   <div
-                    v-if="status === 'approved' && runningForUser(u.username).length"
+                    v-if="
+                      status === 'approved' && runningForUser(u.username).length
+                    "
                     class="flex flex-col gap-1 mt-1"
                   >
                     <div
@@ -141,9 +157,7 @@
                         icon="pi pi-stop-circle"
                         label="Stop simulation"
                         outlined
-                        :loading="
-                          stopSimPending && stopSimId === sim.id
-                        "
+                        :loading="stopSimPending && stopSimId === sim.id"
                         @click="adminStopSimulation(sim.id, u.username)"
                       />
                     </div>
@@ -152,8 +166,8 @@
                     v-if="status === 'rejected' && u.rejected_at"
                     class="text-xs text-surface-500 dark:text-surface-400"
                   >
-                    Rejected {{ formatDateTime(u.rejected_at) }} · removed automatically
-                    after 30 days
+                    Rejected {{ formatDateTime(u.rejected_at) }} · removed
+                    automatically after 30 days
                   </span>
                   <span
                     v-if="status === 'unverified'"
@@ -161,7 +175,8 @@
                   >
                     Registered {{ formatDateTime(u.date_joined) }}
                     <template v-if="u.token_date">
-                      · verification email sent {{ formatDateTime(u.token_date) }}
+                      · verification email sent
+                      {{ formatDateTime(u.token_date) }}
                     </template>
                     · removed automatically after 30 days
                   </span>
@@ -202,7 +217,10 @@
                     @click="confirmDelete(u.username)"
                   />
                 </div>
-                <div v-else-if="status === 'rejected'" class="flex gap-2 flex-wrap">
+                <div
+                  v-else-if="status === 'rejected'"
+                  class="flex gap-2 flex-wrap"
+                >
                   <Button
                     severity="success"
                     icon="pi pi-user-plus"
@@ -315,7 +333,8 @@ const users = ref<PendingUser[] | null>(null)
 const loading = ref(false)
 const error = ref(false)
 
-const { mutateAsync: approveMutate, isPending: approvePending } = useApproveUser()
+const { mutateAsync: approveMutate, isPending: approvePending } =
+  useApproveUser()
 const { mutateAsync: rejectMutate, isPending: rejectPending } = useRejectUser()
 const { mutateAsync: deleteMutate, isPending: deletePending } =
   useDeleteUserPermanently()
@@ -337,7 +356,8 @@ function runningForUser(username: string) {
 }
 
 async function loadRunningSimulations() {
-  if (!authenticated.value || !isAdmin.value || status.value !== 'approved') return
+  if (!authenticated.value || !isAdmin.value || status.value !== 'approved')
+    return
   try {
     runningByUser.value = await fetchRunningSimulations()
   } catch {
@@ -346,9 +366,15 @@ async function loadRunningSimulations() {
 }
 
 async function refreshApprovedStatus() {
-  if (!authenticated.value || !isAdmin.value || status.value !== 'approved') return
+  if (!authenticated.value || !isAdmin.value || status.value !== 'approved')
+    return
   try {
-    const res = await fetchUsers(status.value, page.value, search.value, pageSize)
+    const res = await fetchUsers(
+      status.value,
+      page.value,
+      search.value,
+      pageSize,
+    )
     users.value = res.results
   } catch {
     // keep existing list on transient errors
@@ -377,7 +403,12 @@ async function load() {
   loading.value = true
   error.value = false
   try {
-    const res = await fetchUsers(status.value, page.value, search.value, pageSize)
+    const res = await fetchUsers(
+      status.value,
+      page.value,
+      search.value,
+      pageSize,
+    )
     users.value = res.results
     total.value = res.total
     totalPages.value = res.total_pages || 1
@@ -580,4 +611,3 @@ function prevPage() {
   }
 }
 </script>
-

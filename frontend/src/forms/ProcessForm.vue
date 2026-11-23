@@ -232,9 +232,7 @@
                         'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
                       "
                       v-model="inCom.ratiomin"
-                      :invalid="
-                        inCom.ratiomin != null && inCom.ratiomin < 0
-                      "
+                      :invalid="inCom.ratiomin != null && inCom.ratiomin < 0"
                     />
                     <label for="ratiomin">Minimum ratio</label>
                   </FloatLabel>
@@ -286,9 +284,7 @@
                         'Input/Output ratio at point of minimum operation (min-fract in \'Process\' sheet). All values have to be larger/equal to ratio! Leave empty to not set it.'
                       "
                       v-model="outCom.ratiomin"
-                      :invalid="
-                        outCom.ratiomin != null && outCom.ratiomin < 0
-                      "
+                      :invalid="outCom.ratiomin != null && outCom.ratiomin < 0"
                     />
                     <label for="ratiomin">Minimum ratio</label>
                   </FloatLabel>
@@ -473,26 +469,23 @@ const unitC = computed(() => unitSource.value?.unitC || 'MWh')
 const unitCboxed = computed(() =>
   unitR.value.includes('/') ? `(${unitC.value})` : unitC.value,
 )
-watch(
-  commodities,
-  () => {
-    if (!commodities.value) return
+watch(commodities, () => {
+  if (!commodities.value) return
 
-    const retag = (list: ProcComTag[]) =>
-      list.map(item => {
-        const com = commodities.value.find(c => c.name === item.name)
-        if (!com) return item
-        return {
-          ...item,
-          unit: com.type === CommodityType.Demand,
-          unitR: com.unitR,
-          unitC: com.unitC,
-        }
-      })
-    outComs.value = retag(outComs.value)
-    inComs.value = retag(inComs.value)
-  },
-)
+  const retag = (list: ProcComTag[]) =>
+    list.map(item => {
+      const com = commodities.value.find(c => c.name === item.name)
+      if (!com) return item
+      return {
+        ...item,
+        unit: com.type === CommodityType.Demand,
+        unitR: com.unitR,
+        unitC: com.unitC,
+      }
+    })
+  outComs.value = retag(outComs.value)
+  inComs.value = retag(inComs.value)
+})
 
 const invalids = ref<string[]>([])
 const nameValidationError = computed(() => getNameValidationError(name.value))
@@ -555,8 +548,7 @@ function submit() {
     toast.add({
       summary: 'Error',
       detail:
-        nameValidationError.value ||
-        'Not all fields have been filled properly',
+        nameValidationError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

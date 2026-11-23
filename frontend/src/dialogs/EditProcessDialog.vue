@@ -28,21 +28,19 @@
     <div class="flex items-center space-x-3 mb-4">
       <i class="pi pi-exclamation-triangle text-red-500 text-2xl"></i>
       <span class="text-lg">
-        Are you sure you want to delete the process <strong>"{{ props.process.name }}"</strong>?
+        Are you sure you want to delete the process
+        <strong>"{{ props.process.name }}"</strong>?
       </span>
     </div>
     <p class="text-gray-600 mb-4">
-      This action cannot be undone. All data associated with this process will be permanently removed.
+      This action cannot be undone. All data associated with this process will
+      be permanently removed.
     </p>
     <template #footer>
       <Button @click="showDeleteDialog = false" text class="mr-2">
         Cancel
       </Button>
-      <Button
-        @click="deleteProc"
-        :loading="deleting"
-        severity="danger"
-      >
+      <Button @click="deleteProc" :loading="deleting" severity="danger">
         <span v-if="deleting">Deleting...</span>
         <span v-else>Delete</span>
       </Button>
@@ -77,7 +75,7 @@ watch(visible, (newValue, oldValue) => {
     router.push({
       name: 'ProjectEnergyDiagram',
       params: { proj: route.params.proj },
-      query: { site: props.site_name }
+      query: { site: props.site_name },
     })
   }
 })

@@ -27,9 +27,7 @@ def send_resend_email(*, to: str, subject: str, text: str) -> None:
         timeout=30,
     )
     if response.status_code >= 400:
-        raise RuntimeError(
-            f"Resend API error {response.status_code}: {response.text}"
-        )
+        raise RuntimeError(f"Resend API error {response.status_code}: {response.text}")
 
 
 def use_resend() -> bool:

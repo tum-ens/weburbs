@@ -168,7 +168,9 @@
 
             <!-- Process total annual production (grouped by process name) -->
             <div v-if="processProdChart.length">
-              <h3 class="font-bold mb-1">Total annual production — Processes</h3>
+              <h3 class="font-bold mb-1">
+                Total annual production — Processes
+              </h3>
               <PlotlyDiagram
                 title="Annual production per process"
                 :data="processProdChart"
@@ -347,9 +349,7 @@ function sortCostCategories(categories: string[]): string[] {
 function costColor(category: string): string {
   if (COST_COLORS[category]) return COST_COLORS[category]
   const idx = availableCostCategories.value.indexOf(category)
-  return FALLBACK_COLORS[
-    (idx >= 0 ? idx : 0) % FALLBACK_COLORS.length
-  ]
+  return FALLBACK_COLORS[(idx >= 0 ? idx : 0) % FALLBACK_COLORS.length]
 }
 
 const availableCostCategories = computed(() => {
@@ -554,9 +554,7 @@ const lcoeChartData = computed<any[]>(() => {
       cliponaxis: false,
       hovertemplate: `%{x}: %{y:,.4f} ${unit}<extra></extra>`,
       marker: {
-        color: valid.map(
-          (_, i) => PROJECT_COLORS[i % PROJECT_COLORS.length],
-        ),
+        color: valid.map((_, i) => PROJECT_COLORS[i % PROJECT_COLORS.length]),
       },
       showlegend: false,
     },

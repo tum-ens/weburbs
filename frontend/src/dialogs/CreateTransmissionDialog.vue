@@ -31,13 +31,17 @@ const visible = defineModel<boolean>('visible', { default: false })
 
 // Watch for dialog close and navigate back to energy diagram if needed
 watch(visible, (newValue, oldValue) => {
-  if (oldValue === true && newValue === false && route.query.from === 'energy-diagram') {
+  if (
+    oldValue === true &&
+    newValue === false &&
+    route.query.from === 'energy-diagram'
+  ) {
     console.log('Navigating back to energy diagram from transmission creation')
     const siteName = route.query.site as string
     router.push({
       name: 'ProjectEnergyDiagram',
       params: { proj: route.params.proj },
-      query: { site: siteName }
+      query: { site: siteName },
     })
   }
 })

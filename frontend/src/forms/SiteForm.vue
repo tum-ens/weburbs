@@ -9,12 +9,7 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
-    <Message
-      v-if="nameError"
-      severity="error"
-      variant="simple"
-      size="small"
-    >
+    <Message v-if="nameError" severity="error" variant="simple" size="small">
       {{ nameError }}
     </Message>
     <FloatLabel variant="on">
@@ -217,9 +212,7 @@ function submit() {
   if (error) {
     toast.add({
       summary: 'Error',
-      detail:
-        nameError.value ||
-        'Not all fields have been filled properly',
+      detail: nameError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

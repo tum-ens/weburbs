@@ -96,8 +96,10 @@ export function displayEnergyLabel(
   const prefix = energyPrefix(nativeUnit)
   if (!prefix) return nativeUnit || (display === 'kW' ? 'kWh' : 'MWh')
   if (!display) return nativeUnit || 'MWh'
-  return (display === 'kW' ? 'kWh' : 'MWh') +
+  return (
+    (display === 'kW' ? 'kWh' : 'MWh') +
     (nativeUnit || '').replace(/^\s*(kWh|MWh)/i, '')
+  )
 }
 
 export function displayMassLabel(
@@ -111,9 +113,7 @@ export function displayMassLabel(
 }
 
 export function processOutputUnit(
-  procConf:
-    | { commodity?: Record<string, { Direction?: string }> }
-    | undefined,
+  procConf: { commodity?: Record<string, { Direction?: string }> } | undefined,
   commodities: Record<string, CommodityLike>,
 ): { unitR?: string; unitC?: string } {
   if (!procConf?.commodity) return {}
@@ -169,10 +169,7 @@ export function siteDemandPowerUnit(
 export function findCarrierUnits(
   config:
     | {
-        site?: Record<
-          string,
-          { commodity?: Record<string, CommodityLike> }
-        >
+        site?: Record<string, { commodity?: Record<string, CommodityLike> }>
       }
     | undefined,
   carrier: 'elec' | 'heat' | 'co2',
@@ -206,9 +203,7 @@ export function inferDisplayScale(
 }
 
 export function processOutputsCarrier(
-  procConf:
-    | { commodity?: Record<string, { Direction?: string }> }
-    | undefined,
+  procConf: { commodity?: Record<string, { Direction?: string }> } | undefined,
   carrier?: string,
 ): boolean {
   if (!carrier || !procConf?.commodity) return true

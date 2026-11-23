@@ -580,8 +580,7 @@ function submit() {
     toast.add({
       summary: 'Error',
       detail:
-        nameValidationError.value ||
-        'Not all fields have been filled properly',
+        nameValidationError.value || 'Not all fields have been filled properly',
       severity: 'error',
       life: 2000,
     })

@@ -2,7 +2,9 @@ export const FORBIDDEN_NAME_CHARS_LABEL = '/ \\ ? # %'
 
 const FORBIDDEN_NAME_CHARS_PATTERN = /[/\\?#%]/
 
-export function getNameValidationError(name: string | null | undefined): string | null {
+export function getNameValidationError(
+  name: string | null | undefined,
+): string | null {
   if (!name || name.trim() === '') {
     return null
   }

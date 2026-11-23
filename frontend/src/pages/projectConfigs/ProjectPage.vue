@@ -4,7 +4,7 @@
       <template #title>Project "{{ project.name }}"</template>
       <template #content> General project page </template>
     </Card>
-    
+
     <!-- This renders the child routes like energy-diagram, sites, etc. -->
     <router-view />
   </div>

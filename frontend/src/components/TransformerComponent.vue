@@ -6,7 +6,7 @@
       <span>{{ title }}</span>
       <span>{{ description }}</span>
     </div>
-    
+
     <div class="grid grid-cols-3">
       <div class="flex flex-col justify-center">
         <span v-for="i in props.in" :key="i">{{ i }}</span>
@@ -21,7 +21,7 @@
         <span v-for="o in props.out" :key="o">{{ o }}</span>
       </div>
     </div>
-    
+
     <!-- Action Buttons - Bottom Right Corner -->
     <div class="absolute bottom-2 right-2 flex gap-1" v-if="showActions">
       <template v-if="props.componentType === 'project'">
@@ -33,7 +33,9 @@
           :disabled="downloadLoading"
           @click.stop="toggleDownloadMenu"
           class="p-button-sm"
-          v-tooltip.bottom="downloadLoading ? 'Downloading...' : 'Download project'"
+          v-tooltip.bottom="
+            downloadLoading ? 'Downloading...' : 'Download project'
+          "
         />
         <Menu ref="downloadMenu" :model="downloadItems" popup />
       </template>
@@ -43,7 +45,11 @@
         text
         @click.stop="emit('duplicate')"
         class="p-button-sm"
-        v-tooltip.bottom="props.componentType === 'transmission' ? 'Create Reverse Transmission' : 'Duplicate'"
+        v-tooltip.bottom="
+          props.componentType === 'transmission'
+            ? 'Create Reverse Transmission'
+            : 'Duplicate'
+        "
       />
     </div>
   </div>
@@ -59,7 +65,12 @@ const props = defineProps<{
   in: string[]
   out: string[]
   showActions?: boolean
-  componentType?: 'commodity' | 'process' | 'storage' | 'transmission' | 'project'
+  componentType?:
+    | 'commodity'
+    | 'process'
+    | 'storage'
+    | 'transmission'
+    | 'project'
   downloadLoading?: boolean
 }>()
 

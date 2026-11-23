@@ -1,4 +1,9 @@
-import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/vue-query'
 import axios, { type AxiosResponse } from 'axios'
 import { onUnmounted, watch } from 'vue'
 
@@ -71,7 +76,8 @@ export type MeResponse = {
 export function useMe() {
   return useQuery({
     queryKey: ['me'],
-    queryFn: () => axios.get<MeResponse>('/api/security/me/').then(res => res.data),
+    queryFn: () =>
+      axios.get<MeResponse>('/api/security/me/').then(res => res.data),
     retry: false,
   })
 }
@@ -97,11 +103,7 @@ export function usePendingUsers() {
   })
 }
 
-export type UserListStatus =
-  | 'pending'
-  | 'unverified'
-  | 'approved'
-  | 'rejected'
+export type UserListStatus = 'pending' | 'unverified' | 'approved' | 'rejected'
 
 export type UserListResponse = {
   results: PendingUser[]
@@ -199,9 +201,9 @@ export type RunningSimulationInfo = {
 
 export async function fetchRunningSimulations() {
   return axios
-    .get<{ by_user: Record<string, RunningSimulationInfo[]> }>(
-      '/api/security/running_simulations/',
-    )
+    .get<{
+      by_user: Record<string, RunningSimulationInfo[]>
+    }>('/api/security/running_simulations/')
     .then(res => res.data.by_user)
 }
 
@@ -262,7 +264,8 @@ export async function login(
       const detail = err.response?.data?.detail
       if (status === 406) return 'verification'
       if (status === 403) return 'approval'
-      if (typeof detail === 'string' && detail) return { ok: false as const, detail }
+      if (typeof detail === 'string' && detail)
+        return { ok: false as const, detail }
       return { ok: false as const, detail: '' }
     })
 }

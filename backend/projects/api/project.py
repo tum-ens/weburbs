@@ -3,23 +3,23 @@ import re
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, validate_name_http_response
 from projects.models import (
-    Project,
-    Site,
+    DSM,
+    BuySellPrice,
     Commodity,
+    Demand,
     Process,
     ProcessCommodity,
+    Project,
+    Site,
     Storage,
-    Demand,
     SupIm,
-    DSM,
     TimeVarEff,
     Transmission,
-    BuySellPrice,
 )
 
 

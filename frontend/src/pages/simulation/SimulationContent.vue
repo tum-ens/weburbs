@@ -31,7 +31,9 @@
       />
       <div class="grid grid-cols-2 gap-3 justify-items-center">
         <div class="col-span-2 flex items-center justify-center gap-2 mb-2">
-          <label for="commodity-select" class="font-bold">Show Results For:</label>
+          <label for="commodity-select" class="font-bold"
+            >Show Results For:</label
+          >
           <select
             id="commodity-select"
             v-model="selectedCommodityType"
@@ -43,7 +45,9 @@
         </div>
 
         <div class="col-span-2 flex items-center justify-center gap-2 mb-2">
-          <label for="display-unit-select" class="font-bold">Display Units:</label>
+          <label for="display-unit-select" class="font-bold"
+            >Display Units:</label
+          >
           <select
             id="display-unit-select"
             v-model="selectedDisplayUnit"
@@ -102,38 +106,44 @@
           :suffix="energySuffix"
         />
       </div>
-<!--      <PlotlyDiagram-->
-<!--        title="Share of Renewables"-->
-<!--        class="min-h-96"-->
-<!--        :data="[-->
-<!--          {-->
-<!--            values: [-->
-<!--              Math.max(currentConsumed - currentFossilProduced, 0),-->
-<!--              currentFossilProduced > 0.1 ? currentFossilProduced : 0,-->
-<!--            ],-->
-<!--            labels: ['Renewables', 'Fossils'],-->
-<!--            marker: {-->
-<!--              colors: ['rgb(44, 160, 44)', 'rgb(214, 39, 40)'],-->
-<!--            },-->
-<!--            type: 'pie',-->
-<!--            hole: 0.6,-->
-<!--          },-->
-<!--        ]"-->
-<!--        :margin="{ l: 0, b: 0, r: 0 }"-->
-<!--      />-->
+      <!--      <PlotlyDiagram-->
+      <!--        title="Share of Renewables"-->
+      <!--        class="min-h-96"-->
+      <!--        :data="[-->
+      <!--          {-->
+      <!--            values: [-->
+      <!--              Math.max(currentConsumed - currentFossilProduced, 0),-->
+      <!--              currentFossilProduced > 0.1 ? currentFossilProduced : 0,-->
+      <!--            ],-->
+      <!--            labels: ['Renewables', 'Fossils'],-->
+      <!--            marker: {-->
+      <!--              colors: ['rgb(44, 160, 44)', 'rgb(214, 39, 40)'],-->
+      <!--            },-->
+      <!--            type: 'pie',-->
+      <!--            hole: 0.6,-->
+      <!--          },-->
+      <!--        ]"-->
+      <!--        :margin="{ l: 0, b: 0, r: 0 }"-->
+      <!--      />-->
     </div>
 
     <Accordion lazy>
       <AccordionPanel v-for="site in sites" :key="site.name" :value="site.name">
         <AccordionHeader>{{ site.name }}</AccordionHeader>
         <AccordionContent>
-          <SiteResults :site="site" :selected-display-unit="selectedDisplayUnit" />
+          <SiteResults
+            :site="site"
+            :selected-display-unit="selectedDisplayUnit"
+          />
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
 
     <!-- Transmission Section -->
-    <div v-if="transmissionCharts && Object.keys(transmissionCharts).length > 0" class="grid grid-cols-1 gap-3 mt-6">
+    <div
+      v-if="transmissionCharts && Object.keys(transmissionCharts).length > 0"
+      class="grid grid-cols-1 gap-3 mt-6"
+    >
       <div class="flex items-center justify-between flex-wrap gap-3">
         <h2 class="text-xl font-bold">Transmission Flows</h2>
         <div class="flex items-center gap-3">
@@ -159,7 +169,12 @@
           </FloatLabel>
         </div>
       </div>
-      <div v-if="selectedTransmission && transmissionCharts[selectedTransmission.key]" class="grid grid-cols-1 gap-3">
+      <div
+        v-if="
+          selectedTransmission && transmissionCharts[selectedTransmission.key]
+        "
+        class="grid grid-cols-1 gap-3"
+      >
         <PlotlyDiagram
           :title="`${selectedTransmission.siteA} → ${selectedTransmission.siteB}`"
           :data="transmissionCharts[selectedTransmission.key].data"
@@ -212,22 +227,22 @@
                 {{ convertEnergyToDisplayUnit(tech.energy).toFixed(1) }}
               </td>
               <td class="py-1 pl-2 text-right">
-                  {{ tech.invest.toFixed(0) }}
-                </td>
-                <td class="py-1 pl-2 text-right">
-                  {{ tech.fixed.toFixed(0) }}
-                </td>
-                <td class="py-1 pl-2 text-right">
-                  {{ tech.fuel.toFixed(0) }}
-                </td>
-                <td class="py-1 pl-2 text-right">
-                  {{ tech.variable.toFixed(0) }}
-                </td>
-                <td class="py-1 pl-2 text-right">
-                  {{ tech.environment.toFixed(0) }}
-                </td>
-                <td class="py-1 pl-2 text-right">
-                  {{ tech.total.toFixed(0) }}
+                {{ tech.invest.toFixed(0) }}
+              </td>
+              <td class="py-1 pl-2 text-right">
+                {{ tech.fixed.toFixed(0) }}
+              </td>
+              <td class="py-1 pl-2 text-right">
+                {{ tech.fuel.toFixed(0) }}
+              </td>
+              <td class="py-1 pl-2 text-right">
+                {{ tech.variable.toFixed(0) }}
+              </td>
+              <td class="py-1 pl-2 text-right">
+                {{ tech.environment.toFixed(0) }}
+              </td>
+              <td class="py-1 pl-2 text-right">
+                {{ tech.total.toFixed(0) }}
               </td>
             </tr>
           </tbody>
@@ -250,7 +265,9 @@
       </div>
 
       <div v-if="processCostList.length" class="mt-8">
-        <h3 class="font-bold mb-2">Process annual cost breakdown (from optimizer)</h3>
+        <h3 class="font-bold mb-2">
+          Process annual cost breakdown (from optimizer)
+        </h3>
         <table class="w-full text-xs md:text-sm border-collapse">
           <thead>
             <tr class="border-b">
@@ -295,7 +312,8 @@
 
       <div v-if="storageCostListForCommodity.length" class="mt-6">
         <h3 class="font-bold mb-2">
-          {{ techCostCommodityLabel }} storage annual cost breakdown (from optimizer)
+          {{ techCostCommodityLabel }} storage annual cost breakdown (from
+          optimizer)
         </h3>
         <table class="w-full text-xs md:text-sm border-collapse">
           <thead>
@@ -351,10 +369,10 @@ import DataPoint from '@/pages/simulation/DataPoint.vue'
 import { useGetSimulation, useGetSimulationConfig } from '@/backend/simulate'
 import type { SimulationsResults } from '@/backend/interfaces'
 import SiteResults from '@/pages/simulation/SiteResults.vue'
-import Accordion from 'primevue/accordion';
-import AccordionPanel from 'primevue/accordionpanel';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
+import Accordion from 'primevue/accordion'
+import AccordionPanel from 'primevue/accordionpanel'
+import AccordionHeader from 'primevue/accordionheader'
+import AccordionContent from 'primevue/accordioncontent'
 import { useTransmission } from '@/backend/transmission'
 import { chunkAdd, groupOptions } from '@/helper/diagrams'
 import {
@@ -367,9 +385,8 @@ import {
   findCarrierUnits,
   inferDisplayScale,
 } from '@/helper/units'
-import FloatLabel from 'primevue/floatlabel';
-import Select from 'primevue/select';
-
+import FloatLabel from 'primevue/floatlabel'
+import Select from 'primevue/select'
 
 const route = useRoute()
 const { data: sites } = useSites(route)
@@ -406,7 +423,6 @@ const techFuelEligibleHeat = ref<Record<string, boolean>>({})
 const techVarCostElec = ref<Record<string, number>>({})
 const techVarCostHeat = ref<Record<string, number>>({})
 
-
 // Dropdown selection for which commodity's results to show
 const selectedCommodityType = ref('elec') // Default to Electricity
 
@@ -432,7 +448,6 @@ const nativeEnergyUnitC = computed(() =>
     ? nativeElecUnits.value.unitC
     : nativeHeatUnits.value.unitC,
 )
-
 
 // Watcher to calculate ALL base metrics for both commodities
 watch(
@@ -462,7 +477,6 @@ watch(
     techFuelEligibleHeat.value = {}
     techVarCostElec.value = {}
     techVarCostHeat.value = {}
-
 
     for (const siteName in simulation.value.result.results) {
       const siteResults = simulation.value.result.results[siteName]
@@ -649,20 +663,16 @@ const heatCostPool = computed(() => {
 
 // Computed properties to get selected commodity's base data (MWh for energy, tonnes for CO2)
 const currentProduced = computed(() => {
-  return selectedCommodityType.value === 'elec' ? elecProduced.value : heatProduced.value;
-});
-
-const currentFossilProduced = computed(() => {
-  return selectedCommodityType.value === 'elec' ? fossilElecProduced.value : fossilHeatProduced.value;
-});
+  return selectedCommodityType.value === 'elec'
+    ? elecProduced.value
+    : heatProduced.value
+})
 
 const currentConsumed = computed(() => {
-  return selectedCommodityType.value === 'elec' ? elecConsumed.value : heatConsumed.value;
-});
-
-const currentSlackProduction = computed(() => {
-  return selectedCommodityType.value === 'elec' ? slackElecProduction.value : slackHeatProduction.value;
-});
+  return selectedCommodityType.value === 'elec'
+    ? elecConsumed.value
+    : heatConsumed.value
+})
 
 // Computed properties for Energy/Mass DISPLAY values and Suffixes
 const convertEnergyToDisplayUnit = (value: number) =>
@@ -679,47 +689,42 @@ const convertCO2ToDisplayUnit = (value: number) =>
     selectedDisplayUnit.value as 'kW' | 'MW',
   )
 
-const currentProducedDisplay = computed(() => convertEnergyToDisplayUnit(currentProduced.value));
-const currentConsumedDisplay = computed(() => convertEnergyToDisplayUnit(currentConsumed.value));
-const currentLostDisplay = computed(() => convertEnergyToDisplayUnit(currentProduced.value - currentConsumed.value));
+const currentProducedDisplay = computed(() =>
+  convertEnergyToDisplayUnit(currentProduced.value),
+)
+const currentConsumedDisplay = computed(() =>
+  convertEnergyToDisplayUnit(currentConsumed.value),
+)
 
 const energySuffix = computed(() =>
-  displayEnergyLabel(nativeEnergyUnitC.value, selectedDisplayUnit.value as 'kW' | 'MW'),
+  displayEnergyLabel(
+    nativeEnergyUnitC.value,
+    selectedDisplayUnit.value as 'kW' | 'MW',
+  ),
 )
 
 const co2Suffix = computed(() =>
-  displayMassLabel(nativeCo2Units.value.unitC, selectedDisplayUnit.value as 'kW' | 'MW'),
+  displayMassLabel(
+    nativeCo2Units.value.unitC,
+    selectedDisplayUnit.value as 'kW' | 'MW',
+  ),
 )
-
-const co2SavedDisplay = computed(() => {
-  // Baseline: 560 kg CO2 per MWh.
-  // currentConsumed.value is now in MWh (base unit).
-  const baselineCO2_kg = 560 * currentConsumed.value;
-
-  // co2Produced.value is now in tonnes (base unit). Convert to kg for calculation.
-  const actualCO2Produced_kg = co2Produced.value * 1000;
-
-  const savedCO2_kg = baselineCO2_kg - actualCO2Produced_kg;
-
-  // Convert the final saved CO2 to the display unit (kg or tonnes)
-  return convertCO2ToDisplayUnit(savedCO2_kg / 1000); // Divide by 1000 to get tonnes, then use convertCO2ToDisplayUnit
-});
 
 // Computed property for CO2 Environment output display
 const co2EnvironmentDisplay = computed(() => {
   // co2Produced.value is in tonnes (base unit)
   // Convert to display unit (kg or tonnes) based on selectedDisplayUnit
-  return convertCO2ToDisplayUnit(co2Produced.value);
-});
+  return convertCO2ToDisplayUnit(co2Produced.value)
+})
 
 // --- LCOE / LCOH (Levelized Cost of Energy/Heat) ---
 const lcoName = computed(() =>
   selectedCommodityType.value === 'elec' ? 'LCOE' : 'LCOH',
-);
+)
 
 // LCO based on delivered/produced energy
 const lcoDeliveredValue = computed(() => {
-  if (!overview.value) return 0;
+  if (!overview.value) return 0
 
   const energy = currentProduced.value
   if (!energy) return 0
@@ -727,11 +732,11 @@ const lcoDeliveredValue = computed(() => {
   const energyDisplay = convertEnergyToDisplayUnit(energy)
   if (!energyDisplay) return 0
   return totalCost.value / energyDisplay
-});
+})
 
 // LCO based on consumed energy (demand)
 const lcoConsumedValue = computed(() => {
-  if (!overview.value) return 0;
+  if (!overview.value) return 0
 
   const energy = currentConsumed.value
   if (!energy) return 0
@@ -739,11 +744,9 @@ const lcoConsumedValue = computed(() => {
   const energyDisplay = convertEnergyToDisplayUnit(energy)
   if (!energyDisplay) return 0
   return totalCost.value / energyDisplay
-});
+})
 
-const lcoSuffix = computed(() =>
-  `€/${energySuffix.value}`,
-);
+const lcoSuffix = computed(() => `€/${energySuffix.value}`)
 
 type TechCostRow = {
   name: string
@@ -842,14 +845,12 @@ function allocateTechCostsByCarrierShare(
 
   const fuelTotalCarrier = catTotals.Fuel * carrierShare
   const fuelDenom = entries.reduce(
-    (sum, [name, energy]) =>
-      fuelEligible[name] ? sum + energy : sum,
+    (sum, [name, energy]) => (fuelEligible[name] ? sum + energy : sum),
     0,
   )
   const variableTotalCarrier = catTotals.Variable * carrierShare
   const variableDenom = entries.reduce(
-    (sum, [name, energy]) =>
-      (varCost[name] ?? 0) > 0 ? sum + energy : sum,
+    (sum, [name, energy]) => ((varCost[name] ?? 0) > 0 ? sum + energy : sum),
     0,
   )
 
@@ -1128,21 +1129,21 @@ const selectedTransmission = ref<{
 // Transmission options for dropdown - combine bidirectional pairs
 const transmissionOptions = computed(() => {
   if (!transmissions.value) return []
-  
+
   // Group transmissions by site pair and commodity (regardless of direction)
   const transmissionMap = new Map<string, typeof transmissions.value>()
-  
+
   for (const trans of transmissions.value) {
     // Create a key that's the same regardless of direction
     const sites = [trans.sitein, trans.siteout].sort().join(' ↔ ')
     const key = `${sites} (${trans.commodity})`
-    
+
     if (!transmissionMap.has(key)) {
       transmissionMap.set(key, [])
     }
     transmissionMap.get(key)!.push(trans)
   }
-  
+
   // Create options from unique pairs (A→B alphabetical; positive = A→B)
   return Array.from(transmissionMap.entries()).map(([key, transList]) => {
     const trans = transList[0]
@@ -1158,11 +1159,15 @@ const transmissionOptions = computed(() => {
 })
 
 // Auto-select first transmission when options are available
-watch(transmissionOptions, (options) => {
-  if (options.length > 0 && !selectedTransmission.value) {
-    selectedTransmission.value = options[0]
-  }
-}, { immediate: true })
+watch(
+  transmissionOptions,
+  options => {
+    if (options.length > 0 && !selectedTransmission.value) {
+      selectedTransmission.value = options[0]
+    }
+  },
+  { immediate: true },
+)
 
 // Transmission charts - calculate import/export for each site combination
 const transmissionCharts = computed(() => {
@@ -1183,11 +1188,11 @@ const transmissionCharts = computed(() => {
 
   // Group transmissions by site pair and commodity (regardless of direction)
   const transmissionMap = new Map<string, typeof transmissions.value>()
-  
+
   for (const trans of transmissions.value) {
     const sites = [trans.sitein, trans.siteout].sort().join(' ↔ ')
     const key = `${sites} (${trans.commodity})`
-    
+
     if (!transmissionMap.has(key)) {
       transmissionMap.set(key, [])
     }
@@ -1308,7 +1313,6 @@ function extractSignedTransmissionFlow(
   if (!signed.some(v => Math.abs(v) > 1e-9)) return null
   return signed
 }
-
 </script>
 
 <style scoped></style>

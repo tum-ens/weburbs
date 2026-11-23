@@ -32,7 +32,13 @@
         </TabPanels>
       </Tabs>
       <FloatLabel variant="on">
-        <InputText fluid id="title" v-model="title" :disabled="uploading" :invalid="!!titleError" />
+        <InputText
+          fluid
+          id="title"
+          v-model="title"
+          :disabled="uploading"
+          :invalid="!!titleError"
+        />
         <label for="name">Title</label>
       </FloatLabel>
       <Message v-if="titleError" severity="error" variant="simple" size="small">

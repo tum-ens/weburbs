@@ -62,11 +62,15 @@
 import { useRoute, useRouter } from 'vue-router'
 import CreateTransmissionDialog from '@/dialogs/CreateTransmissionDialog.vue'
 import { ref } from 'vue'
-import { useTransmission, useDuplicateTransmission } from '@/backend/transmission'
+import {
+  useTransmission,
+  useDuplicateTransmission,
+} from '@/backend/transmission'
 import Transformer from '@/components/TransformerComponent.vue'
 import { type Transmission, TransmissionType } from '@/backend/interfaces'
 import EditTransmissionDialog from '@/dialogs/EditTransmissionDialog.vue'
 import { useToast } from 'primevue/usetoast'
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,28 +91,28 @@ const duplicateTransmission = async (transmission: Transmission) => {
     await duplicateTransmissionMutation.mutateAsync({
       sitein_name: transmission.sitein,
       siteout_name: transmission.siteout,
-      com_name: transmission.commodity
+      com_name: transmission.commodity,
     })
     toast.add({
       severity: 'success',
       summary: 'Success',
       detail: 'Reverse transmission created successfully',
-      life: 3000
+      life: 3000,
     })
-  } catch (error: any) {
-    if (error.response?.status === 400) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 400) {
       toast.add({
         severity: 'warn',
         summary: 'Warning',
         detail: 'Reverse transmission already exists',
-        life: 3000
+        life: 3000,
       })
     } else {
       toast.add({
         severity: 'error',
         summary: 'Error',
         detail: 'Failed to create reverse transmission',
-        life: 3000
+        life: 3000,
       })
       console.error('Failed to duplicate transmission:', error)
     }

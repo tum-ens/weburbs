@@ -126,7 +126,8 @@ const queryClient = useQueryClient()
 async function clogin() {
   loading.value = true
   if (!csrf.value) {
-    error.value = 'Still loading security token. Please wait a moment and try again.'
+    error.value =
+      'Still loading security token. Please wait a moment and try again.'
     loading.value = false
     return
   }
@@ -155,8 +156,7 @@ async function clogin() {
     login_result !== null &&
     'detail' in login_result
   ) {
-    error.value =
-      login_result.detail || 'Wrong username or password.'
+    error.value = login_result.detail || 'Wrong username or password.'
   } else {
     error.value = 'Wrong username or password.'
   }

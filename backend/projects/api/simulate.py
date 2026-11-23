@@ -4,26 +4,26 @@ import os
 import requests
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import BadRequest
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, validate_name_http_response
 from projects.models import (
-    Site,
+    DSM,
+    BuySellPrice,
     Commodity,
+    Demand,
     Process,
     ProcessCommodity,
-    SupIm,
-    Demand,
-    Storage,
+    Project,
     SimulationResult,
     SimulationResultStatus,
-    DSM,
+    Site,
+    Storage,
+    SupIm,
     TimeVarEff,
-    BuySellPrice,
     Transmission,
-    Project,
 )
 
 
@@ -89,7 +89,9 @@ def urbs_timestep_count(steps) -> int:
     return len(steps) + 1
 
 
-def resolve_timestep_range(config: dict, run_config: dict | None = None) -> tuple[int, int]:
+def resolve_timestep_range(
+    config: dict, run_config: dict | None = None
+) -> tuple[int, int]:
     """Return validated (timestep_from, timestep_to) inclusive indices."""
     total = config["c_timesteps"]
     run_config = run_config or {}
@@ -114,8 +116,14 @@ def build_project_config(project: Project):
     supims = SupIm.objects.filter(commodity__in=commodities)
     demands = Demand.objects.filter(commodity__in=commodities)
     timesteps = min(
-        min(map(lambda supim: urbs_timestep_count(supim.steps), supims), default=999999),
-        min(map(lambda demand: urbs_timestep_count(demand.steps), demands), default=999999),
+        min(
+            (urbs_timestep_count(supim.steps) for supim in supims),
+            default=999999,
+        ),
+        min(
+            (urbs_timestep_count(demand.steps) for demand in demands),
+            default=999999,
+        ),
     )
 
     config = {
@@ -259,9 +267,8 @@ def trigger_simulation(request, project_name):
             run_config["generate_report"] = "full"
         else:
             raise BadRequest("Invalid generate_report")
-    if "generate_h5" in fr_config:
-        if fr_config["generate_h5"]:
-            run_config["generate_h5"] = True
+    if fr_config.get("generate_h5"):
+        run_config["generate_h5"] = True
     if "solver" in fr_config and fr_config["solver"] is not None:
         solver = fr_config["solver"]
         if solver not in ("gurobi", "glpk"):
@@ -282,7 +289,10 @@ def trigger_simulation(request, project_name):
                 if item not in cleaned:
                     cleaned.append(item)
             run_config["timeseries_commodity_types"] = cleaned
-    if fr_config.get("timestep_from") is not None or fr_config.get("timestep_to") is not None:
+    if (
+        fr_config.get("timestep_from") is not None
+        or fr_config.get("timestep_to") is not None
+    ):
         t_from = fr_config.get("timestep_from", 0)
         t_to = fr_config.get("timestep_to", config["c_timesteps"] - 1)
         t_from, t_to = resolve_timestep_range(
@@ -325,7 +335,10 @@ def _find_callback_json(simres, simulation: dict) -> str | None:
         candidates.append(os.path.join("result", subdir, "callback.json"))
     candidates.append(
         os.path.join(
-            "result", simres.timestamp.strftime("%Y%m%d"), str(simres.id), "callback.json"
+            "result",
+            simres.timestamp.strftime("%Y%m%d"),
+            str(simres.id),
+            "callback.json",
         )
     )
     for path in candidates:
@@ -443,18 +456,16 @@ def get_simulations(request, project_name):
         .values("id", "timestamp", "name", "completed", "status")
     )
     return JsonResponse(
-        list(
-            map(
-                lambda res: {
-                    "id": res["id"],
-                    "timestamp": res["timestamp"],
-                    "name": res["name"] if "name" in res else None,
-                    "completed": res["completed"],
-                    "status": res["status"],
-                },
-                simres,
-            )
-        ),
+        [
+            {
+                "id": res["id"],
+                "timestamp": res["timestamp"],
+                "name": res.get("name"),
+                "completed": res["completed"],
+                "status": res["status"],
+            }
+            for res in simres
+        ],
         status=200,
         safe=False,
     )
@@ -482,7 +493,11 @@ def get_simulation_progress(request, project_name, simid):
     generate_report = run_config.get("generate_report")
     generate_h5 = bool(run_config.get("generate_h5"))
     steps = [
-        {"id": "building_model", "label": "Building Pyomo model", "status": "in_progress"},
+        {
+            "id": "building_model",
+            "label": "Building Pyomo model",
+            "status": "in_progress",
+        },
         {"id": "optimizing", "label": "Running optimization", "status": "pending"},
     ]
     if generate_report is not None:
@@ -625,9 +640,7 @@ def compute_simulation_iis(request, project_name, simid):
     try:
         response = requests.post(compute_url, json=simres.config, timeout=600)
     except requests.RequestException as exc:
-        return JsonResponse(
-            {"detail": f"Could not reach optimizer: {exc}"}, status=502
-        )
+        return JsonResponse({"detail": f"Could not reach optimizer: {exc}"}, status=502)
 
     if response.status_code != 200:
         detail = "Failed to compute IIS"
@@ -674,9 +687,7 @@ def _optimizer_base_url():
 
 
 def _simulation_result_dir(simres) -> str:
-    return os.path.join(
-        "result", simres.timestamp.strftime("%Y%m%d"), str(simres.id)
-    )
+    return os.path.join("result", simres.timestamp.strftime("%Y%m%d"), str(simres.id))
 
 
 def _cancel_progress_file(simres) -> None:
@@ -789,7 +800,7 @@ def stop_simulation(request, project_name, simid):
 
     try:
         stop_simulation_record(simres)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"stop_simulation {simid} failed: {exc}")
         return JsonResponse(
             {"detail": f"Could not stop simulation: {exc}"},

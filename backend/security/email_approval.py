@@ -1,9 +1,9 @@
-from django.contrib.auth.models import User
-
 from security.models import UserVerification
 
 
-def email_approval_conflict(email: str, *, exclude_user_id: int | None = None) -> str | None:
+def email_approval_conflict(
+    email: str, *, exclude_user_id: int | None = None
+) -> str | None:
     """
     Return an error message if another approved account already uses this email.
     Rejecting the other account frees the email for approval.

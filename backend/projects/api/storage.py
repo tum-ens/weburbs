@@ -1,13 +1,13 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
-from projects.api.helper import get_project, get_site, validate_name_http_response
 from projects.api import commodity
-from projects.models import Site, DefStorage, Storage, Commodity, DefCommodity
-from django.forms.models import model_to_dict
+from projects.api.helper import get_project, get_site, validate_name_http_response
+from projects.models import Commodity, DefCommodity, DefStorage, Site, Storage
 
 
 @login_required
@@ -111,9 +111,11 @@ def update_storage(request, project_name, site_name, storage_name):
     if err:
         return err
 
-    if storage_name != data["name"]:
-        if Storage.objects.filter(site=site, name=data["name"]).exists():
-            return HttpResponse("Storage with the same name already exists", status=409)
+    if (
+        storage_name != data["name"]
+        and Storage.objects.filter(site=site, name=data["name"]).exists()
+    ):
+        return HttpResponse("Storage with the same name already exists", status=409)
 
     try:
         storage = Storage.objects.get(site=site, name=storage_name)
@@ -183,7 +185,7 @@ def duplicate_storage(request, project_name, site_name, storage_name):
     base_name = original_storage.name
     counter = 1
     new_name = f"{base_name}_{counter}"
-    
+
     while Storage.objects.filter(site=site, name=new_name).exists():
         counter += 1
         new_name = f"{base_name}_{counter}"

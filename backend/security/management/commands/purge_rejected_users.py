@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand
 
-from security.user_deletion import REJECTED_RETENTION_DAYS, purge_rejected_users_older_than
+from security.user_deletion import (
+    REJECTED_RETENTION_DAYS,
+    purge_rejected_users_older_than,
+)
 
 
 class Command(BaseCommand):

@@ -3,19 +3,19 @@ import threading
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.http import require_GET, require_POST
 
-from projects.api import process, commodity, storage
+from projects.api import commodity, process, storage
 from projects.api.helper import get_project, get_site, validate_name_http_response
 from projects.api.supim import querySolar, queryWind
 from projects.models import (
-    Site,
-    DefCommodity,
-    Commodity,
     AutoQuery,
-    SupIm,
+    Commodity,
+    DefCommodity,
     DefProcess,
     DefStorage,
+    Site,
+    SupIm,
 )
 
 
@@ -46,7 +46,7 @@ def edit_site(request, project_name, site_name):
         site = Site.objects.get(project=project, name=site_name)
 
         site.name = data["name"]
-        site.area = data["area"] if "area" in data else None
+        site.area = data.get("area")
         site.lon = data["lon"]
         site.lat = data["lat"]
         site.save()
@@ -57,7 +57,7 @@ def edit_site(request, project_name, site_name):
         site = Site(
             project=project,
             name=data["name"],
-            area=data["area"] if "area" in data else None,
+            area=data.get("area"),
             lon=data["lon"],
             lat=data["lat"],
         )

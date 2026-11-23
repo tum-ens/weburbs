@@ -192,10 +192,7 @@
                     Limited timestep range (test run)
                   </label>
                 </div>
-                <div
-                  v-if="custom_timestep_range"
-                  class="flex flex-col gap-2"
-                >
+                <div v-if="custom_timestep_range" class="flex flex-col gap-2">
                   <div class="flex items-center gap-2">
                     <InputNumber
                       v-model="timestep_from"
@@ -213,10 +210,7 @@
                       class="flex-1"
                     />
                   </div>
-                  <small
-                    v-if="simulationInfo"
-                    class="text-surface-500"
-                  >
+                  <small v-if="simulationInfo" class="text-surface-500">
                     Timesteps are 0-based (0 … {{ maxTimestep }})
                   </small>
                 </div>
@@ -345,7 +339,8 @@ const pollSimulationProgress = computed(() => {
   ) {
     return false
   }
-  if (simulation.value?.status === SimulationResultStatus.Cancelled) return false
+  if (simulation.value?.status === SimulationResultStatus.Cancelled)
+    return false
   if (!simulation.value) return true
   return simulation.value.status !== SimulationResultStatus.Optimal
 })

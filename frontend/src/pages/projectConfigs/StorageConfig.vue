@@ -122,7 +122,7 @@ const duplicateStorage = async (storage: Storage) => {
   try {
     await duplicateStorageMutation.mutateAsync({
       site_name: curSite.value,
-      storage_name: storage.name
+      storage_name: storage.name,
     })
   } catch (error) {
     console.error('Failed to duplicate storage:', error)
@@ -141,57 +141,66 @@ watch(
 // Watch for query parameters to auto-open edit dialog or create dialog
 watch(
   () => route.query,
-  (query) => {
+  query => {
     // Handle auto-edit for existing storage
     if (query.autoEdit === 'true' && query.edit && query.site) {
       curSite.value = query.site as string
-      
+
       // Get storage for the specified site
       const { data: storage } = useQuery({
         queryKey: ['storage', route.params.proj, query.site],
         queryFn: () => {
           return axios
-            .get<Storage[]>(`/api/project/${route.params.proj}/site/${query.site}/storage/`)
+            .get<
+              Storage[]
+            >(`/api/project/${route.params.proj}/site/${query.site}/storage/`)
             .then(response => response.data)
         },
-        enabled: !!query.site
+        enabled: !!query.site,
       })
-      
+
       watch(
         storage,
-        (storageItems) => {
+        storageItems => {
           if (storageItems) {
             const targetStorage = storageItems.find(s => s.name === query.edit)
             if (targetStorage) {
               clickedStorage.value = targetStorage
               editVisible.value = true
-              console.log('Auto-opening edit dialog for storage:', targetStorage.name)
+              console.log(
+                'Auto-opening edit dialog for storage:',
+                targetStorage.name,
+              )
             }
           }
         },
-        { immediate: true }
+        { immediate: true },
       )
     }
-    
+
     // Handle auto-create for new storage
-    if (query.create === 'true' && query.site && query.from === 'energy-diagram') {
+    if (
+      query.create === 'true' &&
+      query.site &&
+      query.from === 'energy-diagram'
+    ) {
       console.log('Auto-create triggered for storage at site:', query.site)
       curSite.value = query.site as string
-      
+
       // Wait for sites to load and then open create dialog
       watch(
         sites,
-        (sitesData) => {
+        sitesData => {
           if (sitesData && sitesData.length > 0) {
             createVisible.value = true
             console.log('✅ Auto-opening create dialog for storage')
           }
         },
-        { immediate: true }
+        { immediate: true },
       )
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const items = [

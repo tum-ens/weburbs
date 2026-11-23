@@ -1,8 +1,8 @@
 import uuid
 from enum import IntEnum
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class Project(models.Model):
@@ -223,6 +223,7 @@ class SupIm(SupImType):
 class TransmissionType(IntEnum):
     hvac = 1
     pipe = 2
+
     @classmethod
     def choices(cls):
         return [(key.value, key.name) for key in cls]

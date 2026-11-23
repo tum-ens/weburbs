@@ -3,7 +3,8 @@ import logging
 import math
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.forms.models import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
 from projects.api.helper import get_project, get_site
@@ -11,7 +12,6 @@ from projects.models import (
     Commodity,
     Transmission,
 )
-from django.forms.models import model_to_dict
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -22,11 +22,9 @@ logger = logging.getLogger(__name__)
 def debug_transmission_count(request, project_name):
     """Debug endpoint to check transmission counts"""
     project = get_project(request.user, project_name)
-    
-    transmissions = Transmission.objects.filter(
-        commodityin__site__project=project
-    )
-    
+
+    transmissions = Transmission.objects.filter(commodityin__site__project=project)
+
     debug_info = {
         "project_name": project_name,
         "db_transmission_count": transmissions.count(),
@@ -40,9 +38,9 @@ def debug_transmission_count(request, project_name):
                 "eff": trans.eff,
             }
             for trans in transmissions
-        ]
+        ],
     }
-    
+
     return JsonResponse(debug_info, safe=False)
 
 
@@ -96,7 +94,7 @@ def list_transmission(request, project_name):
                 elif math.isnan(value):
                     sanitized[key] = None
         transmissionsList.append(sanitized)
-    
+
     # Debug logging
     logger.error(
         f"DEBUG: Project {project_name} - DB count: {transmissions.count()}, API response count: {len(transmissionsList)}"
@@ -104,7 +102,7 @@ def list_transmission(request, project_name):
     print(
         f"DEBUG: Project {project_name} - DB count: {transmissions.count()}, API response count: {len(transmissionsList)}"
     )
-    
+
     return JsonResponse(transmissionsList, safe=False)
 
 
@@ -120,11 +118,21 @@ def update_transmission(request, project_name, sitein_name, siteout_name, com_na
     data = json.loads(request.body)
 
     # Validate required fields to prevent empty transmissions
-    required_fields = ["type", "eff", "invcost", "fixcost", "varcost", "instcap", "caplo", "capup", "wacc", "depreciation"]
+    required_fields = [
+        "type",
+        "eff",
+        "invcost",
+        "fixcost",
+        "varcost",
+        "instcap",
+        "caplo",
+        "capup",
+        "wacc",
+        "depreciation",
+    ]
     for field in required_fields:
         if field not in data or data[field] is None or data[field] == "":
             return HttpResponse(f"Missing or invalid field: {field}", status=400)
-        
 
     sitein_new = get_site(project, data["sitein"])
     comin_new = Commodity.objects.get(site=sitein_new, name=com_name)
@@ -134,14 +142,13 @@ def update_transmission(request, project_name, sitein_name, siteout_name, com_na
         sitein_name != data["sitein"]
         or siteout_name != data["siteout"]
         or com_name != data["commodity"]
-    ):
-        if Transmission.objects.filter(
-            commodityin=comin_new, commodityout=comout_new
-        ).exists():
-            return HttpResponse(
-                "Transmission between the same commodities name already exists",
-                status=409,
-            )
+    ) and Transmission.objects.filter(
+        commodityin=comin_new, commodityout=comout_new
+    ).exists():
+        return HttpResponse(
+            "Transmission between the same commodities name already exists",
+            status=409,
+        )
 
     try:
         transmission = Transmission.objects.get(commodityin=comin, commodityout=comout)
@@ -202,13 +209,17 @@ def duplicate_transmission(request, project_name, sitein_name, siteout_name, com
     comout = Commodity.objects.get(site=siteout, name=com_name)
 
     try:
-        original_transmission = Transmission.objects.get(commodityin=comin, commodityout=comout)
+        original_transmission = Transmission.objects.get(
+            commodityin=comin, commodityout=comout
+        )
     except Transmission.DoesNotExist:
         return HttpResponse("Transmission not found", status=404)
 
     # Check if reverse transmission already exists (from siteout to sitein)
     try:
-        reverse_transmission = Transmission.objects.get(commodityin=comout, commodityout=comin)
+        reverse_transmission = Transmission.objects.get(
+            commodityin=comout, commodityout=comin
+        )
         return HttpResponse("Reverse transmission already exists", status=400)
     except Transmission.DoesNotExist:
         pass  # Good, we can create the reverse transmission

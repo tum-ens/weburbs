@@ -83,7 +83,9 @@
           :options="demandCommodityOptions"
           v-model="selectedCommodity"
         />
-        <label for="commodityoptions">Select Commodity for Production View</label>
+        <label for="commodityoptions"
+          >Select Commodity for Production View</label
+        >
       </FloatLabel>
       <div v-if="selectedCommodity" class="w-full md:col-span-2">
         <PlotlyDiagram
@@ -100,10 +102,7 @@
             b: 50,
           }"
         />
-        <div
-          v-else
-          class="flex items-center justify-center p-8 text-gray-500"
-        >
+        <div v-else class="flex items-center justify-center p-8 text-gray-500">
           <p>No production data available for {{ selectedCommodity }}</p>
         </div>
       </div>
@@ -174,10 +173,7 @@ const annualProductionXRange = ref<[number, number] | undefined>()
 const productionChartTitle = computed(() => {
   const com = selectedCommodity.value || 'commodity'
   const rc = config.value?.run_config
-  if (
-    rc &&
-    (rc.timestep_from !== undefined || rc.timestep_to !== undefined)
-  ) {
+  if (rc && (rc.timestep_from !== undefined || rc.timestep_to !== undefined)) {
     const from = rc.timestep_from ?? 0
     const to = rc.timestep_to ?? (config.value?.c_timesteps ?? 1) - 1
     return `Production for ${com} (timesteps ${from}–${to})`
@@ -215,7 +211,6 @@ watch(
     storRetrieved.value = 0
     storCapNative.value = 0
     annualProductionUnit.value = 'MWh'
-
 
     if (!simulation.value || !config.value) return
 
@@ -408,10 +403,7 @@ watch(
       // Production per process (positive bars); skip all-zero series.
       for (const procName in comResults?.created ?? {}) {
         const series = scaleEnergy(
-          chunkAdd(
-            comResults!.created[procName],
-            groupOption.value.groupSize,
-          ),
+          chunkAdd(comResults!.created[procName], groupOption.value.groupSize),
         )
         if (!hasFlow(series)) continue
         traces.push({
@@ -549,7 +541,10 @@ watch(
       // Validate and set selected commodity
       if (demandCommodityOptions.value.length > 0) {
         // If no commodity is selected, or the selected one is no longer valid, set to first available
-        if (!selectedCommodity.value || !demandCommodityOptions.value.includes(selectedCommodity.value)) {
+        if (
+          !selectedCommodity.value ||
+          !demandCommodityOptions.value.includes(selectedCommodity.value)
+        ) {
           selectedCommodity.value = demandCommodityOptions.value[0]
         }
       } else {
@@ -561,19 +556,27 @@ watch(
       annualProductionData.value = undefined
       annualProductionXRange.value = undefined
 
-      if (selectedCommodity.value && results && results[selectedCommodity.value]) {
+      if (
+        selectedCommodity.value &&
+        results &&
+        results[selectedCommodity.value]
+      ) {
         const commodityResult = results[selectedCommodity.value]
         annualProductionUnit.value = displayEnergyLabel(
           siteConfig.commodity[selectedCommodity.value]?.unitC,
           scale,
         )
-        
+
         // Check if created property exists
         if (commodityResult && commodityResult.created) {
           const productionByProcess = commodityResult.created
 
           // Check if created data exists and is not empty
-          if (productionByProcess && typeof productionByProcess === 'object' && !Array.isArray(productionByProcess)) {
+          if (
+            productionByProcess &&
+            typeof productionByProcess === 'object' &&
+            !Array.isArray(productionByProcess)
+          ) {
             const processNames: string[] = []
             const productionTotals: number[] = []
 
@@ -581,7 +584,10 @@ watch(
               if (productionByProcess.hasOwnProperty(procName)) {
                 const processProduction = productionByProcess[procName]
                 // Ensure it's an array and has values
-                if (Array.isArray(processProduction) && processProduction.length > 0) {
+                if (
+                  Array.isArray(processProduction) &&
+                  processProduction.length > 0
+                ) {
                   const yearlyProduction = processProduction.reduce(
                     (sum, current) => sum + (current || 0),
                     0,
@@ -607,29 +613,29 @@ watch(
               // Calculate x-axis range to make bars clearly visible
               const maxValue = Math.max(...productionTotals)
               const minValue = 0
-              
+
               // Ensure bars take up a significant portion of the chart
               // Use a multiplier that ensures bars are clearly visible
               // If maxValue is very small, scale it up more aggressively
               let multiplier = 1.5 // Default: bars take up ~67% of chart
-              
+
               if (maxValue < 0.1) {
                 multiplier = 3.0 // For very small values, scale up more
               } else if (maxValue < 1) {
                 multiplier = 2.0 // For small values, scale up
               }
-              
+
               const rangeMax = maxValue * multiplier
-              
+
               annualProductionXRange.value = [minValue, rangeMax]
-              
+
               console.log('Annual Production Data:', {
                 processNames,
                 productionTotals,
                 selectedCommodity: selectedCommodity.value,
-                xRange: annualProductionXRange.value
+                xRange: annualProductionXRange.value,
               })
-              
+
               annualProductionData.value = [
                 {
                   name: 'Annual Production',
@@ -641,10 +647,14 @@ watch(
               ]
             } else {
               annualProductionXRange.value = undefined
-              console.log('No processes found with production for:', selectedCommodity.value, {
-                productionByProcess,
-                commodityResult
-              })
+              console.log(
+                'No processes found with production for:',
+                selectedCommodity.value,
+                {
+                  productionByProcess,
+                  commodityResult,
+                },
+              )
             }
           }
         }

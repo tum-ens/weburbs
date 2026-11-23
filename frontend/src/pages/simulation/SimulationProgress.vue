@@ -115,7 +115,11 @@ watch(tick, () => undefined)
 
 function defaultSteps(): SimulationProgressStep[] {
   return [
-    { id: 'building_model', label: 'Building Pyomo model', status: 'in_progress' },
+    {
+      id: 'building_model',
+      label: 'Building Pyomo model',
+      status: 'in_progress',
+    },
     { id: 'optimizing', label: 'Running optimization', status: 'pending' },
     {
       id: 'preparing_dashboard',
@@ -183,8 +187,10 @@ function stepIcon(step: SimulationProgressStep): string {
 
 function stepClass(step: SimulationProgressStep): string {
   if (step.status === 'failed') return 'text-red-600 dark:text-red-400'
-  if (step.status === 'cancelled') return 'text-surface-500 dark:text-surface-400 line-through'
-  if (step.status === 'completed') return 'text-surface-700 dark:text-surface-200'
+  if (step.status === 'cancelled')
+    return 'text-surface-500 dark:text-surface-400 line-through'
+  if (step.status === 'completed')
+    return 'text-surface-700 dark:text-surface-200'
   if (step.status === 'in_progress') return 'text-primary font-medium'
   return 'text-surface-500 dark:text-surface-400'
 }

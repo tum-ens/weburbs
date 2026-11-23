@@ -35,12 +35,16 @@ const props = defineProps<{
 
 // Watch for dialog close and navigate back to energy diagram if needed
 watch(visible, (newValue, oldValue) => {
-  if (oldValue === true && newValue === false && route.query.from === 'energy-diagram') {
+  if (
+    oldValue === true &&
+    newValue === false &&
+    route.query.from === 'energy-diagram'
+  ) {
     console.log('Navigating back to energy diagram from commodity creation')
     router.push({
       name: 'ProjectEnergyDiagram',
       params: { proj: route.params.proj },
-      query: { site: props.site_name }
+      query: { site: props.site_name },
     })
   }
 })

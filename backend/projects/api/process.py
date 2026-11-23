@@ -3,21 +3,21 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.forms import model_to_dict
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 
+from projects.api import commodity
 from projects.api.helper import get_project, get_site, validate_name_http_response
 from projects.models import (
-    DefProcess,
-    Process,
-    Site,
-    DefProcessCommodity,
-    ProcComDir,
-    ProcessCommodity,
     Commodity,
     DefCommodity,
+    DefProcess,
+    DefProcessCommodity,
+    ProcComDir,
+    Process,
+    ProcessCommodity,
+    Site,
 )
-from projects.api import commodity
 
 
 @login_required
@@ -185,9 +185,11 @@ def update_process(request, project_name, site_name, process_name):
     if err:
         return err
 
-    if process_name != data["name"]:
-        if Process.objects.filter(site=site, name=data["name"]).exists():
-            return HttpResponse("Process with the same name already exists", status=409)
+    if (
+        process_name != data["name"]
+        and Process.objects.filter(site=site, name=data["name"]).exists()
+    ):
+        return HttpResponse("Process with the same name already exists", status=409)
 
     try:
         process = Process.objects.get(site=site, name=process_name)
@@ -272,7 +274,7 @@ def duplicate_process(request, project_name, site_name, process_name):
     base_name = original_process.name
     counter = 1
     new_name = f"{base_name}_{counter}"
-    
+
     while Process.objects.filter(site=site, name=new_name).exists():
         counter += 1
         new_name = f"{base_name}_{counter}"

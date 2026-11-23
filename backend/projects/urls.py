@@ -1,23 +1,23 @@
 from django.urls import path
 
 from projects.api import (
-    project,
-    site,
-    commodity,
-    process,
-    storage,
-    transmission,
-    supim,
-    demand,
-    simulate,
-    excelupload,
-    excelexport,
-    configupload,
-    configexport,
-    dsm,
     buysellprice,
-    timevareff,
+    commodity,
+    configexport,
+    configupload,
+    demand,
+    dsm,
+    excelexport,
+    excelupload,
+    process,
+    project,
     projectpresets,
+    simulate,
+    site,
+    storage,
+    supim,
+    timevareff,
+    transmission,
 )
 
 urlpatterns = [
@@ -109,7 +109,10 @@ urlpatterns = [
     ),
     # Transmission: List, Update, Delete
     path("project/<str:project_name>/transmission/", transmission.list_transmission),
-    path("project/<str:project_name>/transmission/debug/", transmission.debug_transmission_count),
+    path(
+        "project/<str:project_name>/transmission/debug/",
+        transmission.debug_transmission_count,
+    ),
     path(
         "project/<str:project_name>/transmission/update/<str:sitein_name>/<str:siteout_name>/<str:com_name>/",
         transmission.update_transmission,

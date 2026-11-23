@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """One-off helper: convert kW/kWh preset configs to MW/MWh (and kg to tonnes)."""
+
 import json
+import math
 import os
-import sys
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "config")
 
 
 def is_num(v):
-    return isinstance(v, (int, float)) and v == v
+    return isinstance(v, (int, float)) and not math.isnan(v)
 
 
 def scale_power(v):
@@ -115,8 +116,8 @@ def convert_urbs_site(site):
             proc["var-cost"] = mapped["varcost"]
             if mapped["areapercap"] is not None:
                 proc["area-per-cap"] = mapped["areapercap"]
-    for com_name, com in site.get("commodity", {}).items():
-        for stor_name, stor in com.get("storage", {}).items():
+    for com in site.get("commodity", {}).values():
+        for stor in com.get("storage", {}).values():
             mapped = {
                 "instcapc": stor.get("inst-cap-c", stor.get("instcapc")),
                 "caploc": stor.get("cap-lo-c", stor.get("caploc")),

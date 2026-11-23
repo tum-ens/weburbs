@@ -128,9 +128,7 @@ const router = useRouter()
 const toast = useToast()
 const { data: csrf } = useCSRF()
 
-const hasToken = computed(
-  () => !!route.params.username && !!route.params.token,
-)
+const hasToken = computed(() => !!route.params.username && !!route.params.token)
 
 const email = ref('')
 const password = ref('')
@@ -141,7 +139,8 @@ const requested = ref(false)
 const done = ref(false)
 
 function extractDetail(err: unknown, fallback: string) {
-  const detail = (<{ detail?: string }>(<AxiosError>err)?.response?.data)?.detail
+  const detail = (<{ detail?: string }>(<AxiosError>err)?.response?.data)
+    ?.detail
   return detail || fallback
 }
 

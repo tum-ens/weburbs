@@ -2,7 +2,7 @@ import re
 
 from django.http import Http404, HttpResponse
 
-from projects.models import Project, Site, Commodity
+from projects.models import Commodity, Project, Site
 
 FORBIDDEN_NAME_CHARS_PATTERN = re.compile(r"[/\\?#%]")
 FORBIDDEN_NAME_CHARS_LABEL = "/ \\ ? # %"

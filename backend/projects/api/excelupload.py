@@ -1,28 +1,31 @@
 import math
 from collections import defaultdict
 
+import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
-import pandas as pd
 
-from projects.api.helper import validate_excel_names_http_response, validate_name_http_response
+from projects.api.helper import (
+    validate_excel_names_http_response,
+    validate_name_http_response,
+)
 from projects.models import (
-    Project,
-    Site,
-    Commodity,
-    ComType,
-    Process,
-    ProcessCommodity,
-    ProcComDir,
-    Storage,
-    Demand,
-    SupIm,
-    Transmission,
-    TransmissionType,
     DSM,
     BuySellPrice,
+    Commodity,
+    ComType,
+    Demand,
+    ProcComDir,
+    Process,
+    ProcessCommodity,
+    Project,
+    Site,
+    Storage,
+    SupIm,
     TimeVarEff,
+    Transmission,
+    TransmissionType,
 )
 
 
@@ -104,7 +107,7 @@ def upload(request, project_name):
         project.save()
 
         sites_tab = xls.parse("Site")
-        sites = dict()
+        sites = {}
         for index, row in sites_tab.iterrows():
             site = Site(
                 project=project,

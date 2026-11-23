@@ -24,6 +24,8 @@ class Command(BaseCommand):
             verification, _ = UserVerification.objects.get_or_create(user=user)
             conflict = apply_preapproved_admin(user, verification)
             if conflict:
-                self.stdout.write(self.style.WARNING(f"skip {user.username}: {conflict}"))
+                self.stdout.write(
+                    self.style.WARNING(f"skip {user.username}: {conflict}")
+                )
                 continue
             self.stdout.write(self.style.SUCCESS(f"promoted {user.username}"))

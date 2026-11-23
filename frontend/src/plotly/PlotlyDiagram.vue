@@ -26,13 +26,11 @@ const props = defineProps<{
 function layout(): Partial<Plotly.Layout> {
   // Check if data contains negative values to determine barmode
   const hasNegativeValues = props.data.some(trace => {
-    const traceData = trace as any
-    if (traceData.y && Array.isArray(traceData.y)) {
-      return traceData.y.some((v: number) => v < 0)
-    }
-    return false
+    const y = (trace as { y?: unknown }).y
+    if (!Array.isArray(y)) return false
+    return y.some(value => typeof value === 'number' && value < 0)
   })
-  
+
   return {
     bargap: props.bargap || 0,
     bargroupgap: props.bargroupgap || 0,

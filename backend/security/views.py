@@ -1,31 +1,33 @@
 import datetime
 import json
+import logging
 import os
 from uuid import uuid4
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
+
 from projects.api.simulate import stop_simulation_record
 from projects.models import SimulationResult
-from security.models import UserVerification
 from security.admin_users import (
     apply_preapproved_admin,
     is_preapproved_admin,
     try_sync_preapproved_admin,
 )
+from security.email import send_resend_email, use_resend
 from security.email_approval import email_approval_conflict
+from security.models import UserVerification
 from security.presence import is_user_online, touch_user_presence
 from security.user_deletion import permanently_delete_user
-from security.email import send_resend_email, use_resend
-from django.core.mail import send_mail
 
 
 def _require_admin(request):
@@ -170,10 +172,8 @@ def register(request):
         return JsonResponse(
             {"detail": "User with this name already exists"}, status=409
         )
-    except Exception as e:
-        return JsonResponse(
-            {"detail": f"Registration failed: {str(e)}"}, status=500
-        )
+    except Exception as e:  # noqa: BLE001
+        return JsonResponse({"detail": f"Registration failed: {e!s}"}, status=500)
 
     if preapproved_admin:
         return JsonResponse(
@@ -186,11 +186,15 @@ def register(request):
     # Step 1: email verification (token link). Step 2: admin approval.
     try:
         send_verification_mail(user.username, user.email, verification.token)
-    except Exception:
-        pass
+    except (OSError, ValueError, RuntimeError):
+        logging.getLogger(__name__).warning(
+            "Failed to send verification email", exc_info=True
+        )
 
     return JsonResponse(
-        {"detail": "User was created. Verify your email, then wait for admin approval."},
+        {
+            "detail": "User was created. Verify your email, then wait for admin approval."
+        },
         status=201,
     )
 
@@ -202,7 +206,9 @@ def pending_users(request):
 
     pending = (
         UserVerification.objects.select_related("user")
-        .filter(is_email_verified=True, is_admin_approved=False, is_admin_rejected=False)
+        .filter(
+            is_email_verified=True, is_admin_approved=False, is_admin_rejected=False
+        )
         .order_by("-user__date_joined")
     )
     data = [
@@ -245,7 +251,9 @@ def list_users(request):
             is_admin_rejected=False,
         )
     else:
-        qs = qs.filter(is_email_verified=True, is_admin_approved=False, is_admin_rejected=False)
+        qs = qs.filter(
+            is_email_verified=True, is_admin_approved=False, is_admin_rejected=False
+        )
 
     if search:
         from django.db.models import Q
@@ -261,8 +269,7 @@ def list_users(request):
 
     total = qs.count()
     total_pages = (total + page_size - 1) // page_size if total else 1
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start = (page - 1) * page_size
     end = start + page_size
@@ -357,7 +364,9 @@ def delete_user_permanently(request, username):
         return JsonResponse({"detail": "User not found"}, status=404)
 
     if user.id == request.user.id:
-        return JsonResponse({"detail": "You cannot delete your own account"}, status=400)
+        return JsonResponse(
+            {"detail": "You cannot delete your own account"}, status=400
+        )
 
     try:
         verification = UserVerification.objects.get(user=user)
@@ -444,7 +453,9 @@ def verify_mail(request, username, token):
         return JsonResponse({"detail": conflict}, status=409)
 
     if is_preapproved_admin(verification.user.username):
-        return JsonResponse({"detail": "E-Mail verified. Admin account is ready to log in."})
+        return JsonResponse(
+            {"detail": "E-Mail verified. Admin account is ready to log in."}
+        )
 
     return JsonResponse({"detail": "E-Mail verified"})
 
@@ -470,16 +481,12 @@ def resend_mail(request, username):
     verification.token = uuid4()
     verification.token_date = datetime.datetime.now(datetime.UTC)
     verification.save()
-    
+
     try:
         send_verification_mail(username, user.email, verification.token)
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Failed to send verification email: {str(e)}")
-        return JsonResponse(
-            {"detail": f"Failed to send email: {str(e)}"}, status=500
-        )
+    except (OSError, ValueError, RuntimeError) as e:
+        logging.getLogger(__name__).warning("Failed to send verification email: %s", e)
+        return JsonResponse({"detail": f"Failed to send email: {e!s}"}, status=500)
 
     return JsonResponse({"detail": "E-Mail was sent"})
 
@@ -513,11 +520,9 @@ def request_password_reset(request):
 
     try:
         send_password_reset_mail(user.username, user.email, verification.reset_token)
-    except Exception as e:
-        import logging
-
+    except (OSError, ValueError, RuntimeError) as e:
         logging.getLogger(__name__).warning(
-            f"Failed to send password reset email: {str(e)}"
+            "Failed to send password reset email: %s", e
         )
 
     return generic

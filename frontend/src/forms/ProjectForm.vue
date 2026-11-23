@@ -9,12 +9,7 @@
       />
       <label for="name">Name</label>
     </FloatLabel>
-    <Message
-      v-if="nameError"
-      severity="error"
-      variant="simple"
-      size="small"
-    >
+    <Message v-if="nameError" severity="error" variant="simple" size="small">
       {{ nameError }}
     </Message>
     <FloatLabel variant="on">
@@ -135,13 +130,21 @@ function submit() {
       nameInvalid.value = false
     }
   }
-  if (co2limit.value === null || co2limit.value === undefined || co2limit.value < 0) {
+  if (
+    co2limit.value === null ||
+    co2limit.value === undefined ||
+    co2limit.value < 0
+  ) {
     error = true
     co2limitInvalid.value = true
   } else {
     co2limitInvalid.value = false
   }
-  if (costlimit.value === null || costlimit.value === undefined || costlimit.value < 0) {
+  if (
+    costlimit.value === null ||
+    costlimit.value === undefined ||
+    costlimit.value < 0
+  ) {
     error = true
     costlimitInvalid.value = true
   } else {

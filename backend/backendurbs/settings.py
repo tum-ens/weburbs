@@ -158,10 +158,10 @@ if os.environ.get("RESEND_API_KEY"):
 elif os.environ.get("EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.environ.get("EMAIL_HOST")
-    EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
+    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
     EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
     EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", True)
+    EMAIL_USE_TLS = bool(os.environ.get("EMAIL_USE_TLS", "true"))
 else:
     # Use console backend for development - emails will be printed to logs
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

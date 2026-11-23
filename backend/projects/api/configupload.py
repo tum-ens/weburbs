@@ -10,21 +10,21 @@ from projects.api.helper import (
     validate_name_http_response,
 )
 from projects.models import (
-    Project,
-    Site,
-    Commodity,
-    ComType,
-    Process,
-    ProcessCommodity,
-    ProcComDir,
-    Storage,
-    Demand,
-    SupIm,
-    Transmission,
-    TransmissionType,
     DSM,
     BuySellPrice,
+    Commodity,
+    ComType,
+    Demand,
+    ProcComDir,
+    Process,
+    ProcessCommodity,
+    Project,
+    Site,
+    Storage,
+    SupIm,
     TimeVarEff,
+    Transmission,
+    TransmissionType,
 )
 
 
@@ -226,18 +226,24 @@ def readConfig(user, project_name, config):
         site = Site.objects.get(project=project, name=siteName)
         for commodityName, dataCommodity in dataSite["commodity"].items():
             commodity = Commodity.objects.get(site=site, name=commodityName)
-            if "transmission" in dataCommodity and dataCommodity["transmission"] is not None:
+            if (
+                "transmission" in dataCommodity
+                and dataCommodity["transmission"] is not None
+            ):
                 # Only create transmissions for the specific relationships defined in the config
-                for siteinName, dataTransmission in dataCommodity["transmission"].items():
+                for siteinName, dataTransmission in dataCommodity[
+                    "transmission"
+                ].items():
                     # Only create transmission if the source site exists and has the commodity
                     try:
                         sitein = Site.objects.get(project=project, name=siteinName)
-                        commodityin = Commodity.objects.get(site=sitein, name=commodityName)
-                        
+                        commodityin = Commodity.objects.get(
+                            site=sitein, name=commodityName
+                        )
+
                         # Check if transmission already exists to avoid duplicates
                         if not Transmission.objects.filter(
-                            commodityin=commodityin,
-                            commodityout=commodity
+                            commodityin=commodityin, commodityout=commodity
                         ).exists():
                             transmission = Transmission(
                                 type=TransmissionType[dataTransmission["Transmission"]],

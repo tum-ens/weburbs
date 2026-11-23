@@ -12,7 +12,10 @@
               ]"
             />
             <span
-              :class="['ml-2', { 'font-semibold': expandedKey[<string>item.key] }]"
+              :class="[
+                'ml-2',
+                { 'font-semibold': expandedKey[<string>item.key] },
+              ]"
               class="select-none"
             >
               {{ item.label }}
@@ -55,7 +58,9 @@
     </div>
 
     <!-- Compare scenarios (kept separate, below Docs) -->
-    <div class="pt-3 pl-3 pb-3 border-t border-surface-200 dark:border-surface-700 mt-3">
+    <div
+      class="pt-3 pl-3 pb-3 border-t border-surface-200 dark:border-surface-700 mt-3"
+    >
       <Button
         class="w-full"
         severity="help"

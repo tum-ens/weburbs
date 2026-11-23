@@ -10,10 +10,10 @@ from openpyxl.styles.colors import Color
 from projects.api.helper import get_project
 from projects.api.simulate import with_t0
 from projects.models import (
+    DSM,
     BuySellPrice,
     Commodity,
     Demand,
-    DSM,
     ProcComDir,
     Process,
     ProcessCommodity,
@@ -205,8 +205,7 @@ def write_sheet(df, writer, sheet_name):
 def build_timeseries_frame(series_by_name):
     max_steps = 0
     for values in series_by_name.values():
-        if len(values) > max_steps:
-            max_steps = len(values)
+        max_steps = max(max_steps, len(values))
 
     frame = {"t": list(range(max_steps))}
     for name, values in series_by_name.items():
@@ -222,36 +221,54 @@ def download(request, project_name):
     project = get_project(request.user, project_name)
 
     sites = Site.objects.filter(project=project).order_by("name")
-    commodities = Commodity.objects.filter(site__project=project).select_related("site").order_by(
-        "site__name", "name"
+    commodities = (
+        Commodity.objects.filter(site__project=project)
+        .select_related("site")
+        .order_by("site__name", "name")
     )
-    processes = Process.objects.filter(site__project=project).select_related("site").order_by(
-        "site__name", "name"
+    processes = (
+        Process.objects.filter(site__project=project)
+        .select_related("site")
+        .order_by("site__name", "name")
     )
     process_commodities = (
         ProcessCommodity.objects.filter(process__site__project=project)
         .select_related("process", "commodity")
         .order_by("process__site__name", "process__name", "commodity__name")
     )
-    storages = Storage.objects.filter(site__project=project).select_related(
-        "site", "commodity"
-    ).order_by("site__name", "name")
-    transmissions = Transmission.objects.filter(commodityin__site__project=project).select_related(
-        "commodityin__site", "commodityout__site"
-    ).order_by("commodityin__site__name", "commodityout__site__name", "commodityin__name")
-    dsms = DSM.objects.filter(commodity__site__project=project).select_related(
-        "commodity__site"
-    ).order_by("commodity__site__name", "commodity__name")
-    demands = Demand.objects.filter(commodity__site__project=project).select_related(
-        "commodity__site"
-    ).order_by("commodity__site__name", "commodity__name", "id")
-    supims = SupIm.objects.filter(commodity__site__project=project).select_related(
-        "commodity__site"
-    ).order_by("commodity__site__name", "commodity__name", "id")
+    storages = (
+        Storage.objects.filter(site__project=project)
+        .select_related("site", "commodity")
+        .order_by("site__name", "name")
+    )
+    transmissions = (
+        Transmission.objects.filter(commodityin__site__project=project)
+        .select_related("commodityin__site", "commodityout__site")
+        .order_by(
+            "commodityin__site__name", "commodityout__site__name", "commodityin__name"
+        )
+    )
+    dsms = (
+        DSM.objects.filter(commodity__site__project=project)
+        .select_related("commodity__site")
+        .order_by("commodity__site__name", "commodity__name")
+    )
+    demands = (
+        Demand.objects.filter(commodity__site__project=project)
+        .select_related("commodity__site")
+        .order_by("commodity__site__name", "commodity__name", "id")
+    )
+    supims = (
+        SupIm.objects.filter(commodity__site__project=project)
+        .select_related("commodity__site")
+        .order_by("commodity__site__name", "commodity__name", "id")
+    )
     buysell_prices = BuySellPrice.objects.filter(project=project).order_by("name", "id")
-    tve_items = TimeVarEff.objects.filter(process__site__project=project).select_related(
-        "process__site"
-    ).order_by("process__site__name", "process__name", "id")
+    tve_items = (
+        TimeVarEff.objects.filter(process__site__project=project)
+        .select_related("process__site")
+        .order_by("process__site__name", "process__name", "id")
+    )
 
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:

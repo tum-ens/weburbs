@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import axios from 'axios'
-import type { Process, Site } from '@/backend/interfaces'
+import type { Process } from '@/backend/interfaces'
 import type { RouteLocationNormalized } from 'vue-router'
 import { computed } from 'vue'
 import { useCSRF } from '@/backend/security'
@@ -15,7 +15,10 @@ export function useDefProcesses() {
   })
 }
 
-export function useProcesses(route: RouteLocationNormalized, site: Site) {
+export function useProcesses(
+  route: RouteLocationNormalized,
+  site: { name: string },
+) {
   return useQuery({
     queryKey: ['processes', computed(() => route.params.proj), site.name],
     queryFn: () =>

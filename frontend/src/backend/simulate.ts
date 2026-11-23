@@ -3,7 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useCSRF } from '@/backend/security'
 import axios from 'axios'
 import { computed } from 'vue'
-import type { Simulation, SimulationInfo, SimulationProgress } from '@/backend/interfaces'
+import type {
+  Simulation,
+  SimulationInfo,
+  SimulationProgress,
+} from '@/backend/interfaces'
 
 export enum GenerateReport {
   SUMMARY = 'summary',
@@ -55,15 +59,11 @@ export function useTriggerSimulation(route: RouteLocationNormalized) {
         body.timeseries_commodity_types = timeseries_commodity_types
       }
       return axios
-        .post(
-          `/api/project/${route.params.proj}/simulate/trigger/`,
-          body,
-          {
-            headers: {
-              'X-CSRFToken': csrf.value,
-            },
+        .post(`/api/project/${route.params.proj}/simulate/trigger/`, body, {
+          headers: {
+            'X-CSRFToken': csrf.value,
           },
-        )
+        })
         .then(response => response.data)
         .then(res => {
           return {
@@ -319,4 +319,3 @@ export function useUpdateSimulationName(route: RouteLocationNormalized) {
     },
   })
 }
-
