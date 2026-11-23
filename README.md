@@ -50,6 +50,7 @@ Backend:
 |    URBS_CALLBACK     |                                            Address where the optimizer can find the backend                                            |      http://backend:8000       |
 | DJANGO_ALLOWED_HOSTS | All the hosts that the backend accepts. Hosts can be separated by comma, also needs to contain the internal address for the optimizer. |      your.domain,backend       |
 |       ORIGINS        |                 Contains your domain again. Does not need to contain the internal address for the optimizer this time.                 |      https://your.domain       |
+|      PUBLIC_URL      |               Optional. Address used in links sent by e-mail; defaults to ORIGINS. Set it when serving under a sub-path.               |  https://your.domain/weburbs   |
 |        RN_KEY        |                                                      API Key for Renewable Ninja                                                       |         gibberishtoken         |
 |      SQL_ENGINE      |                                                       Selected type of database                                                        | django.db.backends.postgresql  |
 |     SQL_DATABASE     |                                                          Name of the database                                                          |              urbs              |
@@ -63,6 +64,21 @@ Frontend:
 |       Key       |                                      Description                                       |       Example       |
 |:---------------:|:--------------------------------------------------------------------------------------:|:-------------------:|
 | VUE_APP_API_URL | The domain where the client finds the backend. Should be equal to your default domain. | https://your.domain |
+
+### Serving under a sub-path
+
+By default the application is served at the root of a domain (`https://your.domain/`).
+To serve it under a sub-path such as `https://your.domain/weburbs/`:
+
+1. Build the frontend with the sub-path as base: `npm run build-only -- --base=/weburbs/`
+2. Set `VUE_APP_API_URL` in `config.json` to the sub-path: `{ "VUE_APP_API_URL": "/weburbs" }`.
+   The frontend then calls the backend at `/weburbs/api/...`.
+3. Configure the reverse proxy so that `/weburbs/api/` reaches the backend as `/api/`,
+   and other paths under `/weburbs/` are served from the built frontend, falling back to `index.html`.
+4. Keep `ORIGINS` as scheme and host only (`https://your.domain`), without the sub-path,
+   and set `PUBLIC_URL` to the full address (`https://your.domain/weburbs`) so that links in e-mails include the sub-path.
+
+The prebuilt Docker images use the root path. For a sub-path, build the frontend image yourself with the base from step 1.
 
 ### Default Data
 
