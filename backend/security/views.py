@@ -568,9 +568,17 @@ def reset_password(request, username, token):
     return JsonResponse({"detail": "Password was reset. You can now log in."})
 
 
-def send_password_reset_mail(username, email, token):
+def _public_base_url():
+    """Address used in links sent by e-mail: PUBLIC_URL, or the first ORIGINS entry."""
+    public_url = os.environ.get("PUBLIC_URL")
+    if public_url:
+        return public_url.strip().rstrip("/")
     origins = os.environ.get("ORIGINS", "http://localhost").split(",")
-    base_url = origins[0].strip().rstrip("/")
+    return origins[0].strip().rstrip("/")
+
+
+def send_password_reset_mail(username, email, token):
+    base_url = _public_base_url()
     link = f"{base_url}/resetPassword/{username}/{token}/"
     message = (
         f"Hi {username},\n"
@@ -603,8 +611,7 @@ def send_password_reset_mail(username, email, token):
 
 
 def send_verification_mail(username, email, token):
-    origins = os.environ.get("ORIGINS", "http://localhost").split(",")
-    base_url = origins[0].strip().rstrip("/")
+    base_url = _public_base_url()
     link = f"{base_url}/verify_mail/{username}/{token}/"
     message = (
         f"Hi {username},\n"

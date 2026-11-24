@@ -15,7 +15,7 @@ import { ConfirmationService } from 'primevue'
 
 axios.defaults.withCredentials = true
 
-fetch('/config.json')
+fetch(import.meta.env.BASE_URL + 'config.json')
   .then(response => response.json())
   .then(async data => {
     if (data.VUE_APP_API_URL) axios.defaults.baseURL = data.VUE_APP_API_URL
