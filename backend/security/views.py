@@ -462,7 +462,9 @@ def verify_mail(request, username, token):
 
 @require_POST
 def resend_mail(request, username):
-    user = User.objects.get(username=username)
+    user = User.objects.filter(username=username).first()
+    if user is None:
+        return JsonResponse({"detail": "Unknown username."}, status=404)
 
     verification = UserVerification.objects.get(user=user)
 
